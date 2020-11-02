@@ -27,9 +27,11 @@ const dateOrUndefinedParseValue = (value: string): string | undefined => {
 };
 
 const dateOrUndefinedParseLiteral = (ast: {
+  // eslint-disable-next-line
   [key: string]: any;
 }): string | undefined => {
   const { value } = ast;
+
   if (isDate(value)) {
     return new Date(value).toLocaleDateString("en-ZA");
   } else if (value === "undefined") {

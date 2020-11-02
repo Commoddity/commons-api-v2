@@ -35,6 +35,7 @@
     "@typescript-eslint/eslint-plugin": "^4.6.0",
     "@typescript-eslint/parser": "^4.6.0",
     "@zerollup/ts-transform-paths": "^1.7.18",
+    "apollo-server-types": "^0.6.1",
     "eslint": "^7.12.1",
     "graphql-import-node": "0.0.4",
     "graphql-tools": "^7.0.1",

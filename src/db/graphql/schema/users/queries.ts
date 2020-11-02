@@ -27,7 +27,7 @@ const userQueries: GraphQLFields = {
       sms_notification: { type: NotificationEnumType },
       active: { type: GraphQLBoolean },
     },
-    where: (usersTable: string, args: { [key: string]: any }) => {
+    where: (usersTable, args, _context, _resolveInfo) => {
       const whereClause = [];
       const values = [];
       if (args.id) {
@@ -69,12 +69,7 @@ const userQueries: GraphQLFields = {
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },
-    resolve: (
-      _parent: any,
-      _args: { [key: string]: any },
-      _context: any,
-      resolveInfo: any,
-    ) => {
+    resolve: (_parent, _args, _context, resolveInfo) => {
       return joinMonster(resolveInfo, {}, (sql: string) => {
         return db.query(sql);
       });
@@ -94,7 +89,7 @@ const userQueries: GraphQLFields = {
       sms_notification: { type: NotificationEnumType },
       active: { type: GraphQLBoolean },
     },
-    where: (userTable: string, args: { [key: string]: any }) => {
+    where: (userTable, args, _context, _resolveInfo) => {
       const whereClause = [];
       const values = [];
       if (args.id) {

@@ -92,11 +92,7 @@ const parliamentQueries: GraphQLFields = {
       parliament_id: { type: GraphQLInt },
       number: { type: GraphQLInt },
     },
-    where: (
-      parliamentarySessionTable: string,
-      args: { [key: string]: any },
-      _context: any,
-    ) => {
+    where: (parliamentarySessionTable, args, _context, _resolveInfo) => {
       const whereClause = [];
       const values = [];
       if (args.id) {
