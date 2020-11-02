@@ -1,0 +1,49 @@
+{
+  "name": "commons-api-v2",
+  "version": "1.0.0",
+  "main": "server.ts",
+  "repository": "git@github.com:Commoddity/commons-api-v2.git",
+  "author": "pascalvl <pascal@coinmiles.io>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start:dev": "yarn run build:dev",
+    "build:dev": "nodemon 'src/server.ts' --exec 'ts-node' src/server.ts -e ts,graphql",
+    "build": "tsc -p ./",
+    "lint": "eslint . --ext .ts"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.8",
+    "@types/graphql": "^14.5.0",
+    "@types/graphql-iso-date": "^3.4.0",
+    "@types/node": "^14.14.6",
+    "@types/pg-promise": "^5.4.3",
+    "@types/sqlstring": "^2.2.1",
+    "@typescript-eslint/eslint-plugin": "^4.6.0",
+    "@typescript-eslint/parser": "^4.6.0",
+    "@zerollup/ts-transform-paths": "^1.7.18",
+    "eslint": "^7.12.1",
+    "graphql-import-node": "0.0.4",
+    "graphql-tools": "^7.0.1",
+    "jest": "^26.6.1",
+    "nodemon": "^2.0.6",
+    "prettier": "^2.1.2",
+    "ts-jest": "^26.4.3",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.5"
+  },
+  "dependencies": {
+    "apollo-server-express": "^2.19.0",
+    "axios": "^0.21.0",
+    "cheerio": "^1.0.0-rc.3",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "graphql": "^15.4.0",
+    "graphql-iso-date": "^3.6.1",
+    "join-monster": "^2.1.2",
+    "pg-promise": "^10.7.1",
+    "sqlstring": "^2.3.2",
+    "xml2js": "^0.4.23"
+  }
+}
