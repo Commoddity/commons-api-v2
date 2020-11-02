@@ -8,9 +8,9 @@ import {
 } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
 
-import { NotificationEnumType } from "../../enums";
-
 import { BillType, CategoryType } from "@graphql";
+
+import { NotificationEnumType } from "../../enums";
 
 const UserType: GraphQLObjectType = new GraphQLObjectType({
   name: "User",

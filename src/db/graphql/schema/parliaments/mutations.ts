@@ -5,8 +5,7 @@ import { db } from "@config";
 import { GraphQLFields } from "@types";
 
 import { DateScalar } from "../../scalars";
-
-import { ParliamentarySessionType, ParliamentType } from "@graphql";
+import { ParliamentarySessionType, ParliamentType } from "./types";
 
 export const parliamentMutations: GraphQLFields = {
   addParliament: {

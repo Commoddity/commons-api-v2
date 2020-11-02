@@ -8,11 +8,12 @@ import {
 } from "graphql";
 
 import { db } from "@config";
-import { UserType } from "@graphql";
+import { GraphQLFields } from "@types";
 
+import { UserType } from "./types";
 import { NotificationEnumType } from "../../enums";
 
-const userQueries = {
+const userQueries: GraphQLFields = {
   users: {
     type: new GraphQLList(UserType),
     args: {
@@ -139,12 +140,7 @@ const userQueries = {
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },
-    resolve: (
-      _parent: any,
-      _args: { [key: string]: any },
-      _context: any,
-      resolveInfo: any,
-    ) => {
+    resolve: (_parent, _args, _context, resolveInfo) => {
       return joinMonster(resolveInfo, {}, (sql: string) => {
         return db.query(sql);
       });

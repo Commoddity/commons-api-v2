@@ -7,10 +7,10 @@ import {
 import { GraphQLDateTime } from "graphql-iso-date";
 
 import { db } from "@config";
-import { UserType } from "@graphql";
 import { GraphQLFields } from "@types";
 
 import { NotificationEnumType } from "../../enums";
+import { UserType } from "./types";
 
 export const userMutations: GraphQLFields = {
   addUser: {

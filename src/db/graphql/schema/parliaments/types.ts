@@ -7,9 +7,9 @@ import {
 } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
 
-import { DateScalar } from "../../scalars";
-
 import { BillType } from "@graphql";
+
+import { DateScalar } from "../../scalars";
 
 // Parliamentary Sessions
 const ParliamentType: GraphQLObjectType = new GraphQLObjectType({

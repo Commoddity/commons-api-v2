@@ -60,12 +60,6 @@ Notifications are sent out using the following web services:
 
 ### _COMING SOON_
 
-### Team Members
-
-- [Frederick Lee](https://github.com/fgfl/)
-- [Mitch Lum](https://github.com/mxmitch)
-- [Pascal van Leeuwen](https://github.com/Commoddity/)
-
 ### Setup
 
 - install `yarn`
