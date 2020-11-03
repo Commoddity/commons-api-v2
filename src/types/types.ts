@@ -15,5 +15,9 @@ export type ColumnValue<T> = { [key: string]: T };
 
 export interface CreateParams<T> {
   table: string;
-  entityValues: T;
+  tableValues: T;
+}
+export interface CreateManyParams<T> {
+  table: string;
+  tableValuesArray: T[];
 }

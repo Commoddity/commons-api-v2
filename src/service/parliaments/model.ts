@@ -10,6 +10,7 @@ export interface BillInterface {
   page_url: string;
   full_text_url: string;
   passed: boolean;
+  created_at: Date;
 }
 
 export class Bill implements BillInterface {
@@ -22,6 +23,7 @@ export class Bill implements BillInterface {
   page_url;
   full_text_url;
   passed;
+  created_at;
 
   static getColumnNames(): string[] {
     return keys<BillInterface>();
@@ -37,6 +39,7 @@ export class Bill implements BillInterface {
     page_url = null,
     full_text_url = null,
     passed = null,
+    created_at = null,
   } = {}) {
     this.parliamentary_session_id = parliamentary_session_id;
     this.code = code;
@@ -47,5 +50,6 @@ export class Bill implements BillInterface {
     this.page_url = page_url;
     this.full_text_url = full_text_url;
     this.passed = passed;
+    this.created_at = created_at;
   }
 }

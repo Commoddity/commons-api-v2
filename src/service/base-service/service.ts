@@ -1,82 +1,110 @@
-import { db } from "@config";
 import SqlString from "sqlstring";
 
-import { CreateParams, Value } from "@types";
+import { db } from "@config";
+import { CreateManyParams, CreateParams, Value } from "@types";
 
 export class BaseService<T> {
   async createOne({
     table,
-    entityValues,
+    tableValues,
   }: CreateParams<T>): Promise<T | undefined> {
-    let entity: T;
+    let row: T;
+    const timestamp = Date.now();
 
-    const columns: string[] = Object.keys(entityValues);
-    const values: Value[] = Object.values(entityValues);
+    const columns: string[] = Object.keys(tableValues);
+    const columnsString: string = this.createColumns(columns);
 
-    const columnString: string =
-      columns.length === 1
-        ? `${columns[0]} = ?, created_at = ?`
-        : columns
-            .reduce((columnString: string, nextString: string) =>
-              columnString.concat(`${nextString} = ?, }`),
-            )
-            .concat("created_at = ?");
+    const rowValues: Value[] = Object.values(tableValues);
+    const rowValuesWithTimestamp: Value[] = rowValues.concat(timestamp);
 
-    const query: string = SqlString.format(
-      `
-    INSERT INTO ${table} (${columnString})
-    RETURNING *`,
-      values.concat(Date.now()),
+    const query: string = this.createQuery(
+      table,
+      columnsString,
+      rowValuesWithTimestamp,
     );
 
     try {
-      const createdEntity = await db.query<T>(query);
+      const createdRow = await db.query<T>(query);
 
-      if (createdEntity) {
-        entity = createdEntity;
-        return entity;
+      if (createdRow) {
+        row = createdRow;
+        return row;
       }
     } catch (err) {
-      console.error(`[ENTITY CREATION ERROR]: ${err}`);
+      console.error(`[ROW CREATION ERROR]: ${err}`);
       return;
     }
   }
 
-  // public async createMany(
-  //   objectsAttributes,
-  //   commandType = "Created",
-  //   sendEntity = true,
-  // ): Promise<any> {
-  //   const entitiesAttributes = objectsAttributes.map((objectAttributes) => {
-  //     return {
-  //       recordStatus: RecordStatus.Created,
-  //       ...objectAttributes,
-  //     };
-  //   });
+  async createMany({
+    table,
+    tableValuesArray,
+  }: CreateManyParams<T>): Promise<T[] | undefined> {
+    let rows: T[] = [];
+    const timestamp = Date.now();
 
-  //   const entities = await this.queriesCollection.insertMany(
-  //     entitiesAttributes,
-  //   );
-  //   let eventEntities;
+    const columns: string[] = Object.keys(tableValuesArray);
+    const columnsString: string = this.createColumns(columns);
 
-  //   try {
-  //     eventEntities = await this.persistEvents(
-  //       entities,
-  //       entitiesAttributes,
-  //       commandType,
-  //       sendEntity,
-  //     );
-  //   } catch (error) {
-  //     throw new Error(`Failed to persist Event: ${error}`);
-  //     await this.queriesCollection.remove({
-  //       _id: entities.map((entity) => entity.id),
-  //     });
-  //   }
+    const rowValuesArray: Value[][] = [];
+    tableValuesArray.forEach((table) => {
+      const rowValues: Value[] = Object.values(table);
+      const rowValuesWithTimestamp: Value[] = rowValues.concat(timestamp);
+      rowValuesArray.push(rowValuesWithTimestamp);
+    });
 
-  //   await this.broadcastDataPersistedEvents({ eventEntities });
+    const query: string = this.createQuery(
+      table,
+      columnsString,
+      rowValuesArray,
+    );
 
-  //   return this.buildMultiple(entities);
-  // }
+    try {
+      const createdRows = await db.query<T[]>(query);
+
+      if (createdRows) {
+        rows = createdRows;
+        return rows;
+      }
+    } catch (err) {
+      console.error(`[MULTIPLE ROW CREATION ERROR]: ${err}`);
+      return;
+    }
+  }
+
+  async findLatest({ table }: { table: string }): Promise<string | undefined> {
+    try {
+      const query = `SELECT id FROM ${table} ORDER BY id DESC LIMIT 1`;
+      const [sessionQueryResult] = await db.query(query);
+      return sessionQueryResult.id;
+    } catch (err) {
+      console.error(`[FIND ONE QUERY ERROR]: ${err}`);
+      return;
+    }
+  }
+
+  private createColumns(columns: string[]) {
+    return columns
+      .reduce(
+        (columnsString: string, nextString: string) =>
+          columnsString.concat(`${nextString} = ?, }`),
+        "",
+      )
+      .concat("created_at = ?");
+  }
+
+  private createQuery(
+    table: string,
+    columnsString: string,
+    values: { [key: string]: Value } | Value[] | Value[][],
+  ): string {
+    return SqlString.format(
+      `
+    INSERT INTO ${table} (${columnsString})
+    RETURNING *`,
+      values,
+    );
+  }
 
   // async update(
   //   query,
