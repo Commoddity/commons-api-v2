@@ -8,3 +8,12 @@ export type GraphQLFields = {
     { [argName: string]: string }
   >;
 };
+
+export type Value = string | number | boolean | Date;
+
+export type ColumnValue<T> = { [key: string]: T };
+
+export interface CreateParams<T> {
+  table: string;
+  entityValues: T;
+}
