@@ -1,0 +1,26 @@
+export const testBills = [
+  {
+    parliamentary_session_id: 1,
+    code: "C-205",
+    title: "A Bill to Touch Butts",
+    description: "Literally just touching butts.",
+    introduced_date: Date.now() - 500000,
+    summary_url: "http://billsbillsbills.com",
+    page_url: "http://billsandbills.com",
+    full_text_url: "http://billsplusbills.com",
+    passed: undefined,
+    created_at: Date.now(),
+  },
+  {
+    parliamentary_session_id: 2,
+    code: "C-231",
+    title: "A Bill for the Provision of Momentary Sanity",
+    description: "Why god why",
+    introduced_date: Date.now() - 1000000,
+    summary_url: "http://billsarebills.com",
+    page_url: undefined,
+    full_text_url: "http://whybillstho.com",
+    passed: true,
+    created_at: undefined,
+  },
+];

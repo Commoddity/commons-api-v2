@@ -1323,7 +1323,7 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@26.x":
+"@types/jest@26.x", "@types/jest@^26.0.15":
   version "26.0.15"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.15.tgz#12e02c0372ad0548e07b9f4e19132b834cb1effe"
   integrity sha512-s2VMReFXRg9XXxV+CW9e5Nz8fH2K1aEhwgjUqPPbQd7g95T0laAcvLv032EhFHIa5GHsZ8W7iJEQVaJq6k3Gog==
@@ -6709,6 +6709,11 @@ ts-transformer-keys@^0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/ts-transformer-keys/-/ts-transformer-keys-0.4.2.tgz#130d5b116b14d537d26aff2894dca10ac1877b22"
   integrity sha512-8WVoathKnPIeZbhKuqkBKdWLq1JuiZjT5EmaKobeMI5AHQZIVLI8vyU+1h7e1YiIEIvtBUbmZ12uj2cFbgj5qg==
+
+tsconfig-paths-jest@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/tsconfig-paths-jest/-/tsconfig-paths-jest-0.0.1.tgz#a977a5648c434037b69884e644ce1b82bf025b68"
+  integrity sha1-qXelZIxDQDe2mITmRM4bgr8CW2g=
 
 tsconfig-paths@^3.9.0:
   version "3.9.0"

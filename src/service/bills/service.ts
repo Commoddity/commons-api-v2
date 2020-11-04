@@ -1,5 +1,5 @@
 import { BaseService } from "../base-service";
-// import { ParliamentsService } from "../parliaments";
+import { ParliamentsService } from "../parliaments";
 
 import { Bill } from "./model";
 
@@ -9,12 +9,20 @@ export class BillsService extends BaseService<Bill> {
   }
 
   async createManyBills(bills: Bill[]): Promise<Bill[] | undefined> {
-    // const parliamentarySession = await new ParliamentsService().queryLatestParliamentarySession();
-    const parliamentarySession = 1;
-
     // const billColumns = Bill.getColumnNames();
 
-    const billValuesArray = bills.map((bill) => {
+    const billValuesArray = await this.createBillsArray(bills);
+
+    return await super.createMany({
+      table: "bills",
+      tableValuesArray: billValuesArray,
+    });
+  }
+
+  private createBillsArray = async (bills: Bill[]): Promise<Bill[]> => {
+    const parliamentarySession = await new ParliamentsService().queryLatestParliamentarySession();
+
+    return bills.map((bill) => {
       const billObject: Bill = {
         parliamentary_session_id: undefined,
         code: undefined,
@@ -26,6 +34,7 @@ export class BillsService extends BaseService<Bill> {
         full_text_url: undefined,
         passed: undefined,
       };
+
       return Object.keys(billObject).reduce((billObject, billColumn, index) => {
         return (billObject = {
           ...billObject,
@@ -33,10 +42,5 @@ export class BillsService extends BaseService<Bill> {
         });
       }, billObject);
     });
-
-    return await super.createMany({
-      table: "bills",
-      tableValuesArray: billValuesArray,
-    });
-  }
+  };
 }

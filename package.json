@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc -p ./",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "test": "jest"
   },
   "nodemonConfig": {
     "ignore": [
@@ -45,9 +46,11 @@
     "ts-jest": "^26.4.3",
     "ts-node": "^9.0.0",
     "tsconfig-paths": "^3.9.0",
+    "tsconfig-paths-jest": "^0.0.1",
     "typescript": "^4.0.5"
   },
   "dependencies": {
+    "@types/jest": "^26.0.15",
     "apollo-server-express": "^2.19.0",
     "axios": "^0.21.0",
     "cheerio": "^1.0.0-rc.3",
