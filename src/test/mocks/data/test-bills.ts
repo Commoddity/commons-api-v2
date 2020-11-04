@@ -9,7 +9,6 @@ export const testBills = [
     page_url: "http://billsandbills.com",
     full_text_url: "http://billsplusbills.com",
     passed: undefined,
-    created_at: Date.now(),
   },
   {
     parliamentary_session_id: 2,
@@ -21,6 +20,16 @@ export const testBills = [
     page_url: undefined,
     full_text_url: "http://whybillstho.com",
     passed: true,
-    created_at: undefined,
+  },
+  {
+    parliamentary_session_id: 2,
+    code: "C-242",
+    title: "A Bill for Sea Otters",
+    description: "Cute little guys",
+    introduced_date: Date.now() - 1000000,
+    summary_url: "http://billsarebills.com",
+    page_url: undefined,
+    full_text_url: "http://whybillstho.com",
+    passed: true,
   },
 ];

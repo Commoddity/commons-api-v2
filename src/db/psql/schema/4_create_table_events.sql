@@ -5,7 +5,8 @@ CREATE TABLE events (
   bill_code VARCHAR (7) NOT NULL REFERENCES bills (code),
   title VARCHAR (555) NOT NULL,
   publication_date DATE,
-  created_at TIMESTAMP
+  created_at DATETIME NOT NULL
+              DEFAULT CURRENT_TIMESTAMP
 );
 
 GRANT ALL PRIVILEGES ON TABLE events TO commoddity;

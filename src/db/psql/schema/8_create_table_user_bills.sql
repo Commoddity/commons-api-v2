@@ -3,7 +3,8 @@ DROP TABLE IF EXISTS user_bills CASCADE;
 CREATE TABLE user_bills (
   user_id INT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   bill_id INT NOT NULL REFERENCES bills (id) ON DELETE CASCADE,
-  created_at TIMESTAMP,
+  created_at DATETIME NOT NULL
+              DEFAULT CURRENT_TIMESTAMP, 
   UNIQUE (user_id, bill_id)
 );
 

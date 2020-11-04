@@ -6,7 +6,8 @@ CREATE TABLE parliamentary_sessions (
   number BIGINT,
   start_date DATE,
   end_date DATE,
-  created_at TIMESTAMP
+  created_at DATETIME NOT NULL
+              DEFAULT CURRENT_TIMESTAMP
 );
 
 GRANT ALL PRIVILEGES ON TABLE parliamentary_sessions TO commoddity;

@@ -12,7 +12,8 @@ CREATE TABLE users (
   email_notification INT,
   sms_notification INT,
   active BOOLEAN,
-  created_at TIMESTAMP
+  created_at DATETIME NOT NULL
+              DEFAULT CURRENT_TIMESTAMP
 );
 
 GRANT ALL PRIVILEGES ON TABLE users TO commoddity;

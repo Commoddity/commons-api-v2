@@ -3,7 +3,8 @@ DROP TABLE IF EXISTS bill_categories CASCADE;
 CREATE TABLE bill_categories (
   bill_id INT NOT NULL REFERENCES bills (id) ON DELETE CASCADE,
   category_id INT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
-  created_at TIMESTAMP,
+  created_at DATETIME NOT NULL
+              DEFAULT CURRENT_TIMESTAMP
   UNIQUE (bill_id, category_id)
 );
 

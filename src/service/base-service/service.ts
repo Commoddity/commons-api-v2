@@ -1,5 +1,3 @@
-import SqlString from "sqlstring";
-
 import { db } from "@config";
 import { CreateManyParams, CreateParams, Value } from "@types";
 
@@ -9,22 +7,16 @@ export class BaseService<T> {
     tableValues,
   }: CreateParams<T>): Promise<T | undefined> {
     let row: T;
-    const timestamp = Date.now();
 
-    const columns: string[] = Object.keys(tableValues);
-    const columnsString: string = this.createColumns(columns);
+    const columns: string = this.createColumns(tableValues);
+    const values: Value[] = Object.values(tableValues);
 
-    const rowValues: Value[] = Object.values(tableValues);
-    const rowValuesWithTimestamp: Value[] = rowValues.concat(timestamp);
-
-    const query: string = this.createQuery(
-      table,
-      columnsString,
-      rowValuesWithTimestamp,
-    );
+    const query: string = `
+    INSERT INTO ${table} (${columns}) VALUES ?
+    RETURNING *`;
 
     try {
-      const createdRow = await db.query<T>(query);
+      const createdRow = await db.query<T>(query, values);
 
       if (createdRow) {
         row = createdRow;
@@ -41,26 +33,20 @@ export class BaseService<T> {
     tableValuesArray,
   }: CreateManyParams<T>): Promise<T[] | undefined> {
     let rows: T[] = [];
-    const timestamp = Date.now();
 
-    const columns: string[] = Object.keys(tableValuesArray);
-    const columnsString: string = this.createColumns(columns);
-
-    const rowValuesArray: Value[][] = [];
-    tableValuesArray.forEach((table) => {
+    const columns: string = this.createColumns(tableValuesArray);
+    const values: Value[][] = [];
+    tableValuesArray.forEach((table: T) => {
       const rowValues: Value[] = Object.values(table);
-      const rowValuesWithTimestamp: Value[] = rowValues.concat(timestamp);
-      rowValuesArray.push(rowValuesWithTimestamp);
+      values.push(rowValues);
     });
 
-    const query: string = this.createQuery(
-      table,
-      columnsString,
-      rowValuesArray,
-    );
+    const query: string = `
+    INSERT INTO ${table} (${columns}) VALUES ?
+    RETURNING *`;
 
     try {
-      const createdRows = await db.query<T[]>(query);
+      const createdRows = await db.query<T[]>(query, [values]);
 
       if (createdRows) {
         rows = createdRows;
@@ -83,28 +69,37 @@ export class BaseService<T> {
     }
   }
 
-  private createColumns(columns: string[]) {
-    return columns
-      .reduce(
-        (columnsString: string, nextString: string) =>
-          columnsString.concat(`${nextString} = ?, }`),
-        "",
-      )
-      .concat("created_at = ?");
-  }
+  private createColumns(tableValues: T | T[]) {
+    let exampleRow: string[];
 
-  private createQuery(
-    table: string,
-    columnsString: string,
-    values: { [key: string]: Value } | Value[] | Value[][],
-  ): string {
-    return SqlString.format(
-      `
-    INSERT INTO ${table} (${columnsString})
-    RETURNING *`,
-      values,
+    if (Array.isArray(tableValues)) {
+      exampleRow = Object.keys(tableValues[0]);
+    } else {
+      exampleRow = Object.keys(tableValues);
+    }
+
+    const addComma = (i: number, a: string[]): string =>
+      i !== a.length - 1 ? `, ` : ``;
+
+    return exampleRow.reduce<string>(
+      (columnsString: string, nextString: string, i: number, a: string[]) =>
+        columnsString.concat(`${nextString}${addComma(i, a)}`),
+      "",
     );
   }
+
+  // private createQuery(
+  //   table: string,
+  //   columnsString: string,
+  //   values: Value[] | Array<Value[]>,
+  // ): { query: string; values: Value[] } {
+  //   return {
+  //     query: `
+  //   INSERT INTO ${table} (${columnsString})
+  //   RETURNING *`,
+  //     values,
+  //   };
+  // }
 
   // async update(
   //   query,
