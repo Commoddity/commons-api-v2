@@ -1,7 +1,19 @@
 import { db } from "@config";
-import { CreateManyParams, CreateParams, UpdateParams, Value } from "@types";
+import {
+  CreateManyParams,
+  CreateParams,
+  QueryParams,
+  ReadParams,
+  TableParams,
+  Value,
+  WhereCondition,
+  WhereParams,
+} from "@types";
+
+import { BillCategory } from "../bills";
 
 export class BaseService<T> {
+  /* Create methods */
   async createOne({
     table,
     tableValues,
@@ -58,34 +70,77 @@ export class BaseService<T> {
     }
   }
 
-  async findLatestId({
+  async createJoinTables({
     table,
-  }: {
-    table: string;
-  }): Promise<string | undefined> {
+    tableValuesArray,
+  }: CreateManyParams<BillCategory>): Promise<BillCategory[] | undefined> {
+    let rows: BillCategory[] = [];
+
+    const columns: string = this.createColumns(tableValuesArray);
+    const values: Value[][] = [];
+    tableValuesArray.forEach((table: BillCategory) => {
+      const rowValues: Value[] = Object.values(table);
+      values.push(rowValues);
+    });
+
+    const query: string = `
+    INSERT INTO ${table} (${columns}) VALUES ?
+    RETURNING *`;
+
+    try {
+      const createdRows = await db.query<BillCategory[]>(query, [values]);
+
+      if (createdRows) {
+        rows = createdRows;
+        return rows;
+      }
+    } catch (err) {
+      console.error(`[MULTIPLE ROW CREATION ERROR]: ${err}`);
+      return;
+    }
+  }
+
+  /* Read methods */
+  async findOne({ table, where }: ReadParams): Promise<T> {
+    const queryString = `SELECT * FROM ${table} LIMIT 1`;
+    const whereClause = this.createWhereClause(where);
+
+    return await db.query<T[]>(queryString.concat(whereClause))[0];
+  }
+
+  async findMany({ table, where }: WhereParams): Promise<T[]> {
+    const queryString = `SELECT * FROM ${table}`;
+    const whereClause = this.createWhereClause(where);
+
+    return await db.query<T[]>(queryString.concat(whereClause));
+  }
+
+  async findLatestId({ table }: TableParams): Promise<string | undefined> {
     try {
       const query = `SELECT id FROM ${table} ORDER BY id DESC LIMIT 1`;
+
       const [sessionQueryResult] = await db.query(query);
       return sessionQueryResult.id;
     } catch (err) {
-      console.error(`[FIND ONE QUERY ERROR]: ${err}`);
+      console.error(`[FIND LATEST ID ERROR]: ${err}`);
       return;
     }
   }
 
   async findIfRowExists({
     table,
-    column,
-    value,
-  }): Promise<boolean | undefined> {
+    where,
+  }: WhereParams): Promise<boolean | undefined> {
     try {
-      const query = `SELECT EXISTS(SELECT 1 FROM ${table} WHERE ${column}='${value}')`;
-      const [rowQueryResult] = await db.query(query);
-      return rowQueryResult.exists;
-    } catch (err) {
-      console.error(
-        `An error occurred while querying whether value exists: ${err}`,
+      const query = `SELECT EXISTS(SELECT 1 FROM ${table}`;
+      const whereClause = this.createWhereClause(where);
+
+      const [rowQueryResult] = await db.query<T[]>(
+        query.concat(`${whereClause})`),
       );
+      return !!rowQueryResult;
+    } catch (err) {
+      console.error(`[FIND ROW EXISTS ERROR]: ${err}`);
     }
   }
 
@@ -93,36 +148,40 @@ export class BaseService<T> {
     table,
     column,
     value,
-  }): Promise<boolean | undefined> {
+  }: QueryParams): Promise<boolean | undefined> {
     try {
       const query = `SELECT EXISTS(SELECT 1 FROM ${table} WHERE ${column} LIKE '%${value}%')`;
-      const [rowQueryResult] = await db.query(query);
-      return rowQueryResult.exists;
+
+      const [rowQueryResult] = await db.query<T[]>(query);
+      return !!rowQueryResult;
     } catch (err) {
-      console.error(
-        `An error occurred while querying whether value exists: ${err}`,
-      );
+      console.error(`[FIND ROW CONTAINS ERROR]: ${err}`);
     }
   }
 
+  /* Update methods */
   async updateOne({
     table,
     column,
     value,
-    whereColumn,
-    whereValue,
-  }: UpdateParams): Promise<boolean> {
+    where,
+  }: WhereParams): Promise<T | undefined> {
     try {
-      const query = `UPDATE ${table} SET ${column} = '${value}' WHERE ${whereColumn} = '${whereValue}'`;
-      await db.query(query);
-      return true;
+      const query = `UPDATE ${table} SET ${column} = '${value}'
+                    RETURNING *`;
+      const whereClause = this.createWhereClause(where);
+
+      return await db.query<T>(query.concat(whereClause));
     } catch (err) {
-      console.error(`An error occurred while updating row: ${err}`);
-      return false;
+      console.error(`[UPDATE ONE ROW ERROR]: ${err}`);
+      return undefined;
     }
   }
 
-  private createColumns(tableValues: T | T[]) {
+  /* Delete methods */
+
+  /* Query String creation methods */
+  private createColumns(tableValues: any | any[]): string {
     let exampleRow: string[];
 
     if (Array.isArray(tableValues)) {
@@ -131,13 +190,30 @@ export class BaseService<T> {
       exampleRow = Object.keys(tableValues);
     }
 
-    const addComma = (i: number, a: string[]): string =>
-      i !== a.length - 1 ? `, ` : ``;
+    const addComma = (index: number, arr: string[]): string =>
+      index !== arr.length - 1 ? `, ` : ``;
 
     return exampleRow.reduce<string>(
-      (columnsString: string, nextString: string, i: number, a: string[]) =>
-        columnsString.concat(`${nextString}${addComma(i, a)}`),
+      (columnsString, nextString, index, arr) =>
+        columnsString.concat(`${nextString}${addComma(index, arr)}`),
       "",
     );
+  }
+
+  private createWhereClause(
+    whereClause: WhereCondition | WhereCondition[],
+    operator: "AND" | "OR" = "AND",
+  ): string {
+    if (Array.isArray(whereClause)) {
+      return whereClause.reduce<string>((whereString, condition, index) => {
+        return whereString.concat(
+          `${index === 0 ? " WHERE" : ` ${operator}`} ${condition.column}='${
+            condition.value
+          }'`,
+        );
+      }, "");
+    } else {
+      return ` WHERE ${whereClause.column}='${whereClause.value}'`;
+    }
   }
 }

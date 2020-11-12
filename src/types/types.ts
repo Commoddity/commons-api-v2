@@ -22,10 +22,24 @@ export interface CreateManyParams<T> {
   tableValuesArray: T[];
 }
 
-export interface UpdateParams {
+export interface TableParams {
   table: string;
+}
+
+export interface QueryParams extends TableParams {
   column: string;
   value: string;
-  whereColumn: string;
-  whereValue: string;
+}
+
+export interface WhereParams extends QueryParams {
+  where: WhereCondition | WhereCondition[];
+}
+
+export interface ReadParams extends TableParams {
+  where: WhereCondition | WhereCondition[];
+}
+
+export interface WhereCondition {
+  column: string;
+  value: string;
 }

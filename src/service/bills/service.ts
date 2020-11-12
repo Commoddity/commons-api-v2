@@ -1,21 +1,22 @@
 import { BaseService } from "../base-service";
+import { CategoriesService } from "../categories";
 import { ParliamentsService } from "../parliaments";
 
-import { Bill } from "./model";
+import { Bill, BillCategory } from "./model";
 
 export class BillsService extends BaseService<Bill> {
+  private table = "bills";
+
   async createBill(bill: Bill): Promise<Bill | undefined> {
-    return await super.createOne({ table: "bills", tableValues: bill });
+    return await super.createOne({ table: this.table, tableValues: bill });
   }
 
   async createManyBills(bills: Bill[]): Promise<Bill[] | undefined> {
-    // const billColumns = Bill.getColumnNames();
-
-    const billValuesArray = await this.createBillsArray(bills);
+    // const billValuesArray = await this.createBillsArray(bills);
 
     return await super.createMany({
-      table: "bills",
-      tableValuesArray: billValuesArray,
+      table: this.table,
+      tableValuesArray: bills,
     });
   }
 
@@ -25,13 +26,12 @@ export class BillsService extends BaseService<Bill> {
   }: {
     billCode: string;
     passed: boolean;
-  }): Promise<boolean> {
+  }): Promise<Bill | undefined> {
     return await super.updateOne({
-      table: "bills",
+      table: this.table,
       column: "passed",
       value: passed.toString(),
-      whereColumn: "code",
-      whereValue: billCode,
+      where: { column: "code", value: billCode },
     });
   }
 
@@ -41,38 +41,77 @@ export class BillsService extends BaseService<Bill> {
   }: {
     billCode: string;
     summaryUrl: string;
-  }): Promise<boolean> {
+  }): Promise<Bill | undefined> {
     return await super.updateOne({
-      table: "bills",
+      table: this.table,
       column: "summary_url",
       value: summaryUrl,
-      whereColumn: "code",
-      whereValue: billCode,
+      where: { column: "code", value: billCode },
     });
   }
 
-  private createBillsArray = async (bills: Bill[]): Promise<Bill[]> => {
-    const parliamentarySession = await new ParliamentsService().queryLatestParliamentarySession();
+  async updateBillCategories({
+    billCode,
+    categories,
+  }: {
+    billCode: string;
+    categories: string[];
+  }): Promise<boolean> {
+    try {
+      const bill = await super.findOne({
+        table: this.table,
+        where: { column: "code", value: billCode },
+      });
 
-    return bills.map((bill) => {
-      const billObject: Bill = {
-        parliamentary_session_id: undefined,
-        code: "",
-        title: "",
-        description: "",
-        introduced_date: "",
-        summary_url: "",
-        page_url: "",
-        full_text_url: "",
-        passed: undefined,
-      };
+      const tableValuesArray: BillCategory[] = [];
 
-      return Object.keys(billObject).reduce((billObject, billColumn, index) => {
-        return (billObject = {
-          ...billObject,
-          [billColumn]: index === 0 ? parliamentarySession : bill[billColumn],
-        });
-      }, billObject);
-    });
-  };
+      for await (const billCategory of categories) {
+        const category = await new CategoriesService().findOneCategory(
+          billCategory,
+        );
+
+        if (!!bill?.id && !!category?.id) {
+          tableValuesArray.push({ bill_id: bill.id, category_id: category.id });
+        } else {
+          throw new Error(`Unable to find Bill or Category.`);
+        }
+      }
+
+      await super.createJoinTables({
+        table: "bill_categories",
+        tableValuesArray,
+      });
+      return true;
+    } catch (err) {
+      console.error(`[BILL CATEGORY UPDATE ERROR]: ${err}`);
+      return false;
+    }
+  }
+
+  /* This method is probably not necessary since */
+
+  // private createBillsArray = async (bills: Bill[]): Promise<Bill[]> => {
+  //   const parliamentarySession = await new ParliamentsService().queryLatestParliamentarySession();
+
+  //   return bills.map((bill) => {
+  //     const billObject: Bill = {
+  //       parliamentary_session_id: undefined,
+  //       code: "",
+  //       title: "",
+  //       description: "",
+  //       introduced_date: "",
+  //       summary_url: "",
+  //       page_url: "",
+  //       full_text_url: "",
+  //       passed: undefined,
+  //     };
+
+  //     return Object.keys(billObject).reduce((billObject, billColumn, index) => {
+  //       return (billObject = {
+  //         ...billObject,
+  //         [billColumn]: index === 0 ? parliamentarySession : bill[billColumn],
+  //       });
+  //     }, billObject);
+  //   });
+  // };
 }

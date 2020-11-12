@@ -2,9 +2,6 @@ import { BaseService } from "..";
 import { testBills } from "@test";
 
 describe(`BaseService methods`, () => {
-  // beforeEach(async () => {
-  // });
-
   describe(`createColumns`, () => {
     const testBaseService = new BaseService();
     const ProtoBaseService = Object.getPrototypeOf(testBaseService);
@@ -12,19 +9,52 @@ describe(`BaseService methods`, () => {
     const correctColumnsOutputForBills =
       "parliamentary_session_id, code, title, description, introduced_date, summary_url, page_url, full_text_url, passed";
 
-    it(`Creates a the columns string for an SQL query from a single object`, () => {
+    it(`Creates the columns string for an SQL query from a single object`, () => {
       const testObject = testBills[0];
       const testColumns = ProtoBaseService.createColumns(testObject);
 
       expect(testColumns).toEqual(correctColumnsOutputForBills);
     });
 
-    it(`Creates a the columns string for an SQL query from an array of objects`, () => {
+    it(`Creates the columns string for an SQL query from an array of objects`, () => {
       const testObjectsArray = testBills;
       const testColumns = ProtoBaseService.createColumns(testObjectsArray);
 
       expect(testColumns).toEqual(correctColumnsOutputForBills);
     });
+  });
+});
+
+describe(`createWhereClause`, () => {
+  const testBaseService = new BaseService();
+  const ProtoBaseService = Object.getPrototypeOf(testBaseService);
+
+  it(`Creates the where clause for an SQL query from a single object`, () => {
+    const testObject = { column: "created_at", value: "2020/10/24" };
+    const correctWhereClauseOutputForSingleObject =
+      " WHERE created_at='2020/10/24'";
+
+    const testWhereClauseForSingleObject = ProtoBaseService.createWhereClause(
+      testObject,
+    );
+
+    expect(testWhereClauseForSingleObject).toEqual(
+      correctWhereClauseOutputForSingleObject,
+    );
+  });
+
+  it(`Creates the where clause for an SQL query from an array of objects`, () => {
+    const testObjectsArray = [
+      { column: "created_at", value: "1987/03/22" },
+      { column: "code", value: "C-432" },
+    ];
+    const testWhereClauseForArray = ProtoBaseService.createWhereClause(
+      testObjectsArray,
+    );
+    const correctWhereClauseOutputForArray =
+      " WHERE created_at='1987/03/22' AND code='C-432'";
+
+    expect(testWhereClauseForArray).toEqual(correctWhereClauseOutputForArray);
   });
 });
 

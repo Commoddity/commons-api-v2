@@ -1,2 +1,2 @@
-export { Bill } from "./model";
+export { Bill, BillCategory } from "./model";
 export { BillsService } from "./service";

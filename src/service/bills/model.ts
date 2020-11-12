@@ -1,6 +1,7 @@
 import { keys } from "ts-transformer-keys";
 
 export interface BillInterface {
+  id: string | undefined;
   parliamentary_session_id: number | undefined;
   code: string;
   title: string;
@@ -13,6 +14,7 @@ export interface BillInterface {
 }
 
 export class Bill implements BillInterface {
+  id: string | undefined;
   parliamentary_session_id: number | undefined;
   code: string;
   title: string;
@@ -38,6 +40,7 @@ export class Bill implements BillInterface {
     full_text_url,
     passed,
   }) {
+    this.id = id;
     this.parliamentary_session_id = parliamentary_session_id;
     this.code = code;
     this.title = title;
@@ -48,4 +51,9 @@ export class Bill implements BillInterface {
     this.full_text_url = full_text_url;
     this.passed = passed;
   }
+}
+
+export interface BillCategory {
+  bill_id: string;
+  category_id: string;
 }
