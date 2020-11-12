@@ -30,6 +30,7 @@ export class Bill implements BillInterface {
   }
 
   constructor({
+    id,
     parliamentary_session_id,
     code,
     title,
