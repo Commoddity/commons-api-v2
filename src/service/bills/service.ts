@@ -19,19 +19,51 @@ export class BillsService extends BaseService<Bill> {
     });
   }
 
+  async updateBillPassed({
+    billCode,
+    passed,
+  }: {
+    billCode: string;
+    passed: boolean;
+  }): Promise<boolean> {
+    return await super.updateOne({
+      table: "bills",
+      column: "passed",
+      value: passed.toString(),
+      whereColumn: "code",
+      whereValue: billCode,
+    });
+  }
+
+  async updateSummaryUrl({
+    billCode,
+    summaryUrl,
+  }: {
+    billCode: string;
+    summaryUrl: string;
+  }): Promise<boolean> {
+    return await super.updateOne({
+      table: "bills",
+      column: "summary_url",
+      value: summaryUrl,
+      whereColumn: "code",
+      whereValue: billCode,
+    });
+  }
+
   private createBillsArray = async (bills: Bill[]): Promise<Bill[]> => {
     const parliamentarySession = await new ParliamentsService().queryLatestParliamentarySession();
 
     return bills.map((bill) => {
       const billObject: Bill = {
         parliamentary_session_id: undefined,
-        code: undefined,
-        title: undefined,
-        description: undefined,
-        introduced_date: undefined,
-        summary_url: undefined,
-        page_url: undefined,
-        full_text_url: undefined,
+        code: "",
+        title: "",
+        description: "",
+        introduced_date: "",
+        summary_url: "",
+        page_url: "",
+        full_text_url: "",
         passed: undefined,
       };
 

@@ -12,14 +12,14 @@ describe(`BaseService methods`, () => {
     const correctColumnsOutputForBills =
       "parliamentary_session_id, code, title, description, introduced_date, summary_url, page_url, full_text_url, passed";
 
-    it(`Creates a the columns string for an SQL query from a single object`, async () => {
+    it(`Creates a the columns string for an SQL query from a single object`, () => {
       const testObject = testBills[0];
       const testColumns = ProtoBaseService.createColumns(testObject);
 
       expect(testColumns).toEqual(correctColumnsOutputForBills);
     });
 
-    it(`Creates a the columns string for an SQL query from an array of objects`, async () => {
+    it(`Creates a the columns string for an SQL query from an array of objects`, () => {
       const testObjectsArray = testBills;
       const testColumns = ProtoBaseService.createColumns(testObjectsArray);
 

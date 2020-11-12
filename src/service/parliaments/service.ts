@@ -7,6 +7,6 @@ export class ParliamentsService extends BaseService<Bill> {
   // }
 
   async queryLatestParliamentarySession(): Promise<string | undefined> {
-    return await super.findLatest({ table: `parliamentary_sessions` });
+    return await super.findLatestId({ table: `parliamentary_sessions` });
   }
 }

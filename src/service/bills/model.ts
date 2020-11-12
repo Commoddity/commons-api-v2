@@ -1,43 +1,43 @@
 import { keys } from "ts-transformer-keys";
 
 export interface BillInterface {
-  parliamentary_session_id: number;
+  parliamentary_session_id: number | undefined;
   code: string;
   title: string;
-  description: string;
-  introduced_date: Date;
-  summary_url: string;
+  description: string | undefined;
+  introduced_date: string | undefined;
   page_url: string;
-  full_text_url: string;
-  passed: boolean;
+  summary_url: string | undefined;
+  full_text_url: string | undefined;
+  passed: boolean | undefined;
 }
 
 export class Bill implements BillInterface {
-  parliamentary_session_id;
-  code;
-  title;
-  description;
-  introduced_date;
-  summary_url;
-  page_url;
-  full_text_url;
-  passed;
+  parliamentary_session_id: number | undefined;
+  code: string;
+  title: string;
+  description: string | undefined;
+  introduced_date: string | undefined;
+  page_url: string;
+  summary_url: string | undefined;
+  full_text_url: string | undefined;
+  passed: boolean | undefined;
 
   static getColumnNames(): string[] {
     return keys<BillInterface>();
   }
 
   constructor({
-    parliamentary_session_id = null,
-    code = null,
-    title = null,
-    description = null,
-    introduced_date = null,
-    summary_url = null,
-    page_url = null,
-    full_text_url = null,
-    passed = null,
-  } = {}) {
+    parliamentary_session_id,
+    code,
+    title,
+    description,
+    introduced_date,
+    summary_url,
+    page_url,
+    full_text_url,
+    passed,
+  }) {
     this.parliamentary_session_id = parliamentary_session_id;
     this.code = code;
     this.title = title;

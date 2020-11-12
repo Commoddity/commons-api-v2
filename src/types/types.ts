@@ -5,7 +5,7 @@ export type GraphQLFields = {
   [key: string]: GraphQLFieldConfig<
     GraphQLObjectType,
     GraphQLRequestContext,
-    { [argName: string]: string }
+    { [argName: string]: any }
   >;
 };
 
@@ -20,4 +20,12 @@ export interface CreateParams<T> {
 export interface CreateManyParams<T> {
   table: string;
   tableValuesArray: T[];
+}
+
+export interface UpdateParams {
+  table: string;
+  column: string;
+  value: string;
+  whereColumn: string;
+  whereValue: string;
 }

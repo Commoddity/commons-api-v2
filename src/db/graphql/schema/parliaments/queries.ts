@@ -14,8 +14,8 @@ const parliamentQueries: GraphQLFields = {
       id: { type: GraphQLNonNull(GraphQLInt) },
     },
     where: (parliamentsTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${parliamentsTable}.id = ?`);
         values.push(args.id);
@@ -36,8 +36,8 @@ const parliamentQueries: GraphQLFields = {
       id: { type: GraphQLNonNull(GraphQLInt) },
     },
     where: (parliamentTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${parliamentTable}.id = ?`);
         values.push(args.id);
@@ -61,8 +61,8 @@ const parliamentQueries: GraphQLFields = {
       number: { type: GraphQLInt },
     },
     where: (parliamentarySessionsTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${parliamentarySessionsTable}.id = ?`);
         values.push(args.id);
@@ -93,8 +93,8 @@ const parliamentQueries: GraphQLFields = {
       number: { type: GraphQLInt },
     },
     where: (parliamentarySessionTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${parliamentarySessionTable}.id = ?`);
         values.push(args.id);

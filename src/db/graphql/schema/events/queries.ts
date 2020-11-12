@@ -18,8 +18,8 @@ const eventQueries: GraphQLFields = {
       publication_date: { type: DateScalar },
     },
     where: (eventsTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${eventsTable}.id = ?`);
         values.push(args.id);
@@ -55,8 +55,8 @@ const eventQueries: GraphQLFields = {
       publication_date: { type: DateScalar },
     },
     where: (eventTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${eventTable}.id = ?`);
         values.push(args.id);

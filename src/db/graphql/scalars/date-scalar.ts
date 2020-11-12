@@ -1,4 +1,5 @@
 import { GraphQLScalarType } from "graphql";
+import dayjs from "dayjs";
 
 const isDate = (dateString: string): boolean => {
   return !isNaN(new Date(dateString).getDate());
@@ -8,7 +9,7 @@ const isDate = (dateString: string): boolean => {
 // as certain bills do not have an Introduced Date and will return undefined
 const dateOrUndefinedSerialize = (value: string): string | undefined => {
   if (isDate(value)) {
-    return new Date(value).toLocaleDateString("en-ZA");
+    return dayjs(value).format(`YYYY/MM/DD`);
   } else if (value === "undefined") {
     return undefined;
   } else {
@@ -18,7 +19,7 @@ const dateOrUndefinedSerialize = (value: string): string | undefined => {
 
 const dateOrUndefinedParseValue = (value: string): string | undefined => {
   if (isDate(value)) {
-    return new Date(value).toLocaleDateString("en-ZA");
+    return dayjs(value).format(`YYYY/MM/DD`);
   } else if (value === "undefined") {
     return undefined;
   } else {
@@ -33,7 +34,7 @@ const dateOrUndefinedParseLiteral = (ast: {
   const { value } = ast;
 
   if (isDate(value)) {
-    return new Date(value).toLocaleDateString("en-ZA");
+    return dayjs(value).format(`YYYY/MM/DD`);
   } else if (value === "undefined") {
     return undefined;
   } else {

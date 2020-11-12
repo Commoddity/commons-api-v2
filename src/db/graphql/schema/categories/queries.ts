@@ -16,8 +16,8 @@ const categoryQueries: GraphQLFields = {
       uclassify_class: { type: GraphQLString },
     },
     where: (categoriesTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${categoriesTable}.id = ?`);
         values.push(args.id);
@@ -48,8 +48,8 @@ const categoryQueries: GraphQLFields = {
       uclassify_class: { type: GraphQLString },
     },
     where: (categoryTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${categoryTable}.id = ?`);
         values.push(args.id);

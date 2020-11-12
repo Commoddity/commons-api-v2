@@ -26,8 +26,8 @@ const billQueries: GraphQLFields = {
       passed: { type: GraphQLBoolean },
     },
     where: (billsTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${billsTable}.id = ?`);
         values.push(args.id);
@@ -78,8 +78,8 @@ const billQueries: GraphQLFields = {
       passed: { type: GraphQLBoolean },
     },
     where: (billTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${billTable}.id = ?`);
         values.push(args.id);

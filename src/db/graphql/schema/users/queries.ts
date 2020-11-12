@@ -28,8 +28,8 @@ const userQueries: GraphQLFields = {
       active: { type: GraphQLBoolean },
     },
     where: (usersTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${usersTable}.id = ?`);
         values.push(args.id);
@@ -90,8 +90,8 @@ const userQueries: GraphQLFields = {
       active: { type: GraphQLBoolean },
     },
     where: (userTable, args, _context, _resolveInfo) => {
-      const whereClause = [];
-      const values = [];
+      const whereClause: string[] = [];
+      const values: any[] = [];
       if (args.id) {
         whereClause.push(`${userTable}.id = ?`);
         values.push(args.id);
