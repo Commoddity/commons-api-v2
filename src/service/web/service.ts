@@ -2,7 +2,11 @@ import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
 import { parseString } from "xml2js";
 
+import { BaseService } from "../base-service";
+
 import { Bill } from "../bills";
+import { Event } from "../events";
+import { BillEvent } from "@types";
 import { FormatUtils } from "@utils";
 
 interface FetchPageParams {
@@ -10,7 +14,7 @@ interface FetchPageParams {
   billCode: string;
 }
 
-export class WebService {
+export class WebService extends BaseService<any> {
   // Returns the XML document from a given URL
   async fetchXml(url: string): Promise<string | undefined> {
     try {
@@ -207,5 +211,67 @@ export class WebService {
     } catch (err) {
       console.error(`[WEB SERVICE ERROR]: Error return${err}`);
     }
+  }
+
+  async splitBillsAndEvents(
+    combinedArray: BillEvent[],
+  ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
+    const billsArray: Bill[] = [];
+    const eventsArray: Event[] = [];
+
+    for (const combinedBillEvent of combinedArray) {
+      const billCode = FormatUtils.formatCode(combinedBillEvent.description!);
+      const eventTitle = FormatUtils.formatTitle(combinedBillEvent.title);
+
+      const bill: Bill = {
+        id: "",
+        parliamentary_session_id: undefined,
+        code: billCode,
+        title: FormatUtils.formatTitle(combinedBillEvent.description!),
+        description: undefined,
+        introduced_date: undefined,
+        summary_url: undefined,
+        page_url: combinedBillEvent.link,
+        full_text_url: undefined,
+        passed: undefined,
+      };
+
+      const event: Event = {
+        id: "",
+        bill_code: billCode,
+        title: eventTitle,
+        publication_date: FormatUtils.formatDate(combinedBillEvent.pubDate),
+      };
+
+      const billExistsInArray = billsArray.some(
+        (savedBill) => savedBill.code === bill.code,
+      );
+      const billExistsinDb = await super.findIfRowExists({
+        table: "bills",
+        where: { column: "code", value: billCode },
+      });
+      const eventExistsInDb = await super.findIfRowExists({
+        table: "events",
+        where: [
+          { column: "bill_code", value: billCode },
+          { column: "title", value: eventTitle },
+        ],
+      });
+
+      if (!!(!billExistsInArray && !billExistsinDb)) {
+        console.log(
+          `Successfuly fetched Bill ${bill.code} from LEGISinfo server ...`,
+        );
+        billsArray.push(bill);
+      }
+      if (!eventExistsInDb) {
+        eventsArray.push(event);
+        console.log(
+          `Successfully fetched ${event.title} for Bill ${event.bill_code} from LEGISinfo server ...`,
+        );
+      }
+    }
+
+    return { billsArray, eventsArray };
   }
 }

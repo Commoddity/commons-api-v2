@@ -43,3 +43,10 @@ export interface WhereCondition {
   column: string;
   value: string;
 }
+
+export interface BillEvent {
+  description: string;
+  link: string;
+  title: string;
+  pubDate: string;
+}

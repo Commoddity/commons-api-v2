@@ -130,7 +130,7 @@ export class BaseService<T> {
   async findIfRowExists({
     table,
     where,
-  }: WhereParams): Promise<boolean | undefined> {
+  }: ReadParams): Promise<boolean | undefined> {
     try {
       const query = `SELECT EXISTS(SELECT 1 FROM ${table}`;
       const whereClause = this.createWhereClause(where);

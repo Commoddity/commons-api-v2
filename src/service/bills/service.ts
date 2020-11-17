@@ -1,6 +1,5 @@
 import { BaseService } from "../base-service";
 import { CategoriesService } from "../categories";
-import { ParliamentsService } from "../parliaments";
 
 import { Bill, BillCategory } from "./model";
 
