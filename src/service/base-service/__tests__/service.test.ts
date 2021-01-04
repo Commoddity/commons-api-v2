@@ -65,29 +65,94 @@ describe(`BaseService query string private methods`, () => {
     });
   });
 
-  describe(`createSingleUpdateQuery`, () => {
+  describe(`createUpdateQuery`, () => {
     it(`Creates the update query for an SQL query for updating a single object with a single value`, () => {
       const testTable = "bills";
-      const testColumn = "summary_url";
-      const testValue = "https://www.testingupdatequery.com";
-      const testWhereClause = { column: "code", value: "C-420" };
+      const testData = {
+        code: "C-420",
+        summary_url: "https://www.testingupdatequery.com",
+      };
 
-      const testSelectQuery = ProtoBaseService.createSingleUpdateQuery({
+      const testUpdateQuery = ProtoBaseService.createUpdateQuery({
         table: testTable,
-        column: testColumn,
-        value: testValue,
-        whereClause: testWhereClause,
+        data: testData,
       });
 
       const correctSelectQuery = `UPDATE "bills" SET "summary_url"='https://www.testingupdatequery.com' WHERE code='C-420'`;
 
-      expect(testSelectQuery).toEqual(correctSelectQuery);
+      expect(testUpdateQuery).toEqual(correctSelectQuery);
+    });
+
+    it(`Creates the update query for an SQL query for updating a single object with multiple values`, () => {
+      const testTable = "bills";
+      const testData = {
+        code: "C-420",
+        summary_url: "https://www.testingupdatequery.com",
+        passed: true,
+      };
+
+      const testUpdateQuery = ProtoBaseService.createUpdateQuery({
+        table: testTable,
+        data: testData,
+      });
+
+      const correctSelectQuery = `UPDATE "bills" SET "summary_url"='https://www.testingupdatequery.com',"passed"=true WHERE code='C-420'`;
+
+      expect(testUpdateQuery).toEqual(correctSelectQuery);
+    });
+
+    it(`Creates the update query for an SQL query for updating multiple objects with a single value`, () => {
+      const testTable = "bills";
+      const testDataArray = [
+        {
+          code: "C-420",
+          summary_url: "https://www.testingupdatequery.com",
+        },
+        {
+          code: "C-666",
+          summary_url: "https://www.testingupdatequeryItem2.com",
+        },
+      ];
+
+      const testUpdateQuery = ProtoBaseService.createUpdateQuery({
+        table: testTable,
+        data: testDataArray,
+      });
+
+      const correctSelectQuery = `UPDATE "bills" AS t SET "summary_url"=v."summary_url" FROM (VALUES('C-420','https://www.testingupdatequery.com'),('C-666','https://www.testingupdatequeryItem2.com')) AS v("code","summary_url") WHERE v.code = t.code`;
+
+      expect(testUpdateQuery).toEqual(correctSelectQuery);
+    });
+
+    it(`Creates the update query for an SQL query for updating multiple objects with multiples values`, () => {
+      const testTable = "bills";
+      const testDataArray = [
+        {
+          code: "C-420",
+          summary_url: "https://www.testingupdatequery.com",
+          passed: true,
+        },
+        {
+          code: "C-666",
+          summary_url: "https://www.testingupdatequeryItem2.com",
+          passed: false,
+        },
+      ];
+
+      const testUpdateQuery = ProtoBaseService.createUpdateQuery({
+        table: testTable,
+        data: testDataArray,
+      });
+
+      const correctSelectQuery = `UPDATE "bills" AS t SET "summary_url"=v."summary_url","passed"=v."passed" FROM (VALUES('C-420','https://www.testingupdatequery.com',true),('C-666','https://www.testingupdatequeryItem2.com',false)) AS v("code","summary_url","passed") WHERE v.code = t.code`;
+
+      expect(testUpdateQuery).toEqual(correctSelectQuery);
     });
   });
 
   describe(`createWhereClause`, () => {
     it(`Creates the where clause for an SQL query from a single object`, () => {
-      const testObject = { column: "created_at", value: "2020/10/24" };
+      const testObject = { created_at: "2020/10/24" };
       const correctWhereClauseOutputForSingleObject =
         " WHERE created_at='2020/10/24'";
 
@@ -102,8 +167,8 @@ describe(`BaseService query string private methods`, () => {
 
     it(`Creates the where clause for an SQL query from an array of objects`, () => {
       const testObjectsArray = [
-        { column: "created_at", value: "1987/03/22" },
-        { column: "code", value: "C-432" },
+        { created_at: "1987/03/22" },
+        { code: "C-432" },
       ];
       const testWhereClauseForArray = ProtoBaseService.createWhereClause(
         testObjectsArray,
@@ -116,8 +181,8 @@ describe(`BaseService query string private methods`, () => {
 
     it(`Creates the where clause for an SQL query from an array of objects with an OR operator`, () => {
       const testObjectsArray = [
-        { column: "created_at", value: "1987/03/22" },
-        { column: "code", value: "C-432" },
+        { created_at: "1987/03/22" },
+        { code: "C-432" },
       ];
       const testWhereClauseForArray = ProtoBaseService.createWhereClause(
         testObjectsArray,

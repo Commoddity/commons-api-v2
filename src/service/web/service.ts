@@ -251,14 +251,11 @@ export class WebService extends BaseService<any> {
       );
       const billExistsinDb = await super.findIfRowExists({
         table: "bills",
-        whereClause: { column: "code", value: billCode },
+        whereClause: { code: billCode },
       });
       const eventExistsInDb = await super.findIfRowExists({
         table: "events",
-        whereClause: [
-          { column: "bill_code", value: billCode },
-          { column: "title", value: eventTitle },
-        ],
+        whereClause: [{ bill_code: billCode }, { title: eventTitle }],
       });
 
       if (!!(!billExistsInArray && !billExistsinDb)) {

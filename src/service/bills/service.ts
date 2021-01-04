@@ -6,11 +6,11 @@ import { Bill, BillCategory } from "./model";
 export class BillsService extends BaseService<Bill> {
   private table = "bills";
 
-  async createBill(bill: Bill): Promise<Bill | undefined> {
+  async createBill(bill: Bill): Promise<Bill> {
     return await super.createOne({ table: this.table, tableValues: bill });
   }
 
-  async createManyBills(bills: Bill[]): Promise<Bill[] | undefined> {
+  async createManyBills(bills: Bill[]): Promise<Bill[]> {
     return await super.createMany({
       table: this.table,
       tableValuesArray: bills,
@@ -23,12 +23,10 @@ export class BillsService extends BaseService<Bill> {
   }: {
     billCode: string;
     passed: boolean;
-  }): Promise<Bill | undefined> {
+  }): Promise<Bill> {
     return await super.updateOne({
       table: this.table,
-      column: "passed",
-      value: passed.toString(),
-      whereClause: { column: "code", value: billCode },
+      data: { code: billCode, passed },
     });
   }
 
@@ -38,12 +36,10 @@ export class BillsService extends BaseService<Bill> {
   }: {
     billCode: string;
     summaryUrl: string;
-  }): Promise<Bill | undefined> {
+  }): Promise<Bill> {
     return await super.updateOne({
       table: this.table,
-      column: "summary_url",
-      value: summaryUrl,
-      whereClause: { column: "code", value: billCode },
+      data: { code: billCode, summary_url: summaryUrl },
     });
   }
 
@@ -57,7 +53,7 @@ export class BillsService extends BaseService<Bill> {
     try {
       const bill = await super.findOne({
         table: this.table,
-        whereClause: { column: "code", value: billCode },
+        whereClause: { code: billCode },
       });
 
       const tableValuesArray: BillCategory[] = [];

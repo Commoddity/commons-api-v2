@@ -5,6 +5,9 @@ import {
   QueryParams,
   ReadParams,
   TableParams,
+  UpdateOneParams,
+  UpdateManyParams,
+  UpdateQueryParams,
   WhereCondition,
   WhereParams,
 } from "@types";
@@ -117,23 +120,29 @@ export class BaseService<T> {
   }
 
   /* Update methods */
-  async updateOne({
-    table,
-    column,
-    value,
-    whereClause,
-  }: WhereParams): Promise<T> {
+  async updateOne({ table, data }: UpdateOneParams): Promise<T> {
     try {
-      const query = this.createSingleUpdateQuery({
+      const query = this.createUpdateQuery({
         table,
-        column,
-        value,
-        whereClause,
+        data,
       });
 
       return await db.one<T>(query);
     } catch (err) {
       throw new Error(`[UPDATE ONE ROW ERROR]: ${err}`);
+    }
+  }
+
+  async updateMany({ table, data }: UpdateManyParams): Promise<T[]> {
+    try {
+      const query = this.createUpdateQuery({
+        table,
+        data,
+      });
+
+      return await db.any<T>(query);
+    } catch (err) {
+      throw new Error(`[UPDATE MANY ROW ERROR]: ${err}`);
     }
   }
 
@@ -162,22 +171,26 @@ export class BaseService<T> {
     const baseQuery = multiple
       ? "SELECT * FROM $1:raw $2:raw"
       : "SELECT * FROM $1:raw LIMIT 1 $2:raw";
+
     return pgp.as.format(baseQuery, [table, where]);
   }
 
-  private createSingleUpdateQuery({
-    table,
-    column,
-    value,
-    whereClause,
-  }): string {
-    const dataSingle = {
-      [whereClause.column]: whereClause.value,
-      [column]: value,
-    };
-    const where = this.createWhereClause(whereClause);
+  private createUpdateQuery({ table, data }: UpdateQueryParams): string {
+    if (Array.isArray(data)) {
+      const columns = Object.keys(data[0]);
+      const where = ` WHERE v.${columns[0]} = t.${columns[0]}`;
+      columns[0] = "?" + columns[0];
+      const columnSet = new pgp.helpers.ColumnSet(columns, { table });
 
-    return pgp.helpers.update(dataSingle, [column], table) + where;
+      return pgp.helpers.update(data, columnSet) + where;
+    } else {
+      const columns = Object.keys(data).slice(1);
+      const whereCondition = Object.entries(data)[0];
+      const whereClause = { [whereCondition[0]]: whereCondition[1] as string };
+      const where = this.createWhereClause(whereClause);
+
+      return pgp.helpers.update(data, columns, table) + where;
+    }
   }
 
   private createWhereClause(
@@ -188,15 +201,22 @@ export class BaseService<T> {
     let values: string[] = [];
 
     if (Array.isArray(whereClause)) {
-      query = whereClause.reduce<string>((whereString, { column }, index) => {
+      query = whereClause.reduce<string>((whereString, where, index) => {
+        const [pairs] = Object.entries(where);
         return whereString.concat(
-          `${index === 0 ? " WHERE" : ` ${operator}`} ${column}=$${index + 1}`,
+          `${index === 0 ? " WHERE" : ` ${operator}`} ${pairs[0]}=$${
+            index + 1
+          }`,
         );
       }, "");
-      values = whereClause.map(({ value }) => value);
+      values = whereClause.map((item) => {
+        const [pairs] = Object.entries(item);
+        return pairs[1];
+      });
     } else {
-      query = ` WHERE ${whereClause.column}=$1`;
-      values = [whereClause.value];
+      const [[column, value]] = Object.entries(whereClause);
+      query = ` WHERE ${column}=$1`;
+      values = [value];
     }
 
     return pgp.as.format(query, values);

@@ -31,6 +31,19 @@ export interface QueryParams extends TableParams {
   value: string;
 }
 
+export interface UpdateOneParams {
+  table: string;
+  data: { [key: string]: any };
+}
+export interface UpdateManyParams {
+  table: string;
+  data: { [key: string]: any }[];
+}
+export interface UpdateQueryParams {
+  table: string;
+  data: { [key: string]: any } | { [key: string]: any }[];
+}
+
 export interface WhereParams extends QueryParams {
   whereClause: WhereCondition | WhereCondition[];
 }
@@ -40,8 +53,7 @@ export interface ReadParams extends TableParams {
 }
 
 export interface WhereCondition {
-  column: string;
-  value: string;
+  [key: string]: any;
 }
 
 export interface BillEvent {

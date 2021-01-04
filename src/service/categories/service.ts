@@ -8,7 +8,7 @@ export class CategoriesService extends BaseService<Category> {
   async findOneCategory(category: string): Promise<Category> {
     return await super.findOne({
       table: this.table,
-      whereClause: { column: "class_code", value: category },
+      whereClause: { class_code: category },
     });
   }
 }
