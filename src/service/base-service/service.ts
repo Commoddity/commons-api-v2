@@ -1,11 +1,10 @@
-import { db } from "@config";
+import { db, pgp } from "@config";
 import {
   CreateManyParams,
   CreateParams,
   QueryParams,
   ReadParams,
   TableParams,
-  Value,
   WhereCondition,
   WhereParams,
 } from "@types";
@@ -14,133 +13,89 @@ import { BillCategory } from "../bills";
 
 export class BaseService<T> {
   /* Create methods */
-  async createOne({
-    table,
-    tableValues,
-  }: CreateParams<T>): Promise<T | undefined> {
-    let row: T;
-
-    const columns: string = this.createColumns(tableValues);
-    const values: Value[] = Object.values(tableValues);
-
-    const query: string = `
-    INSERT INTO ${table} (${columns}) VALUES ?
-    RETURNING *`;
+  async createOne({ table, tableValues }: CreateParams<T>): Promise<T> {
+    const query: string = this.createInsertQuery(tableValues, table);
 
     try {
-      const createdRow = await db.one<T>(query, values);
-
-      if (createdRow) {
-        row = createdRow;
-        return row;
-      }
+      return await db.one<T>(query);
     } catch (err) {
-      console.error(`[ROW CREATION ERROR]: ${err}`);
-      return;
+      throw new Error(`[ROW CREATION ERROR]: ${err}`);
     }
   }
 
   async createMany({
     table,
     tableValuesArray,
-  }: CreateManyParams<T>): Promise<T[] | undefined> {
-    let rows: T[] = [];
-
-    const columns: string = this.createColumns(tableValuesArray);
-    const values: Value[][] = [];
-    tableValuesArray.forEach((table: T) => {
-      const rowValues: Value[] = Object.values(table);
-      values.push(rowValues);
-    });
-
-    const query: string = `
-    INSERT INTO ${table} (${columns}) VALUES ?
-    RETURNING *`;
+  }: CreateManyParams<T>): Promise<T[]> {
+    const query: string = this.createInsertQuery(tableValuesArray, table);
 
     try {
-      const createdRows = await db.any<T>(query, [values]);
-
-      if (createdRows) {
-        rows = createdRows;
-        return rows;
-      }
+      return await db.any<T>(query);
     } catch (err) {
-      console.error(`[MULTIPLE ROW CREATION ERROR]: ${err}`);
-      return;
+      throw new Error(`[MULTIPLE ROW CREATION ERROR]: ${err}`);
     }
   }
 
   async createJoinTables({
     table,
     tableValuesArray,
-  }: CreateManyParams<BillCategory>): Promise<BillCategory[] | undefined> {
-    let rows: BillCategory[] = [];
-
-    const columns: string = this.createColumns(tableValuesArray);
-    const values: Value[][] = [];
-    tableValuesArray.forEach((table: BillCategory) => {
-      const rowValues: Value[] = Object.values(table);
-      values.push(rowValues);
-    });
-
-    const query: string = `
-    INSERT INTO ${table} (${columns}) VALUES ?
-    RETURNING *`;
+  }: CreateManyParams<BillCategory>): Promise<BillCategory[]> {
+    const query: string = this.createInsertQuery(tableValuesArray, table);
 
     try {
-      const createdRows = await db.any<BillCategory>(query, [values]);
-
-      if (createdRows) {
-        rows = createdRows;
-        return rows;
-      }
+      return await db.any<BillCategory>(query);
     } catch (err) {
-      console.error(`[MULTIPLE ROW CREATION ERROR]: ${err}`);
-      return;
+      throw new Error(`[JOIN TABLE CREATION ERROR]: ${err}`);
     }
   }
 
   /* Read methods */
-  async findOne({ table, where }: ReadParams): Promise<T> {
-    const queryString = `SELECT * FROM ${table} LIMIT 1`;
-    const whereClause = this.createWhereClause(where);
+  async findOne({ table, whereClause }: ReadParams): Promise<T> {
+    const where = this.createWhereClause(whereClause);
+    const query = this.createSelectQuery(table, where);
 
-    return await db.one<T>(queryString.concat(whereClause))[0];
-  }
-
-  async findMany({ table, where }: WhereParams): Promise<T[]> {
-    const queryString = `SELECT * FROM ${table}`;
-    const whereClause = this.createWhereClause(where);
-
-    return await db.any<T>(queryString.concat(whereClause));
-  }
-
-  async findLatestId({ table }: TableParams): Promise<string | undefined> {
     try {
-      const query = `SELECT id FROM ${table} ORDER BY id DESC LIMIT 1`;
-
-      const [sessionQueryResult] = await db.query(query);
-      return sessionQueryResult.id;
+      return await db.one<T>(query);
     } catch (err) {
-      console.error(`[FIND LATEST ID ERROR]: ${err}`);
-      return;
+      throw new Error(`[FIND ONE ERROR]: ${err}`);
     }
   }
 
-  async findIfRowExists({
-    table,
-    where,
-  }: ReadParams): Promise<boolean | undefined> {
-    try {
-      const query = `SELECT EXISTS(SELECT 1 FROM ${table}`;
-      const whereClause = this.createWhereClause(where);
+  async findMany({ table, whereClause }: WhereParams): Promise<T[]> {
+    const where = this.createWhereClause(whereClause);
+    const query = this.createSelectQuery(table, where, true);
 
-      const [rowQueryResult] = await db.one<T[]>(
-        query.concat(`${whereClause})`),
-      );
-      return !!rowQueryResult;
+    try {
+      return await db.any<T>(query);
     } catch (err) {
-      console.error(`[FIND ROW EXISTS ERROR]: ${err}`);
+      throw new Error(`[FIND MANY ERROR]: ${err}`);
+    }
+  }
+
+  async findLatestId({ table }: TableParams): Promise<string> {
+    const query = pgp.as.format(
+      "SELECT id FROM $1:raw ORDER BY id DESC LIMIT 1",
+      [table],
+    );
+
+    try {
+      return (await db.one<{ id: string }>(query)).id;
+    } catch (err) {
+      throw new Error(`[FIND LATEST ID ERROR]: ${err}`);
+    }
+  }
+
+  async findIfRowExists({ table, whereClause }: ReadParams): Promise<boolean> {
+    const where = this.createWhereClause(whereClause);
+    const query = pgp.as.format("SELECT EXISTS(SELECT 1 FROM $1:raw $2:raw", [
+      table,
+      where,
+    ]);
+
+    try {
+      return await db.one<boolean>(query);
+    } catch (err) {
+      throw new Error(`[FIND ROW EXISTS ERROR]: ${err}`);
     }
   }
 
@@ -148,14 +103,16 @@ export class BaseService<T> {
     table,
     column,
     value,
-  }: QueryParams): Promise<boolean | undefined> {
+  }: QueryParams): Promise<boolean> {
     try {
-      const query = `SELECT EXISTS(SELECT 1 FROM ${table} WHERE ${column} LIKE '%${value}%')`;
+      const query = pgp.as.format(
+        `SELECT EXISTS(SELECT 1 FROM $1:raw WHERE $2:raw LIKE '%$3:raw%')`,
+        [table, column, value],
+      );
 
-      const [rowQueryResult] = await db.one<T[]>(query);
-      return !!rowQueryResult;
+      return await db.one<boolean>(query);
     } catch (err) {
-      console.error(`[FIND ROW CONTAINS ERROR]: ${err}`);
+      throw new Error(`[FIND ROW CONTAINS ERROR]: ${err}`);
     }
   }
 
@@ -164,24 +121,26 @@ export class BaseService<T> {
     table,
     column,
     value,
-    where,
-  }: WhereParams): Promise<T | undefined> {
+    whereClause,
+  }: WhereParams): Promise<T> {
     try {
-      const query = `UPDATE ${table} SET ${column} = '${value}'
-                    RETURNING *`;
-      const whereClause = this.createWhereClause(where);
+      const query = this.createSingleUpdateQuery({
+        table,
+        column,
+        value,
+        whereClause,
+      });
 
-      return await db.one<T>(query.concat(whereClause));
+      return await db.one<T>(query);
     } catch (err) {
-      console.error(`[UPDATE ONE ROW ERROR]: ${err}`);
-      return undefined;
+      throw new Error(`[UPDATE ONE ROW ERROR]: ${err}`);
     }
   }
 
   /* Delete methods */
 
   /* Query String creation methods */
-  private createColumns(tableValues: any | any[]): string {
+  private createInsertQuery(tableValues: any | any[], table: string): string {
     let exampleRow: string[];
 
     if (Array.isArray(tableValues)) {
@@ -190,30 +149,56 @@ export class BaseService<T> {
       exampleRow = Object.keys(tableValues);
     }
 
-    const addComma = (index: number, arr: string[]): string =>
-      index !== arr.length - 1 ? `, ` : ``;
+    const columnSet = new pgp.helpers.ColumnSet(exampleRow, { table });
 
-    return exampleRow.reduce<string>(
-      (columnsString, nextString, index, arr) =>
-        columnsString.concat(`${nextString}${addComma(index, arr)}`),
-      "",
-    );
+    return pgp.helpers.insert(tableValues, columnSet);
+  }
+
+  private createSelectQuery(
+    table: string,
+    where: string,
+    multiple: boolean = false,
+  ): string {
+    const baseQuery = multiple
+      ? "SELECT * FROM $1:raw $2:raw"
+      : "SELECT * FROM $1:raw LIMIT 1 $2:raw";
+    return pgp.as.format(baseQuery, [table, where]);
+  }
+
+  private createSingleUpdateQuery({
+    table,
+    column,
+    value,
+    whereClause,
+  }): string {
+    const dataSingle = {
+      [whereClause.column]: whereClause.value,
+      [column]: value,
+    };
+    const where = this.createWhereClause(whereClause);
+
+    return pgp.helpers.update(dataSingle, [column], table) + where;
   }
 
   private createWhereClause(
     whereClause: WhereCondition | WhereCondition[],
     operator: "AND" | "OR" = "AND",
   ): string {
+    let query: string;
+    let values: string[] = [];
+
     if (Array.isArray(whereClause)) {
-      return whereClause.reduce<string>((whereString, condition, index) => {
+      query = whereClause.reduce<string>((whereString, { column }, index) => {
         return whereString.concat(
-          `${index === 0 ? " WHERE" : ` ${operator}`} ${condition.column}='${
-            condition.value
-          }'`,
+          `${index === 0 ? " WHERE" : ` ${operator}`} ${column}=$${index + 1}`,
         );
       }, "");
+      values = whereClause.map(({ value }) => value);
     } else {
-      return ` WHERE ${whereClause.column}='${whereClause.value}'`;
+      query = ` WHERE ${whereClause.column}=$1`;
+      values = [whereClause.value];
     }
+
+    return pgp.as.format(query, values);
   }
 }

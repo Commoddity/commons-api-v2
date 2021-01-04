@@ -32,11 +32,11 @@ export interface QueryParams extends TableParams {
 }
 
 export interface WhereParams extends QueryParams {
-  where: WhereCondition | WhereCondition[];
+  whereClause: WhereCondition | WhereCondition[];
 }
 
 export interface ReadParams extends TableParams {
-  where: WhereCondition | WhereCondition[];
+  whereClause: WhereCondition | WhereCondition[];
 }
 
 export interface WhereCondition {

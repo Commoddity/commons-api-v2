@@ -3,9 +3,9 @@ import pgPromise from "pg-promise";
 
 dotenv.config();
 
-const pgp = pgPromise({});
-
-console.log("HERE IS PROCESS.ENV", process.env.NODE_ENV);
+const pgp = pgPromise({
+  capSQL: true,
+});
 
 // Development database configuration
 const devConfig = {
@@ -18,4 +18,4 @@ const devConfig = {
 
 const db = pgp(devConfig);
 
-export { db };
+export { db, pgp };

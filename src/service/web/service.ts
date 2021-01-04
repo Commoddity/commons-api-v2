@@ -85,6 +85,7 @@ export class WebService extends BaseService<any> {
       console.error(
         `[WEB SERVICE ERROR]: fetchIntroducedDate - Bill ${billCode}: ${err}`,
       );
+      return undefined;
     }
   }
 
@@ -250,11 +251,11 @@ export class WebService extends BaseService<any> {
       );
       const billExistsinDb = await super.findIfRowExists({
         table: "bills",
-        where: { column: "code", value: billCode },
+        whereClause: { column: "code", value: billCode },
       });
       const eventExistsInDb = await super.findIfRowExists({
         table: "events",
-        where: [
+        whereClause: [
           { column: "bill_code", value: billCode },
           { column: "title", value: eventTitle },
         ],

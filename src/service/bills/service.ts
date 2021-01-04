@@ -11,8 +11,6 @@ export class BillsService extends BaseService<Bill> {
   }
 
   async createManyBills(bills: Bill[]): Promise<Bill[] | undefined> {
-    // const billValuesArray = await this.createBillsArray(bills);
-
     return await super.createMany({
       table: this.table,
       tableValuesArray: bills,
@@ -30,7 +28,7 @@ export class BillsService extends BaseService<Bill> {
       table: this.table,
       column: "passed",
       value: passed.toString(),
-      where: { column: "code", value: billCode },
+      whereClause: { column: "code", value: billCode },
     });
   }
 
@@ -45,7 +43,7 @@ export class BillsService extends BaseService<Bill> {
       table: this.table,
       column: "summary_url",
       value: summaryUrl,
-      where: { column: "code", value: billCode },
+      whereClause: { column: "code", value: billCode },
     });
   }
 
@@ -59,7 +57,7 @@ export class BillsService extends BaseService<Bill> {
     try {
       const bill = await super.findOne({
         table: this.table,
-        where: { column: "code", value: billCode },
+        whereClause: { column: "code", value: billCode },
       });
 
       const tableValuesArray: BillCategory[] = [];
@@ -86,31 +84,4 @@ export class BillsService extends BaseService<Bill> {
       return false;
     }
   }
-
-  /* This method is probably not necessary since */
-
-  // private createBillsArray = async (bills: Bill[]): Promise<Bill[]> => {
-  //   const parliamentarySession = await new ParliamentsService().queryLatestParliamentarySession();
-
-  //   return bills.map((bill) => {
-  //     const billObject: Bill = {
-  //       parliamentary_session_id: undefined,
-  //       code: "",
-  //       title: "",
-  //       description: "",
-  //       introduced_date: "",
-  //       summary_url: "",
-  //       page_url: "",
-  //       full_text_url: "",
-  //       passed: undefined,
-  //     };
-
-  //     return Object.keys(billObject).reduce((billObject, billColumn, index) => {
-  //       return (billObject = {
-  //         ...billObject,
-  //         [billColumn]: index === 0 ? parliamentarySession : bill[billColumn],
-  //       });
-  //     }, billObject);
-  //   });
-  // };
 }

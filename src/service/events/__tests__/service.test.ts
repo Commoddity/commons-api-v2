@@ -1,4 +1,4 @@
-import { BillsService } from "..";
+import { EventsService } from "..";
 import { testBills } from "@test";
 
 describe(`BillsService methods`, () => {
@@ -6,12 +6,6 @@ describe(`BillsService methods`, () => {
   // });
 
   describe(`Create Bill`, () => {
-    it(`Creates a new bill in the DB `, async () => {
-      const testBillInput = testBills[0];
-
-      const testBillOutput = await new BillsService().createBill(testBillInput);
-
-      console.log("TESTING HERE", testBillOutput);
-    });
+    it(`Creates a new bill in the DB `, async () => {});
   });
 });
