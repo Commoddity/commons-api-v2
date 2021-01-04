@@ -4,8 +4,7 @@ CREATE TABLE parliaments (
   id SERIAL PRIMARY KEY,
   start_date DATE,
   end_date DATE,
-  created_at DATETIME NOT NULL
-              DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER SEQUENCE parliaments_id_seq RESTART WITH 43;

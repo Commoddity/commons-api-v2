@@ -50,3 +50,7 @@ export interface BillEvent {
   title: string;
   pubDate: string;
 }
+export interface BillSummaryMap {
+  code: string;
+  url: string;
+}

@@ -3,8 +3,7 @@ DROP TABLE IF EXISTS user_categories CASCADE;
 CREATE TABLE user_categories (
   user_id INT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   category_id INT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
-  created_at DATETIME NOT NULL
-              DEFAULT CURRENT_TIMESTAMP, 
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (user_id, category_id)
 );
 

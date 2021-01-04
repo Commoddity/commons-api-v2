@@ -28,7 +28,7 @@ export class BaseService<T> {
     RETURNING *`;
 
     try {
-      const createdRow = await db.query<T>(query, values);
+      const createdRow = await db.one<T>(query, values);
 
       if (createdRow) {
         row = createdRow;
@@ -58,7 +58,7 @@ export class BaseService<T> {
     RETURNING *`;
 
     try {
-      const createdRows = await db.query<T[]>(query, [values]);
+      const createdRows = await db.any<T>(query, [values]);
 
       if (createdRows) {
         rows = createdRows;
@@ -88,7 +88,7 @@ export class BaseService<T> {
     RETURNING *`;
 
     try {
-      const createdRows = await db.query<BillCategory[]>(query, [values]);
+      const createdRows = await db.any<BillCategory>(query, [values]);
 
       if (createdRows) {
         rows = createdRows;
@@ -105,14 +105,14 @@ export class BaseService<T> {
     const queryString = `SELECT * FROM ${table} LIMIT 1`;
     const whereClause = this.createWhereClause(where);
 
-    return await db.query<T[]>(queryString.concat(whereClause))[0];
+    return await db.one<T>(queryString.concat(whereClause))[0];
   }
 
   async findMany({ table, where }: WhereParams): Promise<T[]> {
     const queryString = `SELECT * FROM ${table}`;
     const whereClause = this.createWhereClause(where);
 
-    return await db.query<T[]>(queryString.concat(whereClause));
+    return await db.any<T>(queryString.concat(whereClause));
   }
 
   async findLatestId({ table }: TableParams): Promise<string | undefined> {
@@ -135,7 +135,7 @@ export class BaseService<T> {
       const query = `SELECT EXISTS(SELECT 1 FROM ${table}`;
       const whereClause = this.createWhereClause(where);
 
-      const [rowQueryResult] = await db.query<T[]>(
+      const [rowQueryResult] = await db.one<T[]>(
         query.concat(`${whereClause})`),
       );
       return !!rowQueryResult;
@@ -152,7 +152,7 @@ export class BaseService<T> {
     try {
       const query = `SELECT EXISTS(SELECT 1 FROM ${table} WHERE ${column} LIKE '%${value}%')`;
 
-      const [rowQueryResult] = await db.query<T[]>(query);
+      const [rowQueryResult] = await db.one<T[]>(query);
       return !!rowQueryResult;
     } catch (err) {
       console.error(`[FIND ROW CONTAINS ERROR]: ${err}`);
@@ -171,7 +171,7 @@ export class BaseService<T> {
                     RETURNING *`;
       const whereClause = this.createWhereClause(where);
 
-      return await db.query<T>(query.concat(whereClause));
+      return await db.one<T>(query.concat(whereClause));
     } catch (err) {
       console.error(`[UPDATE ONE ROW ERROR]: ${err}`);
       return undefined;

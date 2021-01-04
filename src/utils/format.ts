@@ -3,15 +3,17 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
+import { BillEvent } from "@types";
+
 export class FormatUtils {
   // Returns the parsed array of bills/events from the source XML (with redundant tags removed)
-  static formatXml = async (xml: string): Promise<string[] | undefined> => {
+  static formatXml = async (xml: string): Promise<BillEvent[]> => {
     try {
       return await new Promise((resolve, _reject) => {
         parseString(xml, (err: Error, response: string) => {
           if (!err) {
             const xmlObject: {
-              rss: { channel: { item: string[] }[] };
+              rss: { channel: { item: BillEvent[] }[] };
             } = JSON.parse(JSON.stringify(response));
             const fetchedArray = xmlObject.rss.channel[0].item;
 
@@ -32,8 +34,9 @@ export class FormatUtils {
 
   // Returns a bill's code from the 'description' field
   static formatCode = (description: string): string =>
-    description.substr(0, description.indexOf(","));
+    description.toString().substr(0, description.indexOf(","));
 
   // Returns the title of a bill or event from the 'description' or 'title' field
-  static formatTitle = (title: string): string => title.split(/, (.+)/)[1];
+  static formatTitle = (title: string): string =>
+    title.toString().split(/, (.+)/)[1];
 }

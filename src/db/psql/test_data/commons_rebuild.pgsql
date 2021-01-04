@@ -220,7 +220,7 @@ ALTER SEQUENCE public.bills_id_seq OWNED BY public.bills.id;
 CREATE TABLE public.categories (
     id bigint NOT NULL,
     name character varying,
-    uclassify_class character varying,
+    class_code character varying,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
@@ -694,7 +694,7 @@ COPY public.bills (id, parliamentary_session_id, code, title, description, intro
 -- Data for Name: categories; Type: TABLE DATA; Schema: public; Owner: commons_dev
 --
 
-COPY public.categories (id, name, uclassify_class, created_at, updated_at) FROM stdin;
+COPY public.categories (id, name, class_code, created_at, updated_at) FROM stdin;
 1	Agriculture, environment, fisheries and natural resources	agriculture_environment	2020-03-04 18:13:06.073373	2020-03-04 18:13:06.073373
 2	Arts, culture and entertainment	arts_culture	2020-03-04 18:13:06.083594	2020-03-04 18:13:06.083594
 3	Business, industry and trade	business_industry	2020-03-04 18:13:06.098846	2020-03-04 18:13:06.098846

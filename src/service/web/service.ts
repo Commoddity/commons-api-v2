@@ -6,7 +6,7 @@ import { BaseService } from "../base-service";
 
 import { Bill } from "../bills";
 import { Event } from "../events";
-import { BillEvent } from "@types";
+import { BillEvent, BillSummaryMap } from "@types";
 import { FormatUtils } from "@utils";
 
 interface FetchPageParams {
@@ -193,7 +193,7 @@ export class WebService extends BaseService<any> {
   }
 
   // Inserts all fetched data into bills and returns updated bills sorted by introduced_date
-  async returnFormattedBills(bills: Bill[]): Promise<Bill[] | undefined> {
+  async returnFormattedBills(bills: Bill[]): Promise<Bill[]> {
     try {
       // Creates an array of Promises to format all bills with fetched data
       const promises: Promise<Bill>[] = bills.map((bill) =>
@@ -209,7 +209,7 @@ export class WebService extends BaseService<any> {
           : -1,
       );
     } catch (err) {
-      console.error(`[WEB SERVICE ERROR]: Error return${err}`);
+      throw new Error(`[WEB SERVICE ERROR]: Error return${err}`);
     }
   }
 
@@ -220,8 +220,10 @@ export class WebService extends BaseService<any> {
     const eventsArray: Event[] = [];
 
     for (const combinedBillEvent of combinedArray) {
-      const billCode = FormatUtils.formatCode(combinedBillEvent.description!);
+      console.log("HERE THIS ONE YOOO", combinedBillEvent.description);
+      const billCode = FormatUtils.formatCode(combinedBillEvent.description[0]);
       const eventTitle = FormatUtils.formatTitle(combinedBillEvent.title);
+      console.log("ONE AFTER", billCode);
 
       const bill: Bill = {
         id: "",
@@ -274,4 +276,55 @@ export class WebService extends BaseService<any> {
 
     return { billsArray, eventsArray };
   }
+
+  // Splits out the code of the bill from each legislative summary in the array
+  // Returns an array of summary objects containing only the bill code and summary url
+  splitSummaries(
+    fetchedSummaryArray: { title: string; link: string }[],
+  ): BillSummaryMap[] {
+    const summariesArray: BillSummaryMap[] = [];
+
+    fetchedSummaryArray.forEach((summary) => {
+      if (summary.title.includes("Legislative Summary Published for ")) {
+        const summaryBillCode = summary.title
+          .split("Legislative Summary Published for ")[1]
+          .split(",")[0];
+
+        const summaryObject: BillSummaryMap = {
+          code: summaryBillCode,
+          url: summary.link,
+        };
+
+        summariesArray.push(summaryObject);
+      }
+    });
+
+    return summariesArray;
+  }
+
+  getLegisInfoCaller = async (
+    url: string,
+  ): Promise<{ formattedBillsArray: Bill[]; eventsArray: Event[] }> => {
+    try {
+      const xml = await this.fetchXml(url);
+
+      const sourceArray = await FormatUtils.formatXml(xml!);
+
+      const { billsArray, eventsArray } = await this.splitBillsAndEvents(
+        sourceArray,
+      );
+      const formattedBillsArray: Bill[] = await this.returnFormattedBills(
+        billsArray,
+      );
+
+      console.log(
+        `Succesfully fetched ${formattedBillsArray.length} bills and ${eventsArray.length} events ...\n`,
+      );
+
+      return { formattedBillsArray, eventsArray };
+    } catch (error) {
+      console.error(`[LEGISINFO CALLER ERROR] ${error}`);
+      throw new Error(`[LEGISINFO CALLER ERROR] ${error}`);
+    }
+  };
 }

@@ -220,7 +220,7 @@ ALTER SEQUENCE public.bills_id_seq OWNED BY public.bills.id;
 CREATE TABLE public.categories (
     id bigint NOT NULL,
     name character varying,
-    uclassify_class character varying,
+    class_code character varying,
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );

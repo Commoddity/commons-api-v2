@@ -20,7 +20,7 @@ const CategoryType: GraphQLObjectType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLNonNull(GraphQLInt), sqlColumn: "id" },
     name: { type: GraphQLString, sqlColumn: "name" },
-    uclassify_class: { type: GraphQLString, sqlColumn: "uclassify_class" },
+    class_code: { type: GraphQLString, sqlColumn: "class_code" },
     created_at: { type: GraphQLDateTime, sqlColumn: "created_at" },
     users: {
       description: "Users following this category",

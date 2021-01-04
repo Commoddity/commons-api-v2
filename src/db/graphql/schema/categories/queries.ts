@@ -13,7 +13,7 @@ const categoryQueries: GraphQLFields = {
     args: {
       id: { type: GraphQLInt },
       name: { type: GraphQLString },
-      uclassify_class: { type: GraphQLString },
+      class_code: { type: GraphQLString },
     },
     where: (categoriesTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
@@ -26,9 +26,9 @@ const categoryQueries: GraphQLFields = {
         whereClause.push(`${categoriesTable}.name = ?`);
         values.push(args.name);
       }
-      if (args.uclassify_class) {
-        whereClause.push(`${categoriesTable}.uclassify_class = ?`);
-        values.push(args.uclassify_class);
+      if (args.class_code) {
+        whereClause.push(`${categoriesTable}.class_code = ?`);
+        values.push(args.class_code);
       }
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
@@ -45,7 +45,7 @@ const categoryQueries: GraphQLFields = {
     args: {
       id: { type: GraphQLInt },
       name: { type: GraphQLString },
-      uclassify_class: { type: GraphQLString },
+      class_code: { type: GraphQLString },
     },
     where: (categoryTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
@@ -58,9 +58,9 @@ const categoryQueries: GraphQLFields = {
         whereClause.push(`${categoryTable}.name = ?`);
         values.push(args.name);
       }
-      if (args.uclassify_class) {
-        whereClause.push(`${categoryTable}.uclassify_class = ?`);
-        values.push(args.uclassify_class);
+      if (args.class_code) {
+        whereClause.push(`${categoryTable}.class_code = ?`);
+        values.push(args.class_code);
       }
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
