@@ -42,6 +42,22 @@ const runSeedFiles = async function (): Promise<void> {
   }
 };
 
+const runTestSeedFiles = async function (): Promise<void> {
+  console.log(`[LOCAL DATABASE RESET] -> Loading Test DB Seed files ...`);
+
+  const schemaFiles: string[] = fs.readdirSync("./src/db/psql/test_seeds");
+
+  for await (const schemaFile of schemaFiles) {
+    const sqlQuery: string = fs.readFileSync(
+      `./src/db/psql/test_seeds/${schemaFile}`,
+      "utf8",
+    );
+
+    console.log(`\t[LOCAL DATABASE RESET] -> Running ${schemaFile}`);
+    await db.query(sqlQuery);
+  }
+};
+
 (async (): Promise<void> => {
   try {
     console.log(
@@ -49,6 +65,7 @@ const runSeedFiles = async function (): Promise<void> {
     );
     await runSchemaFiles();
     await runSeedFiles();
+    await runTestSeedFiles();
   } catch (error) {
     console.error(
       `[LOCAL DATABASE RESET ERROR] -> Failed due to error: ${error}`,

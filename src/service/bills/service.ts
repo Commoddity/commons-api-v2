@@ -17,43 +17,47 @@ export class BillsService extends BaseService<Bill> {
     });
   }
 
+  async deleteBill(code: string): Promise<boolean> {
+    return await super.deleteOne({ table: this.table, whereClause: { code } });
+  }
+
   async updateBillPassed({
-    billCode,
+    code,
     passed,
   }: {
-    billCode: string;
+    code: string;
     passed: boolean;
   }): Promise<Bill> {
     return await super.updateOne({
       table: this.table,
-      data: { code: billCode, passed },
+      data: { code, passed },
     });
   }
 
   async updateSummaryUrl({
-    billCode,
-    summaryUrl,
+    code,
+    summary_url,
   }: {
-    billCode: string;
-    summaryUrl: string;
+    code: string;
+    summary_url: string;
   }): Promise<Bill> {
     return await super.updateOne({
       table: this.table,
-      data: { code: billCode, summary_url: summaryUrl },
+      data: { code, summary_url },
     });
   }
 
   async updateBillCategories({
-    billCode,
+    code,
     categories,
   }: {
-    billCode: string;
+    code: string;
     categories: string[];
   }): Promise<boolean> {
     try {
       const bill = await super.findOne({
         table: this.table,
-        whereClause: { code: billCode },
+        whereClause: { code },
       });
 
       const tableValuesArray: BillCategory[] = [];

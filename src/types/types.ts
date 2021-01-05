@@ -17,6 +17,11 @@ export interface CreateParams<T> {
   table: string;
   tableValues: T;
 }
+export interface DeleteParams {
+  table: string;
+  whereClause: WhereCondition | WhereCondition[];
+  operator?: "AND" | "OR";
+}
 export interface CreateManyParams<T> {
   table: string;
   tableValuesArray: T[];

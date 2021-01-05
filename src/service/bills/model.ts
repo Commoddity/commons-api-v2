@@ -1,26 +1,26 @@
 import { keys } from "ts-transformer-keys";
 
 export interface BillInterface {
-  id: string | undefined;
+  id?: string | undefined;
   parliamentary_session_id: number | undefined;
   code: string;
   title: string;
   description: string | undefined;
   introduced_date: string | undefined;
-  page_url: string;
+  page_url: string | undefined;
   summary_url: string | undefined;
   full_text_url: string | undefined;
   passed: boolean | undefined;
 }
 
 export class Bill implements BillInterface {
-  id: string | undefined;
+  id?: string | undefined;
   parliamentary_session_id: number | undefined;
   code: string;
   title: string;
   description: string | undefined;
   introduced_date: string | undefined;
-  page_url: string;
+  page_url: string | undefined;
   summary_url: string | undefined;
   full_text_url: string | undefined;
   passed: boolean | undefined;

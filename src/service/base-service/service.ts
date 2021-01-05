@@ -2,6 +2,7 @@ import { db, pgp } from "@config";
 import {
   CreateManyParams,
   CreateParams,
+  DeleteParams,
   QueryParams,
   ReadParams,
   TableParams,
@@ -147,8 +148,33 @@ export class BaseService<T> {
   }
 
   /* Delete methods */
+  async deleteOne({
+    table,
+    whereClause,
+    operator = undefined,
+  }: DeleteParams): Promise<boolean> {
+    const query: string = this.createDeleteQuery(table, whereClause, operator);
+
+    try {
+      await db.none(query);
+      return true;
+    } catch (err) {
+      throw new Error(`[ROW DELETION ERROR]: ${err}`);
+    }
+  }
 
   /* Query String creation methods */
+  private createDeleteQuery(
+    table: string,
+    whereClause: WhereCondition | WhereCondition[],
+    operator?: "AND" | "OR",
+  ): string {
+    const where = this.createWhereClause(whereClause, operator);
+    const baseQuery = "DELETE FROM $1:raw" + where;
+
+    return pgp.as.format(baseQuery, [table]);
+  }
+
   private createInsertQuery(tableValues: any | any[], table: string): string {
     let exampleRow: string[];
 
@@ -160,7 +186,7 @@ export class BaseService<T> {
 
     const columnSet = new pgp.helpers.ColumnSet(exampleRow, { table });
 
-    return pgp.helpers.insert(tableValues, columnSet);
+    return pgp.helpers.insert(tableValues, columnSet) + " RETURNING *";
   }
 
   private createSelectQuery(
