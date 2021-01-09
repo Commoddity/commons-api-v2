@@ -6,6 +6,8 @@ describe(`BillsService methods`, () => {
   // });
 
   describe(`Create Bill`, () => {
-    // it(`Creates a new bill in the DB `, async () => {});
+    it(`Creates a new bill in the DB `, async () => {
+      (() => undefined)();
+    });
   });
 });
