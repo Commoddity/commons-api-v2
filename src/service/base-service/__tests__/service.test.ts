@@ -59,7 +59,7 @@ describe(`BaseService query string private methods`, () => {
         testObjectsArray,
         testTable,
       );
-      const correctQueryForBillsArray = `INSERT INTO "bills"("parliamentary_session_id","code","title","description","introduced_date","summary_url","page_url","full_text_url","passed") VALUES(1,'C-205','A Bill to Touch Butts','Literally just touching butts.','2020/09/23','http://billsbillsbills.com','http://billsandbills.com','http://billsplusbills.com',null),(2,'C-231','A Bill for the Provision of Momentary Sanity','Why god why','2020/08/26','http://billsarebills.com',null,'http://whybillstho.com',true),(2,'C-242','A Bill for Sea Otters','Cute little guys','2019/03/10','http://billsarebills.com',null,'http://whybillstho.com',true) RETURNING *`;
+      const correctQueryForBillsArray = `INSERT INTO "bills"("parliamentary_session_id","code","title","description","introduced_date","summary_url","page_url","full_text_url","passed") VALUES(1,'C-205','A Bill to Touch Butts','Literally just touching butts.','2020/09/23','http://billsbillsbills.com','http://billsandbills.com','http://billsplusbills.com',null),(2,'C-231','A Bill for the Provision of Momentary Sanity','Why god why','2020/08/26','http://billsarebills.com','http://billsbillsbills.com','http://whybillstho.com',true),(2,'C-242','A Bill for Sea Otters','Cute little guys','2019/03/10','http://billsarebills.com','http://billsbillsbills.com','http://whybillstho.com',true) RETURNING *`;
 
       expect(testQueryForArrays).toEqual(correctQueryForBillsArray);
     });
@@ -91,7 +91,7 @@ describe(`BaseService query string private methods`, () => {
       );
 
       const correctSelectQueryForSingleObject =
-        "SELECT * FROM parliaments LIMIT 1 WHERE created_at='2018/03/22' OR session='1'";
+        "SELECT * FROM parliaments WHERE created_at='2018/03/22' OR session='1' LIMIT 1";
 
       expect(testSelectQueryForSingleObject).toEqual(
         correctSelectQueryForSingleObject,
@@ -112,7 +112,7 @@ describe(`BaseService query string private methods`, () => {
         data: testData,
       });
 
-      const correctSelectQuery = `UPDATE "bills" SET "summary_url"='https://www.testingupdatequery.com' WHERE code='C-420'`;
+      const correctSelectQuery = `UPDATE "bills" SET "summary_url"='https://www.testingupdatequery.com' WHERE code='C-420' RETURNING *`;
 
       expect(testUpdateQuery).toEqual(correctSelectQuery);
     });
@@ -130,7 +130,7 @@ describe(`BaseService query string private methods`, () => {
         data: testData,
       });
 
-      const correctSelectQuery = `UPDATE "bills" SET "summary_url"='https://www.testingupdatequery.com',"passed"=true WHERE code='C-420'`;
+      const correctSelectQuery = `UPDATE "bills" SET "summary_url"='https://www.testingupdatequery.com',"passed"=true WHERE code='C-420' RETURNING *`;
 
       expect(testUpdateQuery).toEqual(correctSelectQuery);
     });
@@ -153,7 +153,7 @@ describe(`BaseService query string private methods`, () => {
         data: testDataArray,
       });
 
-      const correctSelectQuery = `UPDATE "bills" AS t SET "summary_url"=v."summary_url" FROM (VALUES('C-420','https://www.testingupdatequery.com'),('C-666','https://www.testingupdatequeryItem2.com')) AS v("code","summary_url") WHERE v.code = t.code`;
+      const correctSelectQuery = `UPDATE "bills" AS t SET "summary_url"=v."summary_url" FROM (VALUES('C-420','https://www.testingupdatequery.com'),('C-666','https://www.testingupdatequeryItem2.com')) AS v("code","summary_url") WHERE v.code = t.code RETURNING *`;
 
       expect(testUpdateQuery).toEqual(correctSelectQuery);
     });
@@ -178,7 +178,7 @@ describe(`BaseService query string private methods`, () => {
         data: testDataArray,
       });
 
-      const correctSelectQuery = `UPDATE "bills" AS t SET "summary_url"=v."summary_url","passed"=v."passed" FROM (VALUES('C-420','https://www.testingupdatequery.com',true),('C-666','https://www.testingupdatequeryItem2.com',false)) AS v("code","summary_url","passed") WHERE v.code = t.code`;
+      const correctSelectQuery = `UPDATE "bills" AS t SET "summary_url"=v."summary_url","passed"=v."passed" FROM (VALUES('C-420','https://www.testingupdatequery.com',true),('C-666','https://www.testingupdatequeryItem2.com',false)) AS v("code","summary_url","passed") WHERE v.code = t.code RETURNING *`;
 
       expect(testUpdateQuery).toEqual(correctSelectQuery);
     });

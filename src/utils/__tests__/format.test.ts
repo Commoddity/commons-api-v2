@@ -16,10 +16,12 @@ describe(`FormatUtils methods`, () => {
       expect(formattedXml).toHaveLength(2);
     });
 
-    it("Returns undefined if given invalid xml", async () => {
-      const formattedInvalidXml = await FormatUtils.formatXml(invalidXml);
-
-      expect(formattedInvalidXml).toEqual(undefined);
+    it("Throws if given invalid xml", async () => {
+      try {
+        await FormatUtils.formatXml(invalidXml);
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
     });
   });
 
