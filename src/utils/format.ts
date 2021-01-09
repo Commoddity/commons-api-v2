@@ -8,21 +8,21 @@ export class FormatUtils {
   static formatXml = async (xml: string): Promise<BillEvent[]> => {
     try {
       return await new Promise((resolve, reject) => {
-        parseString(xml, (err: Error, response: string) => {
-          if (!err) {
+        parseString(xml, (error: Error, response: string) => {
+          if (!error) {
             const xmlObject: {
               rss: { channel: { item: BillEvent[] }[] };
             } = JSON.parse(JSON.stringify(response));
             const fetchedArray = xmlObject.rss.channel[0].item;
 
-            !!fetchedArray.length ? resolve(fetchedArray) : resolve([]);
-          } else if (!!err) {
-            reject(err);
+            fetchedArray.length ? resolve(fetchedArray) : resolve([]);
+          } else if (error) {
+            reject(error);
           }
         });
       });
-    } catch (err) {
-      throw new Error(`[FORMAT XML ERROR]: ${err}`);
+    } catch (error) {
+      throw new Error(`[FORMAT XML ERROR]: ${error}`);
     }
   };
 

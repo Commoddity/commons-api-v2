@@ -15,12 +15,12 @@ interface FetchPageParams {
 
 export class WebService extends BaseService<any> {
   // Returns the XML document from a given URL
-  async fetchXml(url: string): Promise<string | undefined> {
+  async fetchXml(url: string): Promise<string> {
     try {
       const { data: xml }: AxiosResponse<string> = await Axios.get(url);
       return xml;
     } catch (error) {
-      console.error(`[WEB SERVICE ERROR]: fetchXml: ${error}`);
+      throw new Error(`[WEB SERVICE ERROR]: fetchXml: ${error}`);
     }
   }
 
@@ -36,7 +36,7 @@ export class WebService extends BaseService<any> {
         'a:contains("Latest Publication")',
       ).attr("href");
 
-      const fullTextUrl: string | undefined = !!link
+      const fullTextUrl: string | undefined = link
         ? `https:${link}`
         : undefined;
 
@@ -70,7 +70,7 @@ export class WebService extends BaseService<any> {
         .find("span")
         .text();
 
-      const introducedDate: string | undefined = !!introducedDateFetch
+      const introducedDate: string | undefined = introducedDateFetch
         ? introducedDateFetch
         : undefined;
 
@@ -101,7 +101,7 @@ export class WebService extends BaseService<any> {
         .text();
 
       // Regex removes trailing space and newline characters
-      const decription: string | undefined = !!summaryDiv
+      const decription: string | undefined = summaryDiv
         ? summaryDiv.replace(/\s+/g, " ").trim()
         : undefined;
 
@@ -125,7 +125,7 @@ export class WebService extends BaseService<any> {
 
       const fullTextXml = await this.fetchXml(fullTextUrlJoined);
 
-      if (!!fullTextXml) {
+      if (fullTextXml) {
         const fullTextRaw: string = Cheerio.load(fullTextXml)("text").text();
         return fullTextRaw;
       }
@@ -136,27 +136,31 @@ export class WebService extends BaseService<any> {
 
   // Returns the array of legislative summaries of bills from the parliament website
   async fetchSummaryUrls(summariesUrl: string): Promise<string[]> {
-    return new Promise(async (resolve, reject) => {
-      const xml: string | undefined = await this.fetchXml(summariesUrl);
+    return new Promise((resolve, reject) => {
+      this.fetchXml(summariesUrl)
+        .then((xml) => {
+          if (xml) {
+            parseString(xml, (error: Error, response: string) => {
+              if (!error) {
+                const xmlObject: {
+                  rss: { channel: { item: string[] }[] };
+                } = JSON.parse(JSON.stringify(response));
+                const summariesArray = xmlObject?.rss?.channel[0]?.item;
 
-      if (!!xml) {
-        parseString(xml, (error: Error, response: string) => {
-          if (!error) {
-            const xmlObject: {
-              rss: { channel: { item: string[] }[] };
-            } = JSON.parse(JSON.stringify(response));
-            const summariesArray = xmlObject?.rss?.channel[0]?.item;
-
-            !!summariesArray ? resolve(summariesArray) : resolve([]);
-          } else if (!!error) {
-            reject(`[WEB SERVICE ERROR - fetchSummaryUrls ] ${error}`);
+                summariesArray ? resolve(summariesArray) : resolve([]);
+              } else if (error) {
+                reject(`[WEB SERVICE ERROR - fetchSummaryUrls ] ${error}`);
+              }
+            });
+          } else {
+            reject(
+              `[WEB SERVICE ERROR - fetchSummaryUrls ] Unable to fetch XML for legislative summaries.`,
+            );
           }
+        })
+        .catch((error) => {
+          reject(`[WEB SERVICE ERROR - fetchSummaryUrls ] ${error}`);
         });
-      } else {
-        reject(
-          `[WEB SERVICE ERROR] Unable to fetch XML for legislative summaries.`,
-        );
-      }
     });
   }
 
@@ -172,7 +176,7 @@ export class WebService extends BaseService<any> {
         pageUrl: bill.page_url,
         billCode: bill.code,
       });
-      const description = !!fullTextUrl
+      const description = fullTextUrl
         ? await this.fetchDescription({
             pageUrl: fullTextUrl,
             billCode: bill.code,
@@ -220,16 +224,14 @@ export class WebService extends BaseService<any> {
     const eventsArray: Event[] = [];
 
     for (const combinedBillEvent of combinedArray) {
-      console.log("HERE THIS ONE YOOO", combinedBillEvent.description);
       const billCode = FormatUtils.formatCode(combinedBillEvent.description[0]);
       const eventTitle = FormatUtils.formatTitle(combinedBillEvent.title);
-      console.log("ONE AFTER", billCode);
 
       const bill: Bill = {
         id: "",
         parliamentary_session_id: undefined,
         code: billCode,
-        title: FormatUtils.formatTitle(combinedBillEvent.description!),
+        title: FormatUtils.formatTitle(combinedBillEvent.description),
         description: undefined,
         introduced_date: undefined,
         summary_url: undefined,
@@ -257,7 +259,7 @@ export class WebService extends BaseService<any> {
         where: [{ bill_code: billCode }, { title: eventTitle }],
       });
 
-      if (!!(!billExistsInArray && !billExistsinDb)) {
+      if (!billExistsInArray && !billExistsinDb) {
         console.log(
           `Successfuly fetched Bill ${bill.code} from LEGISinfo server ...`,
         );
@@ -305,7 +307,7 @@ export class WebService extends BaseService<any> {
     try {
       const xml = await this.fetchXml(url);
 
-      const sourceArray = await FormatUtils.formatXml(xml!);
+      const sourceArray = await FormatUtils.formatXml(xml);
 
       const { billsArray, eventsArray } = await this.splitBillsAndEvents(
         sourceArray,

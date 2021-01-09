@@ -177,7 +177,7 @@ export class BaseService<T> {
   private createSelectQuery(
     table: string,
     where: string,
-    multiple: boolean = false,
+    multiple = false,
   ): string {
     const baseQuery = multiple
       ? "SELECT * FROM $1:raw $2:raw"
