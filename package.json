@@ -12,7 +12,8 @@
     "lint": "eslint . --ext .ts",
     "test": "NODE_ENV=test jest",
     "db:reset": "ts-node ./src/bin/resetDb.ts",
-    "db:test_reset": "ts-node ./src/bin/testResetDb.ts"
+    "db:test_reset": "ts-node ./src/bin/testResetDb.ts",
+    "push:dev": "yarn lint && yarn build && yarn test && git push origin dev"
   },
   "nodemonConfig": {
     "ignore": [
