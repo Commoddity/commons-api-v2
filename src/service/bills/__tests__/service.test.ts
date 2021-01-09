@@ -98,7 +98,7 @@ describe(`BillsService methods`, () => {
     });
   });
 
-  describe.only(`updateBillCategories`, () => {
+  describe(`updateBillCategories`, () => {
     it(`Creates join tables for a given bill to create a many to many relationship with a number of categories`, async () => {
       const testBillCode = "C-829";
       const testCategories = [
