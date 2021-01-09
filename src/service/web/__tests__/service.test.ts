@@ -1,4 +1,4 @@
-import { WebService } from "..";
+// import { WebService } from "..";
 // import { testBills } from "@test";
 
 describe(`WebService methods`, () => {
