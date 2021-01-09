@@ -1,5 +1,5 @@
 import { BaseService } from "../base-service";
-import { CategoriesService } from "../categories";
+import { CategoriesService, Category } from "../categories";
 
 import { Bill, BillCategory } from "./model";
 
@@ -50,10 +50,7 @@ export class BillsService extends BaseService<Bill> {
   async updateBillCategories({
     code,
     categories,
-  }: {
-    code: string;
-    categories: string[];
-  }): Promise<boolean> {
+  }: UpdateBillCategoriesParams): Promise<boolean> {
     try {
       const bill = await super.findOne({
         table: this.table,
@@ -63,7 +60,7 @@ export class BillsService extends BaseService<Bill> {
       const tableValuesArray: BillCategory[] = [];
 
       for await (const billCategory of categories) {
-        const category = await new CategoriesService().findOneCategory(
+        const category: Category = await new CategoriesService().findOneCategory(
           billCategory,
         );
 
@@ -74,14 +71,13 @@ export class BillsService extends BaseService<Bill> {
         }
       }
 
-      await super.createJoinTables({
+      await super.createJoinTables<BillCategory>({
         table: "bill_categories",
         tableValuesArray,
       });
       return true;
     } catch (err) {
-      console.error(`[BILL CATEGORY UPDATE ERROR]: ${err}`);
-      return false;
+      throw new Error(`[BILL CATEGORY UPDATE ERROR]: ${err}`);
     }
   }
 }

@@ -19,8 +19,8 @@ export class WebService extends BaseService<any> {
     try {
       const { data: xml }: AxiosResponse<string> = await Axios.get(url);
       return xml;
-    } catch (err) {
-      console.error(`[WEB SERVICE ERROR]: fetchXml: ${err}`);
+    } catch (error) {
+      console.error(`[WEB SERVICE ERROR]: fetchXml: ${error}`);
     }
   }
 
@@ -46,9 +46,9 @@ export class WebService extends BaseService<any> {
         );
 
       return fullTextUrl;
-    } catch (err) {
+    } catch (error) {
       console.error(
-        `[WEB SERVICE ERROR]: fetchFullTextUrl - Bill ${billCode}: ${err}`,
+        `[WEB SERVICE ERROR]: fetchFullTextUrl - Bill ${billCode}: ${error}`,
       );
     }
   }
@@ -80,9 +80,9 @@ export class WebService extends BaseService<any> {
         );
 
       return introducedDate;
-    } catch (err) {
+    } catch (error) {
       console.error(
-        `[WEB SERVICE ERROR]: fetchIntroducedDate - Bill ${billCode}: ${err}`,
+        `[WEB SERVICE ERROR]: fetchIntroducedDate - Bill ${billCode}: ${error}`,
       );
       return undefined;
     }
@@ -106,9 +106,9 @@ export class WebService extends BaseService<any> {
         : undefined;
 
       return decription;
-    } catch (err) {
+    } catch (error) {
       console.error(
-        `[WEB SERVICE ERROR]: fetchDescription - Bill ${billCode}: ${err}`,
+        `[WEB SERVICE ERROR]: fetchDescription - Bill ${billCode}: ${error}`,
       );
     }
   }
@@ -129,35 +129,35 @@ export class WebService extends BaseService<any> {
         const fullTextRaw: string = Cheerio.load(fullTextXml)("text").text();
         return fullTextRaw;
       }
-    } catch (err) {
-      console.error(`An error occurred while fetching raw full text: ${err}`);
+    } catch (error) {
+      console.error(`An error occurred while fetching raw full text: ${error}`);
     }
   }
 
   // Returns the array of legislative summaries of bills from the parliament website
-  async fetchSummaryUrls(summariesUrl: string): Promise<string[] | undefined> {
-    try {
+  async fetchSummaryUrls(summariesUrl: string): Promise<string[]> {
+    return new Promise(async (resolve, reject) => {
       const xml: string | undefined = await this.fetchXml(summariesUrl);
 
       if (!!xml) {
-        return await new Promise((resolve, reject) => {
-          parseString(xml, (err: Error, response: string) => {
-            if (!err) {
-              const xmlObject: {
-                rss: { channel: { item: string[] }[] };
-              } = JSON.parse(JSON.stringify(response));
-              const summariesArray = xmlObject?.rss?.channel[0]?.item;
+        parseString(xml, (error: Error, response: string) => {
+          if (!error) {
+            const xmlObject: {
+              rss: { channel: { item: string[] }[] };
+            } = JSON.parse(JSON.stringify(response));
+            const summariesArray = xmlObject?.rss?.channel[0]?.item;
 
-              !!summariesArray ? resolve(summariesArray) : resolve(undefined);
-            } else if (!!err) {
-              resolve(undefined);
-            }
-          });
+            !!summariesArray ? resolve(summariesArray) : resolve([]);
+          } else if (!!error) {
+            reject(`[WEB SERVICE ERROR - fetchSummaryUrls ] ${error}`);
+          }
         });
+      } else {
+        reject(
+          `[WEB SERVICE ERROR] Unable to fetch XML for legislative summaries.`,
+        );
       }
-    } catch (err) {
-      console.error(`[WEB SERVICE ERROR]: fetchSummaryUrls: ${err}`);
-    }
+    });
   }
 
   // Fetches full text URL, introduced date and description via web scraping
@@ -186,8 +186,8 @@ export class WebService extends BaseService<any> {
       bill.description = description;
 
       return bill;
-    } catch (err) {
-      console.error(`[WEB SERVICE ERROR]: insertFetchedDataIntoBill: ${err}`);
+    } catch (error) {
+      console.error(`[WEB SERVICE ERROR]: insertFetchedDataIntoBill: ${error}`);
       return bill;
     }
   }
@@ -208,8 +208,8 @@ export class WebService extends BaseService<any> {
           ? 1
           : -1,
       );
-    } catch (err) {
-      throw new Error(`[WEB SERVICE ERROR]: Error return${err}`);
+    } catch (error) {
+      throw new Error(`[WEB SERVICE ERROR]: Error return${error}`);
     }
   }
 

@@ -1,7 +1,5 @@
 import { db, pgp } from "@config";
 
-import { BillCategory } from "../bills";
-
 export class BaseService<T> {
   /* Create methods */
   async createOne({ table, tableValues }: CreateParams<T>): Promise<T> {
@@ -27,14 +25,14 @@ export class BaseService<T> {
     }
   }
 
-  async createJoinTables({
+  async createJoinTables<T>({
     table,
     tableValuesArray,
-  }: CreateManyParams<BillCategory>): Promise<BillCategory[]> {
+  }: CreateManyParams<T>): Promise<T[]> {
     const query: string = this.createInsertQuery(tableValuesArray, table);
 
     try {
-      return await db.any<BillCategory>(query);
+      return await db.any<T>(query);
     } catch (err) {
       throw new Error(`[JOIN TABLE CREATION ERROR]: ${err}`);
     }
@@ -183,7 +181,7 @@ export class BaseService<T> {
   ): string {
     const baseQuery = multiple
       ? "SELECT * FROM $1:raw $2:raw"
-      : "SELECT * FROM $1:raw LIMIT 1 $2:raw";
+      : "SELECT * FROM $1:raw $2:raw LIMIT 1";
 
     return pgp.as.format(baseQuery, [table, where]);
   }
@@ -195,14 +193,16 @@ export class BaseService<T> {
       columns[0] = "?" + columns[0];
       const columnSet = new pgp.helpers.ColumnSet(columns, { table });
 
-      return pgp.helpers.update(data, columnSet) + where;
+      return pgp.helpers.update(data, columnSet) + where + " RETURNING *";
     } else {
       const columns = Object.keys(data).slice(1);
       const whereCondition = Object.entries(data)[0];
       const where = { [whereCondition[0]]: whereCondition[1] as string };
       const whereClause = this.createWhereClause(where);
 
-      return pgp.helpers.update(data, columns, table) + whereClause;
+      return (
+        pgp.helpers.update(data, columns, table) + whereClause + " RETURNING *"
+      );
     }
   }
 

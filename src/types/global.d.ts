@@ -40,6 +40,10 @@ declare global {
   interface TableParams {
     table: string;
   }
+  interface UpdateBillCategoriesParams {
+    code: string;
+    categories: string[];
+  }
   interface UpdateManyParams {
     table: string;
     data: { [key: string]: any }[];
