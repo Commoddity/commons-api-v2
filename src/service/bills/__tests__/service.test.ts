@@ -1,6 +1,5 @@
 import { BillsService } from "..";
-import { testBills } from "@test";
-import { resetBills } from "./resetBills";
+import { resetBills, testBills } from "@test";
 
 describe(`BillsService methods`, () => {
   afterEach(async () => {
