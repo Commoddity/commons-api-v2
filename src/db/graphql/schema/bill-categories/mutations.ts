@@ -1,7 +1,6 @@
 import { GraphQLInt, GraphQLNonNull } from "graphql";
 
 import { db } from "@config";
-import { GraphQLFields } from "@types";
 
 import { BillCategoryType } from "./types";
 

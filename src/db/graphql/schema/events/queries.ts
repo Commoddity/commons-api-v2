@@ -3,7 +3,6 @@ import sqlString from "sqlstring";
 import { GraphQLInt, GraphQLList, GraphQLString } from "graphql";
 
 import { db } from "@config";
-import { GraphQLFields } from "@types";
 
 import { DateScalar } from "../../scalars";
 import { EventType } from "./types";

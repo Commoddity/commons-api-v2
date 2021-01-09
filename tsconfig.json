@@ -10,7 +10,6 @@
       "@graphql": ["src/db/graphql/schema"],
       "@scripts": ["src/scripts"],
       "@test": ["src/test"],
-      "@types": ["src/types"],
       "@utils": ["src/utils"]
     },
     "plugins": [{ "transform": "@zerollup/ts-transform-paths" }],

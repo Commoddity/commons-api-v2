@@ -1,29 +1,31 @@
 import { keys } from "ts-transformer-keys";
 
 export interface BillInterface {
-  id?: string | undefined;
-  parliamentary_session_id: number | undefined;
+  id?: string;
+  parliamentary_session_id?: number;
   code: string;
   title: string;
-  description: string | undefined;
-  introduced_date: string | undefined;
-  page_url: string | undefined;
-  summary_url: string | undefined;
-  full_text_url: string | undefined;
-  passed: boolean | undefined;
+  description?: string;
+  introduced_date?: string;
+  page_url: string;
+  summary_url?: string;
+  full_text_url?: string;
+  passed?: boolean;
+  created_at?: Date;
 }
 
 export class Bill implements BillInterface {
-  id?: string | undefined;
-  parliamentary_session_id: number | undefined;
+  id?: string;
+  parliamentary_session_id?: number;
   code: string;
   title: string;
-  description: string | undefined;
-  introduced_date: string | undefined;
-  page_url: string | undefined;
-  summary_url: string | undefined;
-  full_text_url: string | undefined;
-  passed: boolean | undefined;
+  description?: string;
+  introduced_date?: string;
+  page_url: string;
+  summary_url?: string;
+  full_text_url?: string;
+  passed?: boolean;
+  created_at?: Date;
 
   static getColumnNames(): string[] {
     return keys<BillInterface>();
@@ -40,6 +42,7 @@ export class Bill implements BillInterface {
     page_url,
     full_text_url,
     passed,
+    created_at,
   }) {
     this.id = id;
     this.parliamentary_session_id = parliamentary_session_id;
@@ -51,6 +54,7 @@ export class Bill implements BillInterface {
     this.page_url = page_url;
     this.full_text_url = full_text_url;
     this.passed = passed;
+    this.created_at = created_at;
   }
 }
 

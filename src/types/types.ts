@@ -1,12 +1,18 @@
 import { GraphQLFieldConfig, GraphQLObjectType } from "graphql";
 import { GraphQLRequestContext } from "apollo-server-types";
+import { Where } from "join-monster";
 
-export type GraphQLFields = {
-  [key: string]: GraphQLFieldConfig<
+interface JoinMonsterQuery
+  extends GraphQLFieldConfig<
     GraphQLObjectType,
     GraphQLRequestContext,
     { [argName: string]: any }
-  >;
+  > {
+  where?: Where<GraphQLRequestContext, { [argName: string]: any }>;
+}
+
+export type GraphQLFields = {
+  [key: string]: JoinMonsterQuery;
 };
 
 export type Value = string | number | boolean | Date;
@@ -19,7 +25,7 @@ export interface CreateParams<T> {
 }
 export interface DeleteParams {
   table: string;
-  whereClause: WhereCondition | WhereCondition[];
+  where: WhereCondition | WhereCondition[];
   operator?: "AND" | "OR";
 }
 export interface CreateManyParams<T> {
@@ -50,11 +56,11 @@ export interface UpdateQueryParams {
 }
 
 export interface WhereParams extends QueryParams {
-  whereClause: WhereCondition | WhereCondition[];
+  where: WhereCondition | WhereCondition[];
 }
 
 export interface ReadParams extends TableParams {
-  whereClause: WhereCondition | WhereCondition[];
+  where: WhereCondition | WhereCondition[];
 }
 
 export interface WhereCondition {

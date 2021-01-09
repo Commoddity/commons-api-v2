@@ -1,13 +1,10 @@
-// load .env data into process.env
+// Load .env data into process.env
 import dotenv from "dotenv-flow";
 dotenv.config({ node_env: "test" });
 
-// other dependencies
+// Other dependencies
 import fs from "fs";
-import { db } from "../config";
-
-// PG connection setup
-const connectionString = `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@localhost:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;
+import { db, sql } from "../config";
 
 // Loads the schema files from db/schema
 const runSchemaFiles = async function (): Promise<void> {
@@ -16,13 +13,10 @@ const runSchemaFiles = async function (): Promise<void> {
   const schemaFiles: string[] = fs.readdirSync("./src/db/psql/schema");
 
   for await (const schemaFile of schemaFiles) {
-    const sqlQuery: string = fs.readFileSync(
-      `./src/db/psql/schema/${schemaFile}`,
-      "utf8",
-    );
+    const sqlQuery = sql(`../db/psql/schema/${schemaFile}`);
 
     console.log(`\t[LOCAL DATABASE RESET] -> Running ${schemaFile}`);
-    await db.query(sqlQuery);
+    await db.none(sqlQuery);
   }
 };
 
@@ -32,13 +26,10 @@ const runSeedFiles = async function (): Promise<void> {
   const schemaFiles: string[] = fs.readdirSync("./src/db/psql/seeds");
 
   for await (const schemaFile of schemaFiles) {
-    const sqlQuery: string = fs.readFileSync(
-      `./src/db/psql/seeds/${schemaFile}`,
-      "utf8",
-    );
+    const sqlQuery = sql(`../db/psql/seeds/${schemaFile}`);
 
     console.log(`\t[LOCAL DATABASE RESET] -> Running ${schemaFile}`);
-    await db.query(sqlQuery);
+    await db.none(sqlQuery);
   }
 };
 
@@ -48,20 +39,17 @@ const runTestSeedFiles = async function (): Promise<void> {
   const schemaFiles: string[] = fs.readdirSync("./src/db/psql/test_seeds");
 
   for await (const schemaFile of schemaFiles) {
-    const sqlQuery: string = fs.readFileSync(
-      `./src/db/psql/test_seeds/${schemaFile}`,
-      "utf8",
-    );
+    const sqlQuery = sql(`../db/psql/test_seeds/${schemaFile}`);
 
     console.log(`\t[LOCAL DATABASE RESET] -> Running ${schemaFile}`);
-    await db.query(sqlQuery);
+    await db.none(sqlQuery);
   }
 };
 
 (async (): Promise<void> => {
   try {
     console.log(
-      `[LOCAL DATABASE RESET] -> Connecting to PG using ${connectionString} ...`,
+      `[LOCAL DATABASE RESET] -> Connecting to PG using pg-promise ...`,
     );
     await runSchemaFiles();
     await runSeedFiles();

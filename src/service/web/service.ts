@@ -6,7 +6,6 @@ import { BaseService } from "../base-service";
 
 import { Bill } from "../bills";
 import { Event } from "../events";
-import { BillEvent, BillSummaryMap } from "@types";
 import { FormatUtils } from "@utils";
 
 interface FetchPageParams {
@@ -251,11 +250,11 @@ export class WebService extends BaseService<any> {
       );
       const billExistsinDb = await super.findIfRowExists({
         table: "bills",
-        whereClause: { code: billCode },
+        where: { code: billCode },
       });
       const eventExistsInDb = await super.findIfRowExists({
         table: "events",
-        whereClause: [{ bill_code: billCode }, { title: eventTitle }],
+        where: [{ bill_code: billCode }, { title: eventTitle }],
       });
 
       if (!!(!billExistsInArray && !billExistsinDb)) {

@@ -8,7 +8,6 @@ import {
 } from "graphql";
 
 import { db } from "@config";
-import { GraphQLFields } from "@types";
 
 import { UserType } from "./types";
 import { NotificationEnumType } from "../../enums";

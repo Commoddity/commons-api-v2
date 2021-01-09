@@ -1,7 +1,8 @@
 import dotenv from "dotenv-flow";
-import pgPromise from "pg-promise";
+import pgPromise, { QueryFile } from "pg-promise";
+import { join } from "path";
 
-dotenv.config();
+dotenv.config({ node_env: process.env.NODE_ENV });
 
 const pgp = pgPromise({
   capSQL: true,
@@ -18,4 +19,10 @@ const devConfig = {
 
 const db = pgp(devConfig);
 
-export { db, pgp };
+// Helper for linking to external query files:
+const sql = (file): QueryFile => {
+  const fullPath = join(__dirname, file);
+  return new pgp.QueryFile(fullPath, { minify: true });
+};
+
+export { db, pgp, sql };

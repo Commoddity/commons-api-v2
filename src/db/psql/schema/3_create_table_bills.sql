@@ -6,7 +6,7 @@ CREATE TABLE bills (
   code VARCHAR (7) NOT NULL UNIQUE,
   title VARCHAR (555) NOT NULL,
   description VARCHAR (2555),
-  introduced_date DATE,
+  introduced_date VARCHAR(555),
   summary_url VARCHAR(555),
   page_url VARCHAR(555),
   full_text_url VARCHAR(555),

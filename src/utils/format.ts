@@ -3,13 +3,11 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
-import { BillEvent } from "@types";
-
 export class FormatUtils {
   // Returns the parsed array of bills/events from the source XML (with redundant tags removed)
   static formatXml = async (xml: string): Promise<BillEvent[]> => {
     try {
-      return await new Promise((resolve, _reject) => {
+      return await new Promise((resolve, reject) => {
         parseString(xml, (err: Error, response: string) => {
           if (!err) {
             const xmlObject: {
@@ -17,9 +15,9 @@ export class FormatUtils {
             } = JSON.parse(JSON.stringify(response));
             const fetchedArray = xmlObject.rss.channel[0].item;
 
-            !!fetchedArray ? resolve(fetchedArray) : resolve(undefined);
+            !!fetchedArray.length ? resolve(fetchedArray) : resolve([]);
           } else if (!!err) {
-            resolve(undefined);
+            reject(err);
           }
         });
       });

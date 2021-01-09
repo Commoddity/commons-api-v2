@@ -1,17 +1,4 @@
 import { db, pgp } from "@config";
-import {
-  CreateManyParams,
-  CreateParams,
-  DeleteParams,
-  QueryParams,
-  ReadParams,
-  TableParams,
-  UpdateOneParams,
-  UpdateManyParams,
-  UpdateQueryParams,
-  WhereCondition,
-  WhereParams,
-} from "@types";
 
 import { BillCategory } from "../bills";
 
@@ -54,9 +41,9 @@ export class BaseService<T> {
   }
 
   /* Read methods */
-  async findOne({ table, whereClause }: ReadParams): Promise<T> {
-    const where = this.createWhereClause(whereClause);
-    const query = this.createSelectQuery(table, where);
+  async findOne({ table, where }: ReadParams): Promise<T> {
+    const whereClause = this.createWhereClause(where);
+    const query = this.createSelectQuery(table, whereClause);
 
     try {
       return await db.one<T>(query);
@@ -65,9 +52,9 @@ export class BaseService<T> {
     }
   }
 
-  async findMany({ table, whereClause }: WhereParams): Promise<T[]> {
-    const where = this.createWhereClause(whereClause);
-    const query = this.createSelectQuery(table, where, true);
+  async findMany({ table, where }: WhereParams): Promise<T[]> {
+    const whereClause = this.createWhereClause(where);
+    const query = this.createSelectQuery(table, whereClause, true);
 
     try {
       return await db.any<T>(query);
@@ -89,11 +76,11 @@ export class BaseService<T> {
     }
   }
 
-  async findIfRowExists({ table, whereClause }: ReadParams): Promise<boolean> {
-    const where = this.createWhereClause(whereClause);
+  async findIfRowExists({ table, where }: ReadParams): Promise<boolean> {
+    const whereClause = this.createWhereClause(where);
     const query = pgp.as.format("SELECT EXISTS(SELECT 1 FROM $1:raw $2:raw", [
       table,
-      where,
+      whereClause,
     ]);
 
     try {
@@ -150,10 +137,10 @@ export class BaseService<T> {
   /* Delete methods */
   async deleteOne({
     table,
-    whereClause,
+    where,
     operator = undefined,
   }: DeleteParams): Promise<boolean> {
-    const query: string = this.createDeleteQuery(table, whereClause, operator);
+    const query: string = this.createDeleteQuery(table, where, operator);
 
     try {
       await db.none(query);
@@ -166,11 +153,11 @@ export class BaseService<T> {
   /* Query String creation methods */
   private createDeleteQuery(
     table: string,
-    whereClause: WhereCondition | WhereCondition[],
+    where: WhereCondition | WhereCondition[],
     operator?: "AND" | "OR",
   ): string {
-    const where = this.createWhereClause(whereClause, operator);
-    const baseQuery = "DELETE FROM $1:raw" + where;
+    const whereClause = this.createWhereClause(where, operator);
+    const baseQuery = "DELETE FROM $1:raw" + whereClause;
 
     return pgp.as.format(baseQuery, [table]);
   }
@@ -212,35 +199,35 @@ export class BaseService<T> {
     } else {
       const columns = Object.keys(data).slice(1);
       const whereCondition = Object.entries(data)[0];
-      const whereClause = { [whereCondition[0]]: whereCondition[1] as string };
-      const where = this.createWhereClause(whereClause);
+      const where = { [whereCondition[0]]: whereCondition[1] as string };
+      const whereClause = this.createWhereClause(where);
 
-      return pgp.helpers.update(data, columns, table) + where;
+      return pgp.helpers.update(data, columns, table) + whereClause;
     }
   }
 
   private createWhereClause(
-    whereClause: WhereCondition | WhereCondition[],
+    where: WhereCondition | WhereCondition[],
     operator: "AND" | "OR" = "AND",
   ): string {
     let query: string;
     let values: string[] = [];
 
-    if (Array.isArray(whereClause)) {
-      query = whereClause.reduce<string>((whereString, where, index) => {
-        const [pairs] = Object.entries(where);
+    if (Array.isArray(where)) {
+      query = where.reduce<string>((whereString, whereClause, index) => {
+        const [pairs] = Object.entries(whereClause);
         return whereString.concat(
           `${index === 0 ? " WHERE" : ` ${operator}`} ${pairs[0]}=$${
             index + 1
           }`,
         );
       }, "");
-      values = whereClause.map((item) => {
+      values = where.map((item) => {
         const [pairs] = Object.entries(item);
         return pairs[1];
       });
     } else {
-      const [[column, value]] = Object.entries(whereClause);
+      const [[column, value]] = Object.entries(where);
       query = ` WHERE ${column}=$1`;
       values = [value];
     }

@@ -2,7 +2,6 @@ import { GraphQLInt, GraphQLNonNull } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
 
 import { db } from "@config";
-import { GraphQLFields } from "@types";
 
 import { UserBillType } from "./types";
 

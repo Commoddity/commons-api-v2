@@ -2,7 +2,6 @@ import { GraphQLInt, GraphQLNonNull, GraphQLString } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
 
 import { db } from "@config";
-import { GraphQLFields } from "@types";
 
 import { DateScalar } from "../../scalars";
 import { ParliamentarySessionType, ParliamentType } from "./types";

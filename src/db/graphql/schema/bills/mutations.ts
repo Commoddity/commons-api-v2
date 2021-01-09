@@ -7,7 +7,6 @@ import {
 import { GraphQLDateTime } from "graphql-iso-date";
 
 import { db } from "@config";
-import { GraphQLFields } from "@types";
 
 import { DateScalar } from "../../scalars";
 import { BillType } from "./types";

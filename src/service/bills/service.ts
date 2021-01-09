@@ -18,7 +18,7 @@ export class BillsService extends BaseService<Bill> {
   }
 
   async deleteBill(code: string): Promise<boolean> {
-    return await super.deleteOne({ table: this.table, whereClause: { code } });
+    return await super.deleteOne({ table: this.table, where: { code } });
   }
 
   async updateBillPassed({
@@ -57,7 +57,7 @@ export class BillsService extends BaseService<Bill> {
     try {
       const bill = await super.findOne({
         table: this.table,
-        whereClause: { code },
+        where: { code },
       });
 
       const tableValuesArray: BillCategory[] = [];

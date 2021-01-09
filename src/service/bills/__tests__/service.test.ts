@@ -1,9 +1,10 @@
 import { BillsService } from "..";
 import { testBills } from "@test";
+import { resetBills } from "./resetBills";
 
 describe(`BillsService methods`, () => {
-  beforeAll(async () => {
-    process.env.NODE_ENV = "test";
+  afterEach(async () => {
+    await resetBills();
   });
 
   describe(`Create Bill`, () => {
@@ -19,17 +20,26 @@ describe(`BillsService methods`, () => {
         description: "Why god why",
         introduced_date: new Date("2020-08-26T07:00:00.000Z"),
         summary_url: "http://billsarebills.com",
-        page_url: null,
+        page_url: "http://billsbillsbills.com",
         full_text_url: "http://whybillstho.com",
         passed: true,
       };
 
-      expect(testBillResult).toEqual(expect.objectContaining(testBill));
+      delete testBillResult.id;
+      delete testBillResult.created_at;
+      expect(testBillResult).toEqual(testBill);
+    });
+  });
 
-      afterEach(async () => {
-        // Clean up bill created by test
-        await new BillsService().deleteBill(testBillResult.code);
-      });
+  describe(`Create Many Bill`, () => {
+    it(`Creates many bills in the DB `, async () => {
+      const testBillsInput = testBills;
+      const testBillsResult = await new BillsService().createManyBills(
+        testBillsInput,
+      );
+
+      expect(Array.isArray(testBillsResult)).toBeTruthy();
+      expect(testBillsResult).toHaveLength(testBillsInput.length);
     });
   });
 

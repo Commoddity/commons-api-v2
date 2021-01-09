@@ -7,7 +7,6 @@ import {
 import { GraphQLDateTime } from "graphql-iso-date";
 
 import { db } from "@config";
-import { GraphQLFields } from "@types";
 
 import { NotificationEnumType } from "../../enums";
 import { UserType } from "./types";
