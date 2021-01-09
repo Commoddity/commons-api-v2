@@ -15,10 +15,12 @@ const parliamentQueries: GraphQLFields = {
     where: (parliamentsTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
       const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${parliamentsTable}.id = ?`);
-        values.push(args.id);
-      }
+
+      Object.entries(args).forEach(([arg, value]) => {
+        whereClause.push(`${parliamentsTable}.${arg} = ?`);
+        values.push(value);
+      });
+
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },
@@ -37,10 +39,12 @@ const parliamentQueries: GraphQLFields = {
     where: (parliamentTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
       const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${parliamentTable}.id = ?`);
-        values.push(args.id);
-      }
+
+      Object.entries(args).forEach(([arg, value]) => {
+        whereClause.push(`${parliamentTable}.${arg} = ?`);
+        values.push(value);
+      });
+
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },

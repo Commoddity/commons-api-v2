@@ -27,34 +27,12 @@ const billQueries: GraphQLFields = {
     where: (billsTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
       const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${billsTable}.id = ?`);
-        values.push(args.id);
-      }
-      if (args.parliamentary_session_id) {
-        whereClause.push(`${billsTable}.parliamentary_session_id = ?`);
-        values.push(args.parliamentary_session_id);
-      }
-      if (args.code) {
-        whereClause.push(`${billsTable}.code = ?`);
-        values.push(args.code);
-      }
-      if (args.title) {
-        whereClause.push(`${billsTable}.title = ?`);
-        values.push(args.title);
-      }
-      if (args.description) {
-        whereClause.push(`${billsTable}.description = ?`);
-        values.push(args.description);
-      }
-      if (args.introduced_date) {
-        whereClause.push(`${billsTable}.introduced_date = ?`);
-        values.push(args.introduced_date);
-      }
-      if (args.passed) {
-        whereClause.push(`${billsTable}.passed = ?`);
-        values.push(args.passed);
-      }
+
+      Object.entries(args).forEach(([arg, value]) => {
+        whereClause.push(`${billsTable}.${arg} = ?`);
+        values.push(value);
+      });
+
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },
@@ -79,34 +57,12 @@ const billQueries: GraphQLFields = {
     where: (billTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
       const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${billTable}.id = ?`);
-        values.push(args.id);
-      }
-      if (args.parliamentary_session_id) {
-        whereClause.push(`${billTable}.parliamentary_session_id = ?`);
-        values.push(args.parliamentary_session_id);
-      }
-      if (args.code) {
-        whereClause.push(`${billTable}.code = ?`);
-        values.push(args.code);
-      }
-      if (args.title) {
-        whereClause.push(`${billTable}.title = ?`);
-        values.push(args.title);
-      }
-      if (args.description) {
-        whereClause.push(`${billTable}.description = ?`);
-        values.push(args.description);
-      }
-      if (args.introduced_date) {
-        whereClause.push(`${billTable}.introduced_date = ?`);
-        values.push(args.introduced_date);
-      }
-      if (args.passed) {
-        whereClause.push(`${billTable}.passed = ?`);
-        values.push(args.passed);
-      }
+
+      Object.entries(args).forEach(([arg, value]) => {
+        whereClause.push(`${billTable}.${arg} = ?`);
+        values.push(value);
+      });
+
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },

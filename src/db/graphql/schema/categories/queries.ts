@@ -17,18 +17,12 @@ const categoryQueries: GraphQLFields = {
     where: (categoriesTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
       const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${categoriesTable}.id = ?`);
-        values.push(args.id);
-      }
-      if (args.name) {
-        whereClause.push(`${categoriesTable}.name = ?`);
-        values.push(args.name);
-      }
-      if (args.class_code) {
-        whereClause.push(`${categoriesTable}.class_code = ?`);
-        values.push(args.class_code);
-      }
+
+      Object.entries(args).forEach(([arg, value]) => {
+        whereClause.push(`${categoriesTable}.${arg} = ?`);
+        values.push(value);
+      });
+
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },
@@ -49,18 +43,12 @@ const categoryQueries: GraphQLFields = {
     where: (categoryTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
       const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${categoryTable}.id = ?`);
-        values.push(args.id);
-      }
-      if (args.name) {
-        whereClause.push(`${categoryTable}.name = ?`);
-        values.push(args.name);
-      }
-      if (args.class_code) {
-        whereClause.push(`${categoryTable}.class_code = ?`);
-        values.push(args.class_code);
-      }
+
+      Object.entries(args).forEach(([arg, value]) => {
+        whereClause.push(`${categoryTable}.${arg} = ?`);
+        values.push(value);
+      });
+
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },

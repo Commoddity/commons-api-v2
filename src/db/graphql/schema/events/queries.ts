@@ -19,22 +19,12 @@ const eventQueries: GraphQLFields = {
     where: (eventsTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
       const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${eventsTable}.id = ?`);
-        values.push(args.id);
-      }
-      if (args.bill_code) {
-        whereClause.push(`${eventsTable}.bill_code = ?`);
-        values.push(args.bill_code);
-      }
-      if (args.title) {
-        whereClause.push(`${eventsTable}.title = ?`);
-        values.push(args.title);
-      }
-      if (args.publication_date) {
-        whereClause.push(`${eventsTable}.publication_date = ?`);
-        values.push(args.publication_date);
-      }
+
+      Object.entries(args).forEach(([arg, value]) => {
+        whereClause.push(`${eventsTable}.${arg} = ?`);
+        values.push(value);
+      });
+
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },
@@ -56,22 +46,12 @@ const eventQueries: GraphQLFields = {
     where: (eventTable, args, _context, _resolveInfo) => {
       const whereClause: string[] = [];
       const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${eventTable}.id = ?`);
-        values.push(args.id);
-      }
-      if (args.bill_code) {
-        whereClause.push(`${eventTable}.bill_code = ?`);
-        values.push(args.bill_code);
-      }
-      if (args.title) {
-        whereClause.push(`${eventTable}.title = ?`);
-        values.push(args.title);
-      }
-      if (args.publication_date) {
-        whereClause.push(`${eventTable}.publication_date = ?`);
-        values.push(args.publication_date);
-      }
+
+      Object.entries(args).forEach(([arg, value]) => {
+        whereClause.push(`${eventTable}.${arg} = ?`);
+        values.push(value);
+      });
+
       const escapedString = sqlString.format(whereClause.join(" AND "), values);
       return escapedString;
     },
