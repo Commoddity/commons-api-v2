@@ -5,13 +5,13 @@ dayjs.extend(utc);
 
 export class FormatUtils {
   // Returns the parsed array of bills/events from the source XML (with redundant tags removed)
-  static formatXml = async (xml: string): Promise<BillEvent[]> => {
+  static formatXml = async (xml: string): Promise<[]> => {
     try {
       return await new Promise((resolve, reject) => {
         parseString(xml, (error: Error, response: string) => {
           if (!error) {
             const xmlObject: {
-              rss: { channel: { item: BillEvent[] }[] };
+              rss: { channel: { item: [] }[] };
             } = JSON.parse(JSON.stringify(response));
             const fetchedArray = xmlObject.rss.channel[0].item;
 

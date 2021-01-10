@@ -80,4 +80,8 @@ export class BillsService extends BaseService<Bill> {
       throw new Error(`[BILL CATEGORY UPDATE ERROR]: ${err}`);
     }
   }
+
+  async findBill(code: string): Promise<Bill> {
+    return await super.findOne({ table: this.table, where: { code } });
+  }
 }

@@ -42,7 +42,7 @@ describe(`BillsService methods`, () => {
     });
   });
 
-  describe(`deleteBill`, () => {
+  describe(`Delete Bill`, () => {
     it(`Deletes a bill in the DB by its code`, async () => {
       const testBillInput = testBills[2];
 

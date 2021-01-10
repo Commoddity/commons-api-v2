@@ -1,1 +1,1 @@
-export { testBills } from "./data";
+export * from "./data";
