@@ -2,7 +2,7 @@ import { BillsService } from "../../bills";
 import { EventsService } from "..";
 import { resetEvents, testEvents } from "@test";
 
-describe(`BillsService methods`, () => {
+describe(`EventsService methods`, () => {
   afterEach(async () => {
     await resetEvents();
   });
