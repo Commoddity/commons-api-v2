@@ -218,7 +218,7 @@ export class WebService extends BaseService<any> {
   }
 
   async splitBillsAndEvents(
-    combinedArray: [],
+    combinedArray: BillEvent[],
   ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
     const billsArray: Bill[] = [];
     const eventsArray: Event[] = [];

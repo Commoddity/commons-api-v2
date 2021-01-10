@@ -64,7 +64,7 @@ declare global {
   }
 
   // Model types
-  interface  {
+  interface BillEvent {
     description: string;
     link: string;
     title: string;
