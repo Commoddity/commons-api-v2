@@ -108,11 +108,15 @@ describe(`WebService methods`, () => {
     });
   });
 
-  describe.only("getSummariesCaller", () => {
+  describe("getSummariesCaller", () => {
     it("Should return summaries with fetched data sorted by introduced_date in descending order", async () => {
       const summariesArray = await new WebService().getSummaries();
 
-      console.log("THIS IS IT", summariesArray);
+      expect(summariesArray).toBeInstanceOf(Array);
+      summariesArray.forEach((billSummaryMap) => {
+        expect(billSummaryMap.code).toBeTruthy();
+        expect(billSummaryMap.url).toBeTruthy();
+      });
     });
   });
 });
