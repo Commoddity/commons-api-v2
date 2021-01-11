@@ -18,7 +18,7 @@ describe(`BillsService methods`, () => {
         code: "C-231",
         title: "A Bill for the Provision of Momentary Sanity",
         description: "Why god why",
-        introduced_date: new Date("2020-08-26T07:00:00.000Z"),
+        introduced_date: "2020/08/26",
         summary_url: "http://billsarebills.com",
         page_url: "http://billsbillsbills.com",
         full_text_url: "http://whybillstho.com",
