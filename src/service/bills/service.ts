@@ -21,13 +21,7 @@ export class BillsService extends BaseService<Bill> {
     return await super.deleteOne({ table: this.table, where: { code } });
   }
 
-  async updateBillPassed({
-    code,
-    passed,
-  }: {
-    code: string;
-    passed: boolean;
-  }): Promise<Bill> {
+  async updateBillPassed({ code, passed }: UpdatePassedParams): Promise<Bill> {
     return await super.updateOne({
       table: this.table,
       data: { code, passed },
@@ -37,10 +31,7 @@ export class BillsService extends BaseService<Bill> {
   async updateSummaryUrl({
     code,
     summary_url,
-  }: {
-    code: string;
-    summary_url: string;
-  }): Promise<Bill> {
+  }: UpdateSummaryParams): Promise<Bill> {
     return await super.updateOne({
       table: this.table,
       data: { code, summary_url },

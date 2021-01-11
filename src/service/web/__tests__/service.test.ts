@@ -50,10 +50,6 @@ describe(`WebService methods`, () => {
 
   describe("fetchSummaryUrls", () => {
     it("Splits out an array of bills and events from a combined BillEvents array returned from Legisinfo", async () => {
-      beforeEach(() => {
-        jest.spyOn(console, "warn").mockImplementation(() => null);
-      });
-
       jest.setTimeout(30000);
 
       const {
@@ -66,7 +62,7 @@ describe(`WebService methods`, () => {
       billsArray.forEach((bill) => {
         expect(bill).toBeInstanceOf(Bill);
         expect(bill.parliamentary_session_id).toBeTruthy();
-        // expect(bill.introduced_date).toBeTruthy();
+        expect(bill.introduced_date).toBeTruthy();
         expect(bill.full_text_url).toBeTruthy();
         expect(bill.description).toBeTruthy();
       });
@@ -79,7 +75,9 @@ describe(`WebService methods`, () => {
     });
   });
 
-  describe.only("getLegisInfoCaller", () => {
+  // This tests the fetch from the actual LEGISinfo website, which gets the full list of Bills
+  // Skipped because it takes around 3+ minutes to execute, but leaving here in case it needs to be tested
+  describe.skip("getLegisInfoCaller", () => {
     it("Should return bills with fetched data sorted by introduced_date in descending order", async () => {
       const timerMessage = "getLegisInfoCaller executed in ";
       console.time(timerMessage);
@@ -92,22 +90,21 @@ describe(`WebService methods`, () => {
         billsArray,
         eventsArray,
       } = await new WebService().getLegisInfoCaller(testUrl);
-
-      //TEMP DIAGNOSTIC CODE
-      let noIntroducedDate = 0;
-      billsArray.forEach((bill) => {
-        if (!bill.introduced_date) {
-          console.log(`${bill.code} ${bill.page_url}`);
-          noIntroducedDate += 1;
-        }
-      });
-      console.log(
-        `[UPDATE DB TEST] Succesfully fetched ${billsArray.length} bills and ${eventsArray.length} events ...\n`,
-      );
-      console.log(
-        `${noIntroducedDate} Bills with no introduced date fetched correctly`,
-      );
       console.timeEnd(timerMessage);
+
+      expect(billsArray).toBeInstanceOf(Array);
+      billsArray.forEach((bill) => {
+        expect(bill).toBeInstanceOf(Bill);
+        expect(bill.parliamentary_session_id).toBeTruthy();
+        expect(bill.introduced_date).toBeTruthy();
+        expect(bill.full_text_url).toBeTruthy();
+        expect(bill.description).toBeTruthy();
+      });
+
+      expect(eventsArray).toBeInstanceOf(Array);
+      eventsArray.forEach((event) => {
+        expect(event).toBeInstanceOf(Event);
+      });
     });
   });
 });

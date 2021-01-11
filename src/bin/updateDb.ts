@@ -15,39 +15,52 @@ const legisInfoUrl =
 // DEV NOTE ---> WILL BE ADDED TO SCHEDULED JOB ONCE APP DEPLOYED - EXECUTE EVERY 24 HOURS
 
 (async () => {
-  const timerMessage = `[UPDATE DB SCRIPT] Successfully executed in `;
-  console.time(timerMessage);
-
-  console.log(
-    `[UPDATE DB SCRIPT] Beginning new fetch of Bills for LEGISinfo website ...`,
-  );
-
-  try {
-    const {
-      billsArray,
-      eventsArray,
-    } = await new WebService().getLegisInfoCaller(legisInfoUrl);
+  if (process.env.NODE_ENV) {
+    const timerMessage = `[UPDATE DB SCRIPT] Successfully executed in `;
+    console.time(timerMessage);
 
     console.log(
-      `[UPDATE DB SCRIPT] Succesfully fetched ${billsArray.length} bills and ${eventsArray.length} events ...\n`,
+      `[UPDATE DB SCRIPT] Beginning new fetch of Bills for LEGISinfo website in [${process.env.NODE_ENV.toUpperCase()}] ...`,
     );
 
-    const createdBills = await new BillsService().createManyBills(billsArray);
+    try {
+      const {
+        billsArray,
+        eventsArray,
+      } = await new WebService().getLegisInfoCaller(legisInfoUrl);
 
+      console.log(
+        `[UPDATE DB SCRIPT] Succesfully fetched ${billsArray.length} bills and ${eventsArray.length} events ...`,
+      );
+
+      console.log(
+        `[UPDATE DB SCRIPT] Adding bills and events to database [${process.env.POSTGRES_DB}] ...`,
+      );
+
+      const createdBills = await new BillsService().createManyBills(billsArray);
+
+      console.log(
+        `[UPDATE DB SCRIPT] Succesfully added ${createdBills.length} bills to the database! ...`,
+      );
+
+      const createdEvents = await new EventsService().createManyEvents(
+        eventsArray,
+      );
+
+      console.log(
+        `[UPDATE DB SCRIPT] Succesfully added ${createdEvents.length} events to the database!`,
+      );
+
+      console.timeEnd(timerMessage);
+      console.log(
+        `[UPDATE DB SUCCESS] The database ${process.env.POSTGRES_DB} has been updated with ${billsArray.length} bills and ${eventsArray.length} events ...\n`,
+      );
+    } catch (error) {
+      console.error(`[UPDATE DB SCRIPT ERROR] ${error}`);
+    }
+  } else {
     console.log(
-      `[UPDATE DB SCRIPT] Succesfully added ${createdBills.length} bills to the database ...\n`,
+      `[UPDATE DB SCRIPT]: NODE_ENV not set. Please set NODE_ENV before attempting to run the script.`,
     );
-
-    const createdEvents = await new EventsService().createManyEvents(
-      eventsArray,
-    );
-
-    console.log(
-      `[UPDATE DB SCRIPT] Succesfully added ${createdEvents.length} events to the database ...\n`,
-    );
-
-    console.timeEnd(timerMessage);
-  } catch (error) {
-    console.error(`[UPDATE DB SCRIPT ERROR] ${error}`);
   }
 })();

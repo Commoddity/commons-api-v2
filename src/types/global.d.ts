@@ -62,9 +62,17 @@ declare global {
     table: string;
     data: { [key: string]: any };
   }
+  interface UpdatePassedParams {
+    code: string;
+    passed: boolean;
+  }
   interface UpdateQueryParams {
     table: string;
     data: { [key: string]: any } | { [key: string]: any }[];
+  }
+  interface UpdateSummaryParams {
+    code: string;
+    summary_url: string;
   }
   interface WhereCondition {
     [key: string]: any;
