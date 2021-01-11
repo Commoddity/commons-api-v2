@@ -94,7 +94,7 @@ describe(`Bill model`, () => {
       });
     });
 
-    describe.only("fetchIntroducedDate", () => {
+    describe("fetchIntroducedDate", () => {
       jest.setTimeout(30000);
 
       it("Fetches the introduced date if available for bill S-215", async () => {
