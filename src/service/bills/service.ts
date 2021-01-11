@@ -1,5 +1,6 @@
 import { BaseService } from "../base-service";
 import { CategoriesService, Category } from "../categories";
+import { WebService } from "../web";
 
 import { BillInterface as Bill } from "./model";
 
@@ -38,6 +39,32 @@ export class BillsService extends BaseService<Bill> {
     });
   }
 
+  async updateSummaryUrls(): Promise<number> {
+    let billsUpdated = 0;
+    const billSummaryMaps = await new WebService().getSummaries();
+    const whereCondition = billSummaryMaps.map(({ code }) => code);
+
+    const billsWithSummaries = await this.findManyBills({
+      code: whereCondition,
+    });
+    const billsWithNewSummaries = billsWithSummaries
+      ?.filter(({ summary_url }) => !summary_url)
+      ?.map(({ code }) => code);
+
+    if (billsWithNewSummaries.length) {
+      const updateData = billSummaryMaps
+        .filter(({ code }) => billsWithNewSummaries.includes(code))
+        .map(({ code, url: summary_url }) => {
+          return { code, summary_url };
+        });
+
+      await this.updateManyBills(updateData);
+      billsUpdated = billsWithNewSummaries.length;
+    }
+
+    return billsUpdated;
+  }
+
   async updateBillCategories({
     code,
     categories,
@@ -72,7 +99,15 @@ export class BillsService extends BaseService<Bill> {
     }
   }
 
+  async updateManyBills(data: { [key: string]: any }[]): Promise<Bill[]> {
+    return await super.updateMany({ table: this.table, data });
+  }
+
   async findBill(code: string): Promise<Bill> {
     return await super.findOne({ table: this.table, where: { code } });
+  }
+
+  async findManyBills(where: WhereCondition): Promise<Bill[]> {
+    return await super.findMany({ table: this.table, where });
   }
 }

@@ -78,7 +78,8 @@ declare global {
     [key: string]: any;
   }
   interface WhereParams extends QueryParams {
-    where: WhereCondition | WhereCondition[];
+    where: WhereCondition | WhereCondition[] | any[];
+    arraySearch?: boolean;
   }
 
   // Model types
@@ -101,6 +102,13 @@ declare global {
   interface BillSummaryMap {
     code: string;
     url: string;
+  }
+
+  interface BillSummary {
+    title: string;
+    link: string;
+    description?: string;
+    pubDate?: string;
   }
   type ColumnValue<T> = { [key: string]: T };
   type Value = string | number | boolean | Date;

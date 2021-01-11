@@ -16,16 +16,20 @@ export class FormatUtils {
 
             const fetchedArray: any[] = xmlObject.rss.channel[0].item;
 
-            const destructuredArray: T[] = fetchedArray.map<T>((item) => {
-              const destructuredItem = {};
-              Object.entries(item).forEach((item) => {
-                const [key, [value]] = item as any;
-                destructuredItem[key] = value;
+            if (!fetchedArray.length) {
+              resolve([]);
+            } else {
+              const destructuredArray: T[] = fetchedArray.map<T>((item) => {
+                const destructuredItem = {};
+                Object.entries(item).forEach((item) => {
+                  const [key, [value]] = item as any;
+                  destructuredItem[key] = value;
+                });
+                return destructuredItem as T;
               });
-              return destructuredItem as T;
-            });
 
-            fetchedArray.length ? resolve(destructuredArray) : resolve([]);
+              resolve(destructuredArray);
+            }
           } else if (error) {
             reject(error);
           }

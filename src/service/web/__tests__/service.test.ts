@@ -107,4 +107,12 @@ describe(`WebService methods`, () => {
       });
     });
   });
+
+  describe.only("getSummariesCaller", () => {
+    it("Should return summaries with fetched data sorted by introduced_date in descending order", async () => {
+      const summariesArray = await new WebService().getSummaries();
+
+      console.log("THIS IS IT", summariesArray);
+    });
+  });
 });

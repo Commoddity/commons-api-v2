@@ -51,7 +51,7 @@ export class WebService extends BaseService<any> {
                 const xmlObject: {
                   rss: { channel: { item: string[] }[] };
                 } = JSON.parse(JSON.stringify(response));
-                const summariesArray = xmlObject?.rss?.channel[0]?.item;
+                const summariesArray = xmlObject.rss.channel[0].item;
 
                 summariesArray ? resolve(summariesArray) : resolve([]);
               } else if (error) {
@@ -72,9 +72,7 @@ export class WebService extends BaseService<any> {
 
   // Splits out the code of the bill from each legislative summary in the array
   // Returns an array of summary objects containing only the bill code and summary url
-  splitSummaries(
-    fetchedSummaryArray: { title: string; link: string }[],
-  ): BillSummaryMap[] {
+  splitSummaries(fetchedSummaryArray: BillSummary[]): BillSummaryMap[] {
     const summariesArray: BillSummaryMap[] = [];
 
     fetchedSummaryArray.forEach((summary) => {
@@ -95,6 +93,8 @@ export class WebService extends BaseService<any> {
     return summariesArray;
   }
 
+  // Splits two arrays of Bills and Events from the fetched LEGISinfo XML data array.
+  // Handles all the async detches needed to assemble the Bills and also avoid duplicates.
   async splitBillsAndEvents(
     billEventsArray: BillEvent[],
   ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
@@ -120,7 +120,7 @@ export class WebService extends BaseService<any> {
         const bill = await createBill(billEvent);
         billsArray.push(bill);
         console.log(
-          `Successfuly fetched Bill ${bill.code} from LEGISinfo server ...`,
+          `[NEW BILL] Successfully fetched Bill ${bill.code} from LEGISinfo server ...`,
         );
       }
 
@@ -132,7 +132,7 @@ export class WebService extends BaseService<any> {
         const event = new Event(billEvent);
         eventsArray.push(event);
         console.log(
-          `Successfully fetched ${event.title} for Bill ${event.bill_code} from LEGISinfo server ...`,
+          `[NEW EVENT] Successfully fetched ${event.title} for Bill ${event.bill_code} from LEGISinfo server ...`,
         );
       }
     }
@@ -150,6 +150,20 @@ export class WebService extends BaseService<any> {
       return await this.splitBillsAndEvents(sourceArray);
     } catch (error) {
       throw new Error(`[LEGISINFO CALLER ERROR] ${error}`);
+    }
+  };
+
+  getSummaries = async (): Promise<BillSummaryMap[]> => {
+    const summaryUrl =
+      "https://www.parl.ca/legisinfo/RSSFeed.aspx?download=rss&Language=E&source=LegislativeSummaryPublications";
+
+    try {
+      const xml = await this.fetchXml(summaryUrl);
+      const summariesArray = await FormatUtils.formatXml<BillSummary>(xml);
+
+      return this.splitSummaries(summariesArray);
+    } catch (error) {
+      throw new Error(`[SUMMARIES FETCH ERROR] ${error}`);
     }
   };
 

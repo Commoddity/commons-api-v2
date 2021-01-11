@@ -98,6 +98,15 @@ describe(`BillsService methods`, () => {
     });
   });
 
+  describe(`updateSummaryUrl`, () => {
+    it(`Updates a bill's summary_url field`, async () => {
+      const billsUpdated = await new BillsService().updateSummaryUrls();
+
+      // No bills from the actual Summaries site are in the Test DB
+      expect(billsUpdated).toEqual(0);
+    });
+  });
+
   describe(`updateBillCategories`, () => {
     it(`Creates join tables for a given bill to create a many to many relationship with a number of categories`, async () => {
       const testBillCode = "C-829";

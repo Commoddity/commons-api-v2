@@ -50,8 +50,18 @@ export class BaseService<T> {
     }
   }
 
-  async findMany({ table, where }: WhereParams): Promise<T[]> {
-    const whereClause = this.createWhereClause(where);
+  async findMany({
+    table,
+    where,
+    arraySearch = true,
+  }: WhereParams): Promise<T[]> {
+    let whereClause: string;
+    if (arraySearch) {
+      whereClause = this.createWhereClauseFromArray(where);
+    } else {
+      whereClause = this.createWhereClause(where);
+    }
+
     const query = this.createSelectQuery(table, whereClause, true);
 
     try {
@@ -265,5 +275,11 @@ export class BaseService<T> {
     }
 
     return pgp.as.format(query, values);
+  }
+
+  private createWhereClauseFromArray(where: WhereCondition): string {
+    const [[column, arrayValue]] = Object.entries(where);
+
+    return pgp.as.format(`WHERE ${column}=ANY(ARRAY[$1:raw])`, [arrayValue]);
   }
 }
