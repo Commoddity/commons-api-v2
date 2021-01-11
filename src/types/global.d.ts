@@ -30,6 +30,16 @@ declare global {
     where: WhereCondition | WhereCondition[];
     operator?: "AND" | "OR";
   }
+
+  interface FetchPageParams {
+    pageUrl: string;
+    billCode: string;
+  }
+  interface FindAllValuesParams {
+    table: string;
+    column: string;
+    sort?: boolean;
+  }
   interface QueryParams extends TableParams {
     column: string;
     value: string;
@@ -64,6 +74,16 @@ declare global {
   }
 
   // Model types
+  interface BillCategory {
+    bill_id: string;
+    category_id: string;
+  }
+  interface BillEventRes {
+    description: string[];
+    link: string[];
+    title: string[];
+    pubDate: string[];
+  }
   interface BillEvent {
     description: string;
     link: string;

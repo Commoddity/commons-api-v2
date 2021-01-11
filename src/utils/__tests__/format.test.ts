@@ -6,19 +6,26 @@ describe(`FormatUtils methods`, () => {
     const invalidXml =
       '<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel><title>Custom RSS Feed';
 
-    it("Should returns an array", async () => {
-      const formattedXml = await FormatUtils.formatXml(testString);
+    it("Should return an array", async () => {
+      const formattedXml = await FormatUtils.formatXml<BillEvent>(testString);
+
       expect(formattedXml).toBeInstanceOf(Array);
+      formattedXml.forEach((billEvent) => {
+        expect(billEvent).toBeInstanceOf(Object);
+        for (const property in billEvent) {
+          expect(typeof billEvent[property]).toEqual("string");
+        }
+      });
     });
 
     it("Should return an array with length equal to number of bills", async () => {
-      const formattedXml = await FormatUtils.formatXml(testString);
+      const formattedXml = await FormatUtils.formatXml<BillEvent>(testString);
       expect(formattedXml).toHaveLength(2);
     });
 
     it("Throws if given invalid xml", async () => {
       try {
-        await FormatUtils.formatXml(invalidXml);
+        await FormatUtils.formatXml<BillEvent>(invalidXml);
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
       }
@@ -37,6 +44,10 @@ describe(`FormatUtils methods`, () => {
 
     it("Should format date", () => {
       expect(FormatUtils.formatDate(testBill.pubDate)).toBe("2020/03/10");
+    });
+
+    it("Should return undefined if passed an invalid date", () => {
+      expect(FormatUtils.formatDate("this is not a date")).toBe(undefined);
     });
   });
 

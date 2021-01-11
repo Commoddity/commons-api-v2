@@ -4,14 +4,9 @@ import { parseString } from "xml2js";
 
 import { BaseService } from "../base-service";
 
-import { Bill } from "../bills";
+import { Bill, createBill } from "../bills";
 import { Event } from "../events";
 import { FormatUtils } from "@utils";
-
-interface FetchPageParams {
-  pageUrl: string;
-  billCode: string;
-}
 
 export class WebService extends BaseService<any> {
   // Returns the XML document from a given URL
@@ -21,95 +16,6 @@ export class WebService extends BaseService<any> {
       return xml;
     } catch (error) {
       throw new Error(`[WEB SERVICE ERROR]: fetchXml: ${error}`);
-    }
-  }
-
-  // Returns the latest full text URL from a bill page
-  async fetchFullTextUrl({
-    pageUrl,
-    billCode,
-  }: FetchPageParams): Promise<string | undefined> {
-    try {
-      const { data }: AxiosResponse<string> = await Axios.get(pageUrl);
-      const billPage: cheerio.Root = Cheerio.load(data);
-      const link: string | undefined = billPage(
-        'a:contains("Latest Publication")',
-      ).attr("href");
-
-      const fullTextUrl: string | undefined = link
-        ? `https:${link}`
-        : undefined;
-
-      !link &&
-        console.log(
-          `No full text available for Bill ${billCode}. Skipping ...`,
-        );
-
-      return fullTextUrl;
-    } catch (error) {
-      console.error(
-        `[WEB SERVICE ERROR]: fetchFullTextUrl - Bill ${billCode}: ${error}`,
-      );
-    }
-  }
-
-  // Returns the date that a bill was introduced from a bill page
-  async fetchIntroducedDate({
-    pageUrl,
-    billCode,
-  }: FetchPageParams): Promise<string | undefined> {
-    try {
-      const { data }: AxiosResponse<string> = await Axios.get(pageUrl);
-      const billPage: cheerio.Root = Cheerio.load(data);
-      const introducedDateFetch: string = billPage(
-        'div:contains("Introduction and First Reading")',
-      )
-        .last()
-        .parent()
-        .parent()
-        .find("span")
-        .text();
-
-      const introducedDate: string | undefined = introducedDateFetch
-        ? introducedDateFetch
-        : undefined;
-
-      !introducedDate &&
-        console.log(
-          `No introduced date available for Bill ${billCode}. Skipping ...`,
-        );
-
-      return introducedDate;
-    } catch (error) {
-      console.error(
-        `[WEB SERVICE ERROR]: fetchIntroducedDate - Bill ${billCode}: ${error}`,
-      );
-      return undefined;
-    }
-  }
-
-  // Returns the description from the summary of the full text of a given bill
-  async fetchDescription({
-    pageUrl,
-    billCode,
-  }: FetchPageParams): Promise<string | undefined> {
-    try {
-      const response: AxiosResponse<string> = await Axios.get(pageUrl);
-      const billPage: cheerio.Root = Cheerio.load(response.data);
-      const summaryDiv: string = billPage('div:contains("This enactment")')
-        .last()
-        .text();
-
-      // Regex removes trailing space and newline characters
-      const decription: string | undefined = summaryDiv
-        ? summaryDiv.replace(/\s+/g, " ").trim()
-        : undefined;
-
-      return decription;
-    } catch (error) {
-      console.error(
-        `[WEB SERVICE ERROR]: fetchDescription - Bill ${billCode}: ${error}`,
-      );
     }
   }
 
@@ -164,108 +70,41 @@ export class WebService extends BaseService<any> {
     });
   }
 
-  // Fetches full text URL, introduced date and description via web scraping
-  // Inserts values into each bill objects and returns the updated object
-  async insertFetchedDataIntoBill(bill: Bill): Promise<Bill> {
-    try {
-      const fullTextUrl = await this.fetchFullTextUrl({
-        pageUrl: bill.page_url,
-        billCode: bill.code,
-      });
-      const introducedDate = await this.fetchIntroducedDate({
-        pageUrl: bill.page_url,
-        billCode: bill.code,
-      });
-      const description = fullTextUrl
-        ? await this.fetchDescription({
-            pageUrl: fullTextUrl,
-            billCode: bill.code,
-          })
-        : undefined;
-
-      bill.full_text_url = fullTextUrl;
-      bill.introduced_date = introducedDate
-        ? FormatUtils.formatDate(introducedDate)
-        : undefined;
-      bill.description = description;
-
-      return bill;
-    } catch (error) {
-      console.error(`[WEB SERVICE ERROR]: insertFetchedDataIntoBill: ${error}`);
-      return bill;
-    }
-  }
-
-  // Inserts all fetched data into bills and returns updated bills sorted by introduced_date
-  async returnFormattedBills(bills: Bill[]): Promise<Bill[]> {
-    try {
-      // Creates an array of Promises to format all bills with fetched data
-      const promises: Promise<Bill>[] = bills.map((bill) =>
-        this.insertFetchedDataIntoBill(bill),
-      );
-
-      // Resolve promises array into new array of formatted bills
-      const formattedBills: Bill[] = await Promise.all(promises);
-      return formattedBills.sort((a, b) =>
-        !!(!!a.introduced_date && !!b.introduced_date) &&
-        a.introduced_date < b.introduced_date
-          ? 1
-          : -1,
-      );
-    } catch (error) {
-      throw new Error(`[WEB SERVICE ERROR]: Error return${error}`);
-    }
-  }
-
   async splitBillsAndEvents(
-    combinedArray: BillEvent[],
+    billEventsArray: BillEvent[],
   ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
     const billsArray: Bill[] = [];
     const eventsArray: Event[] = [];
 
-    for (const combinedBillEvent of combinedArray) {
-      const billCode = FormatUtils.formatCode(combinedBillEvent.description[0]);
-      const eventTitle = FormatUtils.formatTitle(combinedBillEvent.title);
+    const sortedBillEventsArray = this.sortBillEventsByDate(billEventsArray);
+    const billCodes: string[] = await super.findAllValues({
+      table: "bills",
+      column: "code",
+    });
+    const events: Event[] = await super.findAll("events");
 
-      const bill: Bill = {
-        id: "",
-        parliamentary_session_id: undefined,
-        code: billCode,
-        title: FormatUtils.formatTitle(combinedBillEvent.description),
-        description: undefined,
-        introduced_date: undefined,
-        summary_url: undefined,
-        page_url: combinedBillEvent.link,
-        full_text_url: undefined,
-        passed: undefined,
-      };
+    for await (const billEvent of sortedBillEventsArray) {
+      const code = FormatUtils.formatCode(billEvent.description);
+      const eventTitle = FormatUtils.formatTitle(billEvent.title);
 
-      const event: Event = {
-        id: "",
-        bill_code: billCode,
-        title: eventTitle,
-        publication_date: FormatUtils.formatDate(combinedBillEvent.pubDate),
-      };
-
-      const billExistsInArray = billsArray.some(
-        (savedBill) => savedBill.code === bill.code,
+      const newBill = !!(
+        !billsArray.some((savedBill) => savedBill.code === code) &&
+        !billCodes.includes(code)
       );
-      const billExistsinDb = await super.findIfRowExists({
-        table: "bills",
-        where: { code: billCode },
-      });
-      const eventExistsInDb = await super.findIfRowExists({
-        table: "events",
-        where: [{ bill_code: billCode }, { title: eventTitle }],
-      });
-
-      if (!billExistsInArray && !billExistsinDb) {
+      if (newBill) {
+        const bill = await createBill(billEvent);
+        billsArray.push(bill);
         console.log(
           `Successfuly fetched Bill ${bill.code} from LEGISinfo server ...`,
         );
-        billsArray.push(bill);
       }
-      if (!eventExistsInDb) {
+
+      const newEvent = !events.some(
+        (savedEvent) =>
+          savedEvent.bill_code === code && savedEvent.title === eventTitle,
+      );
+      if (newEvent) {
+        const event = new Event(billEvent);
         eventsArray.push(event);
         console.log(
           `Successfully fetched ${event.title} for Bill ${event.bill_code} from LEGISinfo server ...`,
@@ -303,27 +142,20 @@ export class WebService extends BaseService<any> {
 
   getLegisInfoCaller = async (
     url: string,
-  ): Promise<{ formattedBillsArray: Bill[]; eventsArray: Event[] }> => {
+  ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> => {
     try {
       const xml = await this.fetchXml(url);
+      const sourceArray = await FormatUtils.formatXml<BillEvent>(xml);
 
-      const sourceArray = await FormatUtils.formatXml(xml);
-
-      const { billsArray, eventsArray } = await this.splitBillsAndEvents(
-        sourceArray,
-      );
-      const formattedBillsArray: Bill[] = await this.returnFormattedBills(
-        billsArray,
-      );
-
-      console.log(
-        `Succesfully fetched ${formattedBillsArray.length} bills and ${eventsArray.length} events ...\n`,
-      );
-
-      return { formattedBillsArray, eventsArray };
+      return await this.splitBillsAndEvents(sourceArray);
     } catch (error) {
-      console.error(`[LEGISINFO CALLER ERROR] ${error}`);
       throw new Error(`[LEGISINFO CALLER ERROR] ${error}`);
     }
   };
+
+  private sortBillEventsByDate(billEventsArray: BillEvent[]): BillEvent[] {
+    return billEventsArray.sort((a, b) =>
+      !!(!!a.pubDate && !!b.pubDate) && a.pubDate < b.pubDate ? 1 : -1,
+    );
+  }
 }

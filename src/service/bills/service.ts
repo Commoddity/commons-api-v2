@@ -1,7 +1,7 @@
 import { BaseService } from "../base-service";
 import { CategoriesService, Category } from "../categories";
 
-import { Bill, BillCategory } from "./model";
+import { BillInterface as Bill } from "./model";
 
 export class BillsService extends BaseService<Bill> {
   private table = "bills";

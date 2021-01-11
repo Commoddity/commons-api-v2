@@ -61,14 +61,46 @@ export class BaseService<T> {
     }
   }
 
-  async findLatestId({ table }: TableParams): Promise<string> {
+  async findAll(table: string): Promise<T[]> {
+    const query = pgp.as.format("SELECT * FROM $1:raw", [table]);
+
+    try {
+      return await db.any<T>(query);
+    } catch (err) {
+      throw new Error(`[FIND MANY ERROR]: ${err}`);
+    }
+  }
+
+  async findLatestId({ table }: TableParams): Promise<number> {
     const query = pgp.as.format(
       "SELECT id FROM $1:raw ORDER BY id DESC LIMIT 1",
       [table],
     );
 
     try {
-      return (await db.one<{ id: string }>(query)).id;
+      return Number((await db.one<{ id: number }>(query)).id);
+    } catch (err) {
+      throw new Error(`[FIND LATEST ID ERROR]: ${err}`);
+    }
+  }
+
+  async findAllValues({
+    table,
+    column,
+    sort = false,
+  }: FindAllValuesParams): Promise<any[]> {
+    const query = sort
+      ? pgp.as.format("SELECT $1:raw FROM $2:raw ORDER BY $1:raw", [
+          column,
+          table,
+        ])
+      : pgp.as.format("SELECT $1:raw FROM $2:raw", [column, table]);
+
+    try {
+      const returnedValues = (await db.any<any>(query)).map(
+        (row) => row[column],
+      );
+      return sort ? returnedValues.sort() : returnedValues;
     } catch (err) {
       throw new Error(`[FIND LATEST ID ERROR]: ${err}`);
     }

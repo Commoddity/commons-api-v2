@@ -10,10 +10,12 @@
     "dev": "nodemon",
     "build": "tsc -p ./",
     "lint": "eslint . --ext .ts",
-    "test": "NODE_ENV=test jest",
+    "test": "NODE_ENV=test jest --silent",
+    "test:log": "NODE_ENV=test jest",
     "db:reset": "ts-node ./src/bin/resetDb.ts",
     "db:test_reset": "ts-node ./src/bin/testResetDb.ts",
-    "push:dev": "yarn lint && yarn build && yarn test && git push origin dev"
+    "push:dev": "yarn lint && yarn build && yarn test && git push origin dev",
+    "db:update_database": "NODE_ENV=dev ts-node ./src/bin/updateDb.ts"
   },
   "nodemonConfig": {
     "ignore": [

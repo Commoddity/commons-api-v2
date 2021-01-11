@@ -5,7 +5,7 @@ dayjs.extend(utc);
 
 export class FormatUtils {
   // Returns the parsed array of bills/events from the source XML (with redundant tags removed)
-  static formatXml = async (xml: string): Promise<[]> => {
+  static async formatXml<T>(xml: string): Promise<T[]> {
     try {
       return await new Promise((resolve, reject) => {
         parseString(xml, (error: Error, response: string) => {
@@ -13,9 +13,19 @@ export class FormatUtils {
             const xmlObject: {
               rss: { channel: { item: [] }[] };
             } = JSON.parse(JSON.stringify(response));
-            const fetchedArray = xmlObject.rss.channel[0].item;
 
-            fetchedArray.length ? resolve(fetchedArray) : resolve([]);
+            const fetchedArray: any[] = xmlObject.rss.channel[0].item;
+
+            const destructuredArray: T[] = fetchedArray.map<T>((item) => {
+              const destructuredItem = {};
+              Object.entries(item).forEach((item) => {
+                const [key, [value]] = item as any;
+                destructuredItem[key] = value;
+              });
+              return destructuredItem as T;
+            });
+
+            fetchedArray.length ? resolve(destructuredArray) : resolve([]);
           } else if (error) {
             reject(error);
           }
@@ -24,11 +34,16 @@ export class FormatUtils {
     } catch (error) {
       throw new Error(`[FORMAT XML ERROR]: ${error}`);
     }
-  };
+  }
 
   // Formats the fetched dates to a consistent format
-  static formatDate = (date: string): string =>
-    dayjs(date).utcOffset(-4).format(`YYYY/MM/DD`);
+  static formatDate = (date: string): string | undefined => {
+    if (dayjs(date).isValid()) {
+      return dayjs(date).utcOffset(-4).format(`YYYY/MM/DD`);
+    } else {
+      return undefined;
+    }
+  };
 
   // Returns a bill's code from the 'description' field
   static formatCode = (description: string): string =>
