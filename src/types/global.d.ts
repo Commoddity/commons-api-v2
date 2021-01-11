@@ -77,7 +77,8 @@ declare global {
   interface WhereCondition {
     [key: string]: any;
   }
-  interface WhereParams extends QueryParams {
+  interface WhereParams {
+    table: string;
     where: WhereCondition | WhereCondition[] | any[];
     arraySearch?: boolean;
   }
