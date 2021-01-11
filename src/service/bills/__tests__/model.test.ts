@@ -130,16 +130,19 @@ describe(`Bill model`, () => {
         expect(testIntroducedDateResponse).toEqual(testIntroducedDate);
       });
 
-      it("Skips the bill if no introduced date available", async () => {
+      it("Fetches the introduced date if it was reinstated from a previous session", async () => {
+        const testReinstatedIntroducedDate = "2020/02/25";
         const testNoIntroducedDateResponse = await ProtoBill.fetchIntroducedDate(
           {
             pageUrl:
-              "https://www.parl.ca/legisinfo/BillDetails.aspx?Language=E&billId=10604308",
-            billCode: "C-2",
+              "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866196",
+            billCode: "C-226",
           },
         );
 
-        expect(testNoIntroducedDateResponse).toEqual(undefined);
+        expect(testNoIntroducedDateResponse).toEqual(
+          testReinstatedIntroducedDate,
+        );
       });
     });
 

@@ -48,12 +48,18 @@ export class Bill implements BillInterface {
   async insertFetchedValues(pageUrl: string, billCode: string) {
     this.parliamentary_session_id =
       (await new ParliamentsService().queryLatestParliamentarySession()) || 0;
-    this.introduced_date = await this.fetchIntroducedDate({
+
+    const introducedDate = await this.fetchIntroducedDate({
       pageUrl,
       billCode,
     });
+    this.introduced_date = introducedDate
+      ? FormatUtils.formatDate(introducedDate)
+      : undefined;
+
     const fullTextUrl = await this.fetchFullTextUrl({ pageUrl, billCode });
     this.full_text_url = fullTextUrl;
+
     this.description = fullTextUrl
       ? await this.fetchDescription({ pageUrl: fullTextUrl, billCode })
       : undefined;
@@ -64,41 +70,71 @@ export class Bill implements BillInterface {
     pageUrl,
     billCode,
   }: FetchPageParams): Promise<string | undefined> {
+    console.log("FIRING INSIDE!!!!!");
+    let introducedDate: string | undefined;
+
     try {
+      console.log("BEFORE FETCH", pageUrl);
       const { data }: AxiosResponse<string> = await Axios.get(pageUrl);
+      console.log("BEFORE FETCH 23", data);
       const billPage: cheerio.Root = Cheerio.load(data);
+      console.log("BEFORE FETCH 65");
 
-      const variantOne = billPage('span:contains("House of Commons")')
-        .parentsUntil("li")
-        .find('div.HouseShadeLevel:contains("First Reading")')
-        .parent()
-        .find("span");
-      const variantTwo = billPage('span:contains("House of Commons")')
-        .parentsUntil("ul")
-        .find('div.HouseShadeLevel:contains("First Reading")')
-        .last()
-        .parent()
-        .parent()
-        .find("span");
-      const variantThree = billPage('div.MajorStage:contains("First Reading")')
-        .parent()
-        .find("div.StatusCol2")
-        .find("span");
+      console.log("HERE");
+      const billReinstated = billPage(
+        'a:contains("Reinstated from previous session")',
+      )?.attr("href");
+      console.log("BELOW", billReinstated);
 
-      const introducedDate = (
-        variantOne.text() ||
-        variantTwo.text() ||
-        variantThree.text()
-      ).substring(0, 10);
+      if (billReinstated) {
+        introducedDate = await this.fetchIntroducedDate({
+          pageUrl: billReinstated,
+          billCode,
+        });
+      } else {
+        const variants = [
+          () =>
+            billPage('span:contains("House of Commons")')
+              .parentsUntil("li")
+              .find('div.HouseShadeLevel:contains("First Reading")')
+              .parent()
+              .find("span"),
+          () =>
+            billPage('span:contains("House of Commons")')
+              .parentsUntil("ul")
+              .find('div.HouseShadeLevel:contains("First Reading")')
+              .last()
+              .parent()
+              .parent()
+              .find("span"),
+          () =>
+            billPage('div.MajorStage:contains("First Reading")')
+              .parent()
+              .find("div.StatusCol2")
+              .find("span"),
+        ];
+
+        while (!introducedDate) {
+          let variantIndex = 0;
+          if (variants[variantIndex]().text()) {
+            introducedDate = variants[variantIndex]().text().substring(0, 10);
+            break;
+          } else {
+            variantIndex += 1;
+            if (variantIndex > variants.length) {
+              introducedDate = undefined;
+              break;
+            }
+          }
+        }
+      }
 
       !introducedDate &&
         console.log(
           `No introduced date available for Bill ${billCode}. Skipping ...`,
         );
 
-      return introducedDate
-        ? FormatUtils.formatDate(introducedDate)
-        : undefined;
+      return introducedDate;
     } catch (error) {
       console.error(
         `[WEB SERVICE ERROR]: fetchIntroducedDate - Bill ${billCode}: ${error}`,

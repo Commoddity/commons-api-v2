@@ -90,7 +90,7 @@ describe(`WebService methods`, () => {
 
       const {
         billsArray,
-        // eventsArray,
+        eventsArray,
       } = await new WebService().getLegisInfoCaller(testUrl);
 
       //TEMP DIAGNOSTIC CODE
@@ -101,6 +101,9 @@ describe(`WebService methods`, () => {
           noIntroducedDate += 1;
         }
       });
+      console.log(
+        `[UPDATE DB TEST] Succesfully fetched ${billsArray.length} bills and ${eventsArray.length} events ...\n`,
+      );
       console.log(
         `${noIntroducedDate} Bills with no introduced date fetched correctly`,
       );
