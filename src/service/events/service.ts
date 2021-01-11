@@ -32,12 +32,22 @@ export class EventsService extends BaseService<Event> {
           code: event.bill_code,
           passed: true,
         });
+
+        console.log(
+          `Bill ${event.bill_code} has passed and the DB has been updated ....`,
+        );
+
         billsUpdated = true;
       } else if (billHasFailed) {
         await new BillsService().updateBillPassed({
           code: event.bill_code,
           passed: false,
         });
+
+        console.log(
+          `Bill ${event.bill_code} has failed and the DB has been updated ....`,
+        );
+
         billsUpdated = true;
       }
     }

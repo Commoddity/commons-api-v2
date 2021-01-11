@@ -51,10 +51,24 @@ const legisInfoUrl =
         `[UPDATE DB SCRIPT] Succesfully added ${createdEvents.length} events to the database!`,
       );
 
-      console.timeEnd(timerMessage);
       console.log(
-        `[UPDATE DB SUCCESS] The database ${process.env.POSTGRES_DB} has been updated with ${billsArray.length} bills and ${eventsArray.length} events ...\n`,
+        `[UPDATE DB SCRIPT] Beginning update of bills passed/failed ...`,
       );
+
+      const billsUpdated = await new EventsService().updateBillsPassedStatus(
+        eventsArray,
+      );
+
+      console.log(
+        `[UPDATE DB SUCCESS] The database ${
+          process.env.POSTGRES_DB
+        } has been updated with ${billsArray.length} bills and ${
+          eventsArray.length
+        } events. ${
+          billsUpdated && "The status of at least one bill has been updated."
+        }`,
+      );
+      console.timeEnd(timerMessage);
     } catch (error) {
       console.error(`[UPDATE DB SCRIPT ERROR] ${error}`);
     }
