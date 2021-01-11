@@ -68,9 +68,10 @@ export class Bill implements BillInterface {
       const { data }: AxiosResponse<string> = await Axios.get(pageUrl);
       const billPage: cheerio.Root = Cheerio.load(data);
 
-      const variantOne = billPage('div.MajorStage:contains("First Reading")')
+      const variantOne = billPage('span:contains("House of Commons")')
+        .parentsUntil("li")
+        .find('div.HouseShadeLevel:contains("First Reading")')
         .parent()
-        .find("div.StatusCol2")
         .find("span");
       const variantTwo = billPage('span:contains("House of Commons")')
         .parentsUntil("ul")
@@ -79,8 +80,16 @@ export class Bill implements BillInterface {
         .parent()
         .parent()
         .find("span");
+      const variantThree = billPage('div.MajorStage:contains("First Reading")')
+        .parent()
+        .find("div.StatusCol2")
+        .find("span");
 
-      const introducedDate = variantOne.text() || variantTwo.text();
+      const introducedDate = (
+        variantOne.text() ||
+        variantTwo.text() ||
+        variantThree.text()
+      ).substring(0, 10);
 
       !introducedDate &&
         console.log(

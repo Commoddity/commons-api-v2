@@ -94,8 +94,10 @@ describe(`Bill model`, () => {
       });
     });
 
-    describe("fetchIntroducedDate", () => {
-      it("Fetches the introduced date if available", async () => {
+    describe.only("fetchIntroducedDate", () => {
+      jest.setTimeout(30000);
+
+      it("Fetches the introduced date if available for bill S-215", async () => {
         const testIntroducedDate = "2020/02/18";
         const testIntroducedDateResponse = await ProtoBill.fetchIntroducedDate({
           pageUrl:
@@ -106,12 +108,23 @@ describe(`Bill model`, () => {
         expect(testIntroducedDateResponse).toEqual(testIntroducedDate);
       });
 
-      it("Fetches the introduced date if available", async () => {
+      it("Fetches the introduced date if available for bill S-217", async () => {
         const testIntroducedDate = "2020/11/05";
         const testIntroducedDateResponse = await ProtoBill.fetchIntroducedDate({
           pageUrl:
             "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10938159",
           billCode: "S-217",
+        });
+
+        expect(testIntroducedDateResponse).toEqual(testIntroducedDate);
+      });
+
+      it("Fetches the introduced date if available for bill C-4", async () => {
+        const testIntroducedDate = "2020/09/28";
+        const testIntroducedDateResponse = await ProtoBill.fetchIntroducedDate({
+          pageUrl:
+            "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10867435",
+          billCode: "C-4",
         });
 
         expect(testIntroducedDateResponse).toEqual(testIntroducedDate);

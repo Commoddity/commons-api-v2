@@ -1,5 +1,6 @@
 import { BillsService } from "..";
 import { resetBills, testBills } from "@test";
+import { BillInterface } from "../model";
 
 describe(`BillsService methods`, () => {
   afterEach(async () => {
@@ -32,7 +33,7 @@ describe(`BillsService methods`, () => {
 
   describe(`Create Many Bills`, () => {
     it(`Creates many bills in the DB `, async () => {
-      const testBillsInput = testBills;
+      const testBillsInput: BillInterface[] = testBills;
       const testBillsResult = await new BillsService().createManyBills(
         testBillsInput,
       );

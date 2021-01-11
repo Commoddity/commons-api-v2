@@ -70,6 +70,31 @@ export class WebService extends BaseService<any> {
     });
   }
 
+  // Splits out the code of the bill from each legislative summary in the array
+  // Returns an array of summary objects containing only the bill code and summary url
+  splitSummaries(
+    fetchedSummaryArray: { title: string; link: string }[],
+  ): BillSummaryMap[] {
+    const summariesArray: BillSummaryMap[] = [];
+
+    fetchedSummaryArray.forEach((summary) => {
+      if (summary.title.includes("Legislative Summary Published for ")) {
+        const summaryBillCode = summary.title
+          .split("Legislative Summary Published for ")[1]
+          .split(",")[0];
+
+        const summaryObject: BillSummaryMap = {
+          code: summaryBillCode,
+          url: summary.link,
+        };
+
+        summariesArray.push(summaryObject);
+      }
+    });
+
+    return summariesArray;
+  }
+
   async splitBillsAndEvents(
     billEventsArray: BillEvent[],
   ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
@@ -113,31 +138,6 @@ export class WebService extends BaseService<any> {
     }
 
     return { billsArray, eventsArray };
-  }
-
-  // Splits out the code of the bill from each legislative summary in the array
-  // Returns an array of summary objects containing only the bill code and summary url
-  splitSummaries(
-    fetchedSummaryArray: { title: string; link: string }[],
-  ): BillSummaryMap[] {
-    const summariesArray: BillSummaryMap[] = [];
-
-    fetchedSummaryArray.forEach((summary) => {
-      if (summary.title.includes("Legislative Summary Published for ")) {
-        const summaryBillCode = summary.title
-          .split("Legislative Summary Published for ")[1]
-          .split(",")[0];
-
-        const summaryObject: BillSummaryMap = {
-          code: summaryBillCode,
-          url: summary.link,
-        };
-
-        summariesArray.push(summaryObject);
-      }
-    });
-
-    return summariesArray;
   }
 
   getLegisInfoCaller = async (

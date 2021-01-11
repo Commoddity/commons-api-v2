@@ -3,7 +3,7 @@ import { FormatUtils } from "@utils";
 export interface EventInterface {
   bill_code: string;
   title: string;
-  publication_date: string;
+  publication_date: string | undefined;
   id?: string;
   created_at?: Date;
 }
@@ -11,7 +11,7 @@ export interface EventInterface {
 export class Event implements EventInterface {
   bill_code: string;
   title: string;
-  publication_date: string;
+  publication_date: string | undefined;
   id?: string;
   created_at?: Date;
 

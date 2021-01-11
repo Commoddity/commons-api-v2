@@ -66,7 +66,7 @@ describe(`WebService methods`, () => {
       billsArray.forEach((bill) => {
         expect(bill).toBeInstanceOf(Bill);
         expect(bill.parliamentary_session_id).toBeTruthy();
-        expect(bill.introduced_date).toBeTruthy();
+        // expect(bill.introduced_date).toBeTruthy();
         expect(bill.full_text_url).toBeTruthy();
         expect(bill.description).toBeTruthy();
       });
@@ -79,126 +79,32 @@ describe(`WebService methods`, () => {
     });
   });
 
-  // describe("insertFetchedDataIntoBill", () => {
-  //   const testBill = {
-  //     id: "12345",
-  //     parliamentary_session_id: undefined,
-  //     code: "S-216",
-  //     title: "An Act to amend the Assisted Human Reproduction Act",
-  //     description: undefined,
-  //     introduced_date: undefined,
-  //     summary_url: undefined,
-  //     page_url:
-  //       "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10644036",
-  //     full_text_url: undefined,
-  //     passed: undefined,
-  //   };
-  //   const testBillReturned = {
-  //     id: "12345",
-  //     parliamentary_session_id: undefined,
-  //     code: "S-216",
-  //     title: "An Act to amend the Assisted Human Reproduction Act",
-  //     description:
-  //       "This enactment amends the Assisted Human Reproduction Act to decriminalize payment for sperm or ovum donation and for surrogacy in certain circumstances.",
-  //     introduced_date: "2020/02/20",
-  //     summary_url: undefined,
-  //     page_url:
-  //       "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10644036",
-  //     full_text_url: "https://parl.ca/DocumentViewer/en/10644072",
-  //     passed: undefined,
-  //   };
-  //   it("Should return bill with fetched data included", async () => {
-  //     jest.setTimeout(8000);
-  //     const testFormattedBill = await new WebService().insertFetchedDataIntoBill(
-  //       testBill,
-  //     );
-  //     expect(testFormattedBill).toEqual(testBillReturned);
-  //   });
-  // });
-
-  // describe("returnFormattedBills", () => {
-  //   const testArray = [
-  //     {
-  //       id: "12345",
-  //       parliamentary_session_id: undefined,
-  //       code: "S-215",
-  //       title:
-  //         "An Act to amend the Greenhouse Gas Pollution Pricing Act (farming exemptions)",
-  //       description: undefined,
-  //       introduced_date: undefined,
-  //       summary_url: undefined,
-  //       page_url:
-  //         "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10637436",
-  //       full_text_url: undefined,
-  //       passed: undefined,
-  //     },
-  //     {
-  //       id: "67890",
-  //       parliamentary_session_id: undefined,
-  //       code: "S-216",
-  //       title: "An Act to amend the Assisted Human Reproduction Act",
-  //       description: undefined,
-  //       introduced_date: undefined,
-  //       summary_url: undefined,
-  //       page_url:
-  //         "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10644036",
-  //       full_text_url: undefined,
-  //       passed: undefined,
-  //     },
-  //   ];
-  //   const testArrayReturned = [
-  //     {
-  //       id: "12345",
-  //       parliamentary_session_id: undefined,
-  //       code: "S-216",
-  //       title: "An Act to amend the Assisted Human Reproduction Act",
-  //       description:
-  //         "This enactment amends the Assisted Human Reproduction Act to decriminalize payment for sperm or ovum donation and for surrogacy in certain circumstances.",
-  //       introduced_date: "2020/02/20",
-  //       summary_url: undefined,
-  //       page_url:
-  //         "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10644036",
-  //       full_text_url: "https://parl.ca/DocumentViewer/en/10644072",
-  //       passed: undefined,
-  //     },
-  //     {
-  //       id: "67890",
-  //       parliamentary_session_id: undefined,
-  //       code: "S-215",
-  //       title:
-  //         "An Act to amend the Greenhouse Gas Pollution Pricing Act (farming exemptions)",
-  //       description:
-  //         "This enactment amends the Greenhouse Gas Pollution Pricing Act to modify the definitions of eligible farming machinery and qualifying farming fuel.",
-  //       introduced_date: "2020/02/18",
-  //       summary_url: undefined,
-  //       page_url:
-  //         "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10637436",
-  //       full_text_url: "https://parl.ca/DocumentViewer/en/10637457",
-  //       passed: undefined,
-  //     },
-  //   ];
-  //   it("Should return bills with fetched data sorted by introduced_date in descending order", async () => {
-  //     jest.setTimeout(30000);
-  //     const testReturnedBills = await new WebService().returnFormattedBills(
-  //       testArray,
-  //     );
-  //     expect(testReturnedBills).toEqual(testArrayReturned);
-  //   });
-  // });
-
   describe.only("getLegisInfoCaller", () => {
     it("Should return bills with fetched data sorted by introduced_date in descending order", async () => {
-      jest.setTimeout(300000);
+      const timerMessage = "getLegisInfoCaller executed in ";
+      console.time(timerMessage);
+      jest.setTimeout(3000000);
 
       const testUrl =
         "https://www.parl.ca/LegisInfo/RSSFeed.aspx?download=rss&Language=E&Mode=1&Source=LegislativeFilteredBills&AllBills=1&HOCEventTypes=60110,60111,60146,60306,60122,60115,60119,60121,60124,60125,60126,60127,60285,60145,60307,60128,60131,60132,60133,60134,60174,60112,60163,60304,60303,60139,60144,60136,60138,60142&SenateEventTypes=60109,60110,60111,60115,60118,60119,60120,60123,60124,60305,60286,60130,60129,60302,60131,60132,60133,60134,60147,60304,60303,60140,60143,60135,60137,60141,60149";
 
       const {
         billsArray,
-        eventsArray,
+        // eventsArray,
       } = await new WebService().getLegisInfoCaller(testUrl);
 
-      console.log(billsArray, eventsArray);
+      //TEMP DIAGNOSTIC CODE
+      let noIntroducedDate = 0;
+      billsArray.forEach((bill) => {
+        if (!bill.introduced_date) {
+          console.log(`${bill.code} ${bill.page_url}`);
+          noIntroducedDate += 1;
+        }
+      });
+      console.log(
+        `${noIntroducedDate} Bills with no introduced date fetched correctly`,
+      );
+      console.timeEnd(timerMessage);
     });
   });
 });
