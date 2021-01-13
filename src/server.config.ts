@@ -1,6 +1,6 @@
 const SERVER_ENV: { [key: string]: { SERVER_PORT: number } } = {
   production: {
-    SERVER_PORT: Number(process.env.IWIP_SERVER_PORT) || 4800,
+    SERVER_PORT: Number(process.env.IWIP_SERVER_PORT) || 5000,
   },
   test: {
     SERVER_PORT: 4800,
