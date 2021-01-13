@@ -1,30 +1,24 @@
 import { keys } from "ts-transformer-keys";
 
 export interface UserInterface {
-  id: string;
+  id?: string;
   first_name: string;
   last_name: string;
   username: string;
   email: string;
-  phone_number: string;
-  email_notification: boolean;
-  sms_notification: boolean;
-  active: boolean;
-  metadata: UserMetadata;
-  created_at: Date;
-}
-
-interface UserMetadata {
-  address: string;
-  street: string;
-  city: string;
-  province: string;
-  postal_code: string;
-  riding: {
-    mp: string;
-    party: string;
-    name: string;
-  };
+  email_notification?: number;
+  sms_notification?: number;
+  active?: boolean;
+  phone_number?: string;
+  address?: string;
+  street?: string;
+  city?: string;
+  province?: string;
+  postal_code?: string;
+  mp?: string;
+  party?: string;
+  riding_name?: string;
+  created_at?: Date;
 }
 
 export class User implements UserInterface {
@@ -34,11 +28,17 @@ export class User implements UserInterface {
   username;
   email;
   phone_number;
-  postal_code;
   email_notification;
   sms_notification;
   active;
-  metadata;
+  address;
+  street;
+  city;
+  province;
+  postal_code;
+  mp;
+  party;
+  riding_name;
   created_at;
 
   constructor({
@@ -48,12 +48,18 @@ export class User implements UserInterface {
     username = null,
     email = null,
     phone_number = null,
-    postal_code = null,
     email_notification = null,
     sms_notification = null,
     active = null,
-    metadata = null,
     created_at = null,
+    address = null,
+    street = null,
+    city = null,
+    province = null,
+    postal_code = null,
+    mp = null,
+    party = null,
+    riding_name = null,
   } = {}) {
     this.id = id;
     this.first_name = first_name;
@@ -61,11 +67,17 @@ export class User implements UserInterface {
     this.username = username;
     this.email = email;
     this.phone_number = phone_number;
-    this.postal_code = postal_code;
     this.email_notification = email_notification;
     this.sms_notification = sms_notification;
     this.active = active;
-    this.metadata = metadata;
+    this.address = address;
+    this.street = street;
+    this.city = city;
+    this.province = province;
+    this.postal_code = postal_code;
+    this.mp = mp;
+    this.party = party;
+    this.riding_name = riding_name;
     this.created_at = created_at;
   }
 
@@ -77,11 +89,7 @@ export class User implements UserInterface {
     return `${this.first_name} ${this.last_name}`;
   }
 
-  get address(): string {
-    return `${this.metadata.address} ${this.metadata.street_name} ${this.metadata.city} ${this.metadata.province} ${this.metadata.postal_code}`;
-  }
-
-  get postalCode(): string {
-    return this.metadata.postal_code;
+  get fullAddress(): string {
+    return `${this.address} ${this.street} ${this.city} ${this.province} ${this.postal_code}`;
   }
 }

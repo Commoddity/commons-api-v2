@@ -31,6 +31,12 @@ declare global {
     table: string;
     tableValues: T;
   }
+  interface CreateJoinParams {
+    idOne: { [key: string]: string };
+    idTwo: { [key: string]: string };
+    table: string;
+  }
+
   interface CreateManyParams<T> {
     table: string;
     tableValuesArray: T[];

@@ -1,6 +1,6 @@
 import { BaseService } from "../base-service";
 
-import { Category } from "./model";
+import { CategoryInterface as Category } from "./model";
 
 export class CategoriesService extends BaseService<Category> {
   private table = "categories";
@@ -10,5 +10,14 @@ export class CategoriesService extends BaseService<Category> {
       table: this.table,
       where: { class_code: category },
     });
+  }
+
+  // GraphQL methods
+  async gqlFindOneCategory(query: string): Promise<Category> {
+    return super.one<Category>(query);
+  }
+
+  async gqlFindManyCategories(query: string): Promise<Category[]> {
+    return super.many<Category>(query);
   }
 }

@@ -1,7 +1,8 @@
 import joinMonster from "join-monster";
 import { GraphQLList, GraphQLInt, GraphQLString } from "graphql";
-import { db, QueryUtils } from "@db";
 import { Category } from "./type";
+
+import { CategoriesService, QueryUtils } from "@services";
 
 export const categoryQueries: GraphQLFields = {
   categories: {
@@ -18,7 +19,9 @@ export const categoryQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.any(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new CategoriesService().gqlFindManyCategories(sql),
+      ),
   },
 
   category: {
@@ -35,6 +38,8 @@ export const categoryQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.one(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new CategoriesService().gqlFindOneCategory(sql),
+      ),
   },
 };

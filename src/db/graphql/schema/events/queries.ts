@@ -1,8 +1,9 @@
 import joinMonster from "join-monster";
 import { GraphQLInt, GraphQLList, GraphQLString } from "graphql";
-import { db, QueryUtils } from "@db";
 import { DateScalar } from "../../scalars";
 import { Event } from "./type";
+
+import { EventsService, QueryUtils } from "@services";
 
 export const eventQueries: GraphQLFields = {
   events: {
@@ -20,7 +21,9 @@ export const eventQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.any(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new EventsService().gqlFindManyEvents(sql),
+      ),
   },
 
   event: {
@@ -38,6 +41,8 @@ export const eventQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.one(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new EventsService().gqlFindOneEvent(sql),
+      ),
   },
 };

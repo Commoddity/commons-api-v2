@@ -110,4 +110,13 @@ export class BillsService extends BaseService<Bill> {
   async findManyBills(where: WhereCondition): Promise<Bill[]> {
     return await super.findMany({ table: this.table, where });
   }
+
+  // GraphQL methods
+  async gqlFindOneBill(query: string): Promise<Bill> {
+    return super.one<Bill>(query);
+  }
+
+  async gqlFindManyBills(query: string): Promise<Bill[]> {
+    return super.many<Bill>(query);
+  }
 }

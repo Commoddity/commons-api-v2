@@ -5,9 +5,10 @@ import {
   GraphQLString,
 } from "graphql";
 import joinMonster from "join-monster";
-import { db, QueryUtils } from "@db";
 import { User } from "./type";
 import { NotificationEnumType } from "../../enums";
+
+import { UsersService, QueryUtils } from "@services";
 
 export const userQueries: GraphQLFields = {
   users: {
@@ -30,7 +31,9 @@ export const userQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.query(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new UsersService().gqlFindManyUsers(sql),
+      ),
   },
 
   user: {
@@ -53,6 +56,8 @@ export const userQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.query(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new UsersService().gqlFindOneUser(sql),
+      ),
   },
 };

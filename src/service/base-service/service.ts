@@ -1,4 +1,5 @@
-import { db, pgp, QueryUtils } from "@db";
+import { db, pgp } from "@db";
+import { QueryUtils } from ".";
 
 export class BaseService<T> {
   /* Create methods */
@@ -6,9 +7,9 @@ export class BaseService<T> {
     const query: string = QueryUtils.createInsertQuery(tableValues, table);
 
     try {
-      return await db.one<T>(query);
-    } catch (err) {
-      throw new Error(`[ROW CREATION ERROR]: ${err}`);
+      return this.one<T>(query);
+    } catch (error) {
+      throw new Error(`[ROW CREATION ERROR]: ${error}`);
     }
   }
 
@@ -19,9 +20,39 @@ export class BaseService<T> {
     const query: string = QueryUtils.createInsertQuery(tableValuesArray, table);
 
     try {
-      return await db.any<T>(query);
-    } catch (err) {
-      throw new Error(`[MULTIPLE ROW CREATION ERROR]: ${err}`);
+      return this.many<T>(query);
+    } catch (error) {
+      throw new Error(`[MULTIPLE ROW CREATION ERROR]: ${error}`);
+    }
+  }
+
+  async createJoinTable({
+    idOne,
+    idTwo,
+    table,
+  }: CreateJoinParams): Promise<boolean> {
+    const query: string = QueryUtils.createJoinQuery(idOne, idTwo, table);
+
+    try {
+      this.one(query);
+      return true;
+    } catch (error) {
+      throw new Error(`[JOIN TABLE CREATION ERROR]: ${error}`);
+    }
+  }
+
+  async deleteJoinTable({
+    idOne,
+    idTwo,
+    table,
+  }: CreateJoinParams): Promise<boolean> {
+    const query: string = QueryUtils.createJoinDeleteQuery(idOne, idTwo, table);
+
+    try {
+      this.none(query);
+      return true;
+    } catch (error) {
+      throw new Error(`[JOIN TABLE DELETION ERROR]: ${error}`);
     }
   }
 
@@ -32,9 +63,9 @@ export class BaseService<T> {
     const query: string = QueryUtils.createInsertQuery(tableValuesArray, table);
 
     try {
-      return await db.any<T>(query);
-    } catch (err) {
-      throw new Error(`[JOIN TABLE CREATION ERROR]: ${err}`);
+      return this.many<T>(query);
+    } catch (error) {
+      throw new Error(`[MULTIPLE JOIN TABLE CREATION ERROR]: ${error}`);
     }
   }
 
@@ -44,9 +75,9 @@ export class BaseService<T> {
     const query = QueryUtils.createSelectQuery(table, whereClause);
 
     try {
-      return await db.one<T>(query);
-    } catch (err) {
-      throw new Error(`[FIND ONE ERROR]: ${err}`);
+      return this.one<T>(query);
+    } catch (error) {
+      throw new Error(`[FIND ONE ERROR]: ${error}`);
     }
   }
 
@@ -65,9 +96,9 @@ export class BaseService<T> {
     const query = QueryUtils.createSelectQuery(table, whereClause, true);
 
     try {
-      return await db.any<T>(query);
-    } catch (err) {
-      throw new Error(`[FIND MANY ERROR]: ${err}`);
+      return this.many<T>(query);
+    } catch (error) {
+      throw new Error(`[FIND MANY ERROR]: ${error}`);
     }
   }
 
@@ -75,9 +106,9 @@ export class BaseService<T> {
     const query = pgp.as.format("SELECT * FROM $1:raw", [table]);
 
     try {
-      return await db.any<T>(query);
-    } catch (err) {
-      throw new Error(`[FIND MANY ERROR]: ${err}`);
+      return await this.many<T>(query);
+    } catch (error) {
+      throw new Error(`[FIND MANY ERROR]: ${error}`);
     }
   }
 
@@ -88,9 +119,9 @@ export class BaseService<T> {
     );
 
     try {
-      return Number((await db.one<{ id: number }>(query)).id);
-    } catch (err) {
-      throw new Error(`[FIND LATEST ID ERROR]: ${err}`);
+      return Number((await this.one<{ id: number }>(query)).id);
+    } catch (error) {
+      throw new Error(`[FIND LATEST ID ERROR]: ${error}`);
     }
   }
 
@@ -107,12 +138,12 @@ export class BaseService<T> {
       : pgp.as.format("SELECT $1:raw FROM $2:raw", [column, table]);
 
     try {
-      const returnedValues = (await db.any<any>(query)).map(
+      const returnedValues = (await this.many<any>(query)).map(
         (row) => row[column],
       );
       return sort ? returnedValues.sort() : returnedValues;
-    } catch (err) {
-      throw new Error(`[FIND LATEST ID ERROR]: ${err}`);
+    } catch (error) {
+      throw new Error(`[FIND LATEST ID ERROR]: ${error}`);
     }
   }
 
@@ -124,9 +155,9 @@ export class BaseService<T> {
     ]);
 
     try {
-      return await db.one<boolean>(query);
-    } catch (err) {
-      throw new Error(`[FIND ROW EXISTS ERROR]: ${err}`);
+      return this.one<boolean>(query);
+    } catch (error) {
+      throw new Error(`[FIND ROW EXISTS ERROR]: ${error}`);
     }
   }
 
@@ -141,9 +172,9 @@ export class BaseService<T> {
         [table, column, value],
       );
 
-      return await db.one<boolean>(query);
-    } catch (err) {
-      throw new Error(`[FIND ROW CONTAINS ERROR]: ${err}`);
+      return this.one<boolean>(query);
+    } catch (error) {
+      throw new Error(`[FIND ROW CONTAINS ERROR]: ${error}`);
     }
   }
 
@@ -155,9 +186,9 @@ export class BaseService<T> {
         data,
       });
 
-      return await db.one<T>(query);
-    } catch (err) {
-      throw new Error(`[UPDATE ONE ROW ERROR]: ${err}`);
+      return this.one<T>(query);
+    } catch (error) {
+      throw new Error(`[UPDATE ONE ROW ERROR]: ${error}`);
     }
   }
 
@@ -168,9 +199,9 @@ export class BaseService<T> {
         data,
       });
 
-      return await db.any<T>(query);
-    } catch (err) {
-      throw new Error(`[UPDATE MANY ROW ERROR]: ${err}`);
+      return this.many<T>(query);
+    } catch (error) {
+      throw new Error(`[UPDATE MANY ROW ERROR]: ${error}`);
     }
   }
 
@@ -181,12 +212,23 @@ export class BaseService<T> {
     operator = undefined,
   }: DeleteParams): Promise<boolean> {
     const query: string = QueryUtils.createDeleteQuery(table, where, operator);
-
     try {
-      await db.none(query);
+      await this.none(query);
       return true;
-    } catch (err) {
-      throw new Error(`[ROW DELETION ERROR]: ${err}`);
+    } catch (error) {
+      throw new Error(`[ROW DELETION ERROR]: ${error}`);
     }
+  }
+
+  async one<T>(query: string): Promise<T> {
+    return await db.one<T>(query);
+  }
+
+  async many<T>(query: string): Promise<T[]> {
+    return await db.many<T>(query);
+  }
+
+  async none(query: string): Promise<null> {
+    return await db.none(query);
   }
 }

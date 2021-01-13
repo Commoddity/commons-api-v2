@@ -1,7 +1,4 @@
-import { GraphQLResolveInfo } from "graphql";
-import joinMonster from "join-monster";
-
-import { db, pgp } from "@db";
+import { pgp } from "@db";
 
 export class QueryUtils {
   static createDeleteQuery(
@@ -27,6 +24,36 @@ export class QueryUtils {
     const columnSet = new pgp.helpers.ColumnSet(exampleRow, { table });
 
     return pgp.helpers.insert(tableValues, columnSet) + " RETURNING *";
+  }
+
+  static createJoinQuery(
+    idOne: { [key: string]: string },
+    idTwo: { [key: string]: string },
+    table: string,
+  ): string {
+    const [[columnOne, valueOne]] = Object.entries(idOne);
+    const [[columnTwo, valueTwo]] = Object.entries(idTwo);
+
+    const query = `INSERT INTO ${table} (${columnOne}, ${columnTwo}) 
+    VALUES ($1:raw, $2:raw)`;
+    const values = [valueOne, valueTwo];
+
+    return pgp.as.format(query, values) + " RETURNING *";
+  }
+
+  static createJoinDeleteQuery(
+    idOne: { [key: string]: string },
+    idTwo: { [key: string]: string },
+    table: string,
+  ): string {
+    const [[columnOne, valueOne]] = Object.entries(idOne);
+    const [[columnTwo, valueTwo]] = Object.entries(idTwo);
+
+    const query = `DELETE FROM ${table} 
+                  WHERE (${columnOne} = $1:raw) AND (${columnTwo} = $2:raw)`;
+    const values = [valueOne, valueTwo];
+
+    return pgp.as.format(query, values);
   }
 
   static createSelectQuery(
@@ -102,21 +129,6 @@ export class QueryUtils {
     });
 
     return pgp.as.format(whereClause.join(" AND "), values);
-  }
-
-  static async graphQLQuery(resolveInfo: GraphQLResolveInfo) {
-    return new Promise<any>((resolve, reject) =>
-      joinMonster(resolveInfo, {}, async (sql: string) => {
-        console.log("SQL IS HERE", sql);
-        try {
-          const result = await db.query(sql);
-          console.log("RESULT IS HERE", result);
-          resolve(result);
-        } catch (error) {
-          reject(error);
-        }
-      }),
-    );
   }
 
   static createWhereClauseFromArray(where: WhereCondition): string {

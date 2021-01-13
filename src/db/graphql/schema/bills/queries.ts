@@ -5,9 +5,10 @@ import {
   GraphQLString,
 } from "graphql";
 import joinMonster from "join-monster";
-import { db, QueryUtils } from "@db";
 import { DateScalar } from "../../scalars";
 import { Bill } from "./type";
+
+import { BillsService, QueryUtils } from "@services";
 
 const billQueries: GraphQLFields = {
   bills: {
@@ -27,8 +28,10 @@ const billQueries: GraphQLFields = {
           QueryUtils.createGraphQLWhereClause(billsTable, args),
       },
     },
-    resolve: async (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, async (sql: string) => db.any(sql)),
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new BillsService().gqlFindManyBills(sql),
+      ),
   },
 
   bill: {
@@ -49,7 +52,9 @@ const billQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.one(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new BillsService().gqlFindOneBill(sql),
+      ),
   },
 };
 

@@ -1,7 +1,8 @@
 import joinMonster from "join-monster";
 import { GraphQLList, GraphQLNonNull, GraphQLInt } from "graphql";
-import { db, QueryUtils } from "@db";
 import { Parliament, ParliamentarySession } from "./type";
+
+import { ParliamentsService, QueryUtils } from "@services";
 
 export const parliamentQueries: GraphQLFields = {
   parliaments: {
@@ -16,7 +17,9 @@ export const parliamentQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.any(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new ParliamentsService().gqlFindManyParliaments(sql),
+      ),
   },
 
   parliament: {
@@ -31,7 +34,9 @@ export const parliamentQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.one(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new ParliamentsService().gqlFindOneParliament(sql),
+      ),
   },
 
   parliamentarySessions: {
@@ -48,7 +53,9 @@ export const parliamentQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.any(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new ParliamentsService().gqlFindManyParliamentarySessions(sql),
+      ),
   },
 
   parliamentarySession: {
@@ -65,6 +72,8 @@ export const parliamentQueries: GraphQLFields = {
       },
     },
     resolve: (_parent, _args, _context, resolveInfo) =>
-      joinMonster(resolveInfo, {}, (sql: string) => db.one(sql)),
+      joinMonster(resolveInfo, {}, (sql: string) =>
+        new ParliamentsService().gqlFindOneParliamentarySession(sql),
+      ),
   },
 };

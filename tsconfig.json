@@ -8,6 +8,7 @@
       "@db": ["src/db"],
       "@graphql": ["src/db/graphql/schema"],
       "@scripts": ["src/scripts"],
+      "@services": ["src/service"],
       "@test": ["src/test"],
       "@utils": ["src/utils"]
     },

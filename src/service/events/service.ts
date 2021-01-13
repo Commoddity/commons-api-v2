@@ -1,7 +1,7 @@
 import { BaseService } from "../base-service";
 import { BillsService } from "../bills";
 
-import { Event } from "./model";
+import { EventInterface as Event } from "./model";
 
 export class EventsService extends BaseService<Event> {
   private table = "events";
@@ -57,5 +57,14 @@ export class EventsService extends BaseService<Event> {
 
   async deleteEvent(bill_code: string): Promise<boolean> {
     return await super.deleteOne({ table: this.table, where: { bill_code } });
+  }
+
+  // GraphQL methods
+  async gqlFindOneEvent(query: string): Promise<Event> {
+    return super.one<Event>(query);
+  }
+
+  async gqlFindManyEvents(query: string): Promise<Event[]> {
+    return super.many<Event>(query);
   }
 }

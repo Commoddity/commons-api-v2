@@ -186,7 +186,7 @@ export class Bill implements BillInterface {
 }
 
 export async function createBill(billEvent: BillEvent): Promise<Bill> {
-  const newBill = new Bill(billEvent);
-  await newBill.insertFetchedValues(newBill.page_url, newBill.code);
-  return newBill;
+  const NewBill = new Bill(billEvent);
+  await NewBill.insertFetchedValues(NewBill.page_url, NewBill.code);
+  return NewBill;
 }
