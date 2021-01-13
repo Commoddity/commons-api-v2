@@ -16,14 +16,12 @@ export const userBillMutations: GraphQLFields = {
         const query = `INSERT INTO user_bills (user_id, bill_id, created_at) 
           VALUES ($1, $2, (to_timestamp(${Date.now()} / 1000.0))) 
           RETURNING *`;
-
         const values = [args.user_id, args.bill_id];
-        const response = await db.one(query, values);
 
+        await db.none(query, values);
         console.log("Successfully added user bill.");
-        return response[0];
+        return true;
       } catch (err) {
-        console.error(`Failed to insert new user bill. ${err}`);
         throw new Error(`Failed to insert new user bill. ${err}`);
       }
     },
@@ -39,14 +37,12 @@ export const userBillMutations: GraphQLFields = {
       try {
         const query = `DELETE FROM user_bills 
           WHERE (user_id = $1) AND (bill_id = $2)`;
-
         const values = [args.user_id, args.bill_id];
-        const response = await db.one(query, values);
 
+        await db.none(query, values);
         console.log("Successfully deleted user bill.");
-        return response[0];
+        return true;
       } catch (err) {
-        console.error(`Failed to delete user bill. ${err}`);
         throw new Error(`Failed to delete user bill. ${err}`);
       }
     },

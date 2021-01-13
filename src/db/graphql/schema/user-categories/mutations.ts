@@ -18,12 +18,10 @@ export const userCategoryMutations: GraphQLFields = {
           RETURNING *`;
         const values = [args.user_id, args.category_id];
 
-        const response = await db.one(query, values);
-
+        await db.none(query, values);
         console.log("Successfully added user category.");
-        return response[0];
+        return true;
       } catch (err) {
-        console.error(`Failed to insert new user category. ${err}`);
         throw new Error(`Failed to insert new user category. ${err}`);
       }
     },
@@ -41,10 +39,9 @@ export const userCategoryMutations: GraphQLFields = {
           WHERE (user_id = $1) AND (category_id = $2)`;
         const values = [args.user_id, args.category_id];
 
-        const response = await db.one(query, values);
-
+        await db.none(query, values);
         console.log("Successfully deleted user category.");
-        return response[0];
+        return true;
       } catch (err) {
         console.error(`Failed to delete user bill. ${err}`);
         throw new Error(`Failed to delete user bill. ${err}`);

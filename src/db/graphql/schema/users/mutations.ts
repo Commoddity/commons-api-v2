@@ -42,12 +42,11 @@ export const userMutations: GraphQLFields = {
           true,
         ];
 
-        const response = await db.one(query, values);
-
+        const [response] = await db.one(query, values);
         console.log(
           `Successfully added user ${args.first_name} ${args.last_name} to database.`,
         );
-        return response[0];
+        return response;
       } catch (err) {
         console.error(`Failed to insert new user. ${err}`);
         throw new Error(`Failed to insert new user. ${err}`);
@@ -66,12 +65,12 @@ export const userMutations: GraphQLFields = {
                       WHERE (id = $1)`;
         const values = [args.id];
 
-        const response = await db.query(query, values);
+        await db.none(query, values);
 
         console.log(
           `Successfully deleted user with id ${args.id} from database.`,
         );
-        return response[0];
+        return true;
       } catch (err) {
         console.error(`Failed to delete user. ${err}`);
         throw new Error(`Failed to delete user. ${err}`);
