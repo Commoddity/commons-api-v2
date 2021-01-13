@@ -4,7 +4,7 @@ dotenv.config({ node_env: "test" });
 
 // Other dependencies
 import fs from "fs";
-import { db, sql } from "../config";
+import { db, sql } from "../db";
 
 // Loads the schema files from db/schema
 const runSchemaFiles = async function (): Promise<void> {

@@ -1,4 +1,4 @@
-import { db } from "@config";
+import { db } from "@db";
 
 const restBillsSQL = `
 DROP TABLE IF EXISTS bills CASCADE;

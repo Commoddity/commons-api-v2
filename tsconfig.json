@@ -5,7 +5,6 @@
     "lib": ["dom", "es6"],
     "baseUrl": "./",
     "paths": {
-      "@config": ["src/config"],
       "@db": ["src/db"],
       "@graphql": ["src/db/graphql/schema"],
       "@scripts": ["src/scripts"],
@@ -20,6 +19,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   }
 }

@@ -1,2 +1,2 @@
-// export { Parliament } from "./model";
+export { Parliament } from "./model";
 export { ParliamentsService } from "./service";

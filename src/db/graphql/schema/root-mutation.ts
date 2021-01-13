@@ -1,24 +1,11 @@
-import "dotenv/config";
 import { GraphQLObjectType } from "graphql";
+import { userMutations } from "./users";
+import { userBillMutations } from "./user-bills";
+import { userCategoryMutations } from "./user-categories";
 
-import {
-  billMutations,
-  billCategoryMutations,
-  eventMutations,
-  parliamentMutations,
-  userMutations,
-  userBillMutations,
-  userCategoryMutations,
-} from ".";
-
-// RootMutation groups mutations for creating/updating data in the database
 const RootMutation = new GraphQLObjectType({
   name: "Mutation",
   fields: () => ({
-    ...billMutations,
-    ...billCategoryMutations,
-    ...eventMutations,
-    ...parliamentMutations,
     ...userMutations,
     ...userBillMutations,
     ...userCategoryMutations,

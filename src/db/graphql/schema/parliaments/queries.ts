@@ -1,124 +1,70 @@
 import joinMonster from "join-monster";
-import sqlString from "sqlstring";
 import { GraphQLList, GraphQLNonNull, GraphQLInt } from "graphql";
+import { db, QueryUtils } from "@db";
+import { Parliament, ParliamentarySession } from "./type";
 
-import { db } from "@config";
-
-import { ParliamentType, ParliamentarySessionType } from "./types";
-
-const parliamentQueries: GraphQLFields = {
+export const parliamentQueries: GraphQLFields = {
   parliaments: {
-    type: new GraphQLList(ParliamentType),
+    type: new GraphQLList(Parliament),
     args: {
       id: { type: GraphQLNonNull(GraphQLInt) },
     },
-    where: (parliamentsTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-
-      Object.entries(args).forEach(([arg, value]) => {
-        whereClause.push(`${parliamentsTable}.${arg} = ?`);
-        values.push(value);
-      });
-
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (parliamentsTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(parliamentsTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) => db.any(sql)),
   },
 
   parliament: {
-    type: ParliamentType,
+    type: Parliament,
     args: {
       id: { type: GraphQLNonNull(GraphQLInt) },
     },
-    where: (parliamentTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-
-      Object.entries(args).forEach(([arg, value]) => {
-        whereClause.push(`${parliamentTable}.${arg} = ?`);
-        values.push(value);
-      });
-
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (parliamentTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(parliamentTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) => db.one(sql)),
   },
 
-  // Parliamentary Session Type Queries
   parliamentarySessions: {
-    type: new GraphQLList(ParliamentarySessionType),
+    type: new GraphQLList(ParliamentarySession),
     args: {
       id: { type: GraphQLInt },
       parliament_id: { type: GraphQLInt },
       number: { type: GraphQLInt },
     },
-    where: (parliamentarySessionsTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${parliamentarySessionsTable}.id = ?`);
-        values.push(args.id);
-      }
-      if (args.parliament_id) {
-        whereClause.push(`${parliamentarySessionsTable}.parliament_id = ?`);
-        values.push(args.parliament_id);
-      }
-      if (args.number) {
-        whereClause.push(`${parliamentarySessionsTable}.number = ?`);
-        values.push(args.number);
-      }
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (parliamentarySessionsTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(parliamentarySessionsTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) => db.any(sql)),
   },
 
   parliamentarySession: {
-    type: ParliamentarySessionType,
+    type: ParliamentarySession,
     args: {
       id: { type: GraphQLInt },
       parliament_id: { type: GraphQLInt },
       number: { type: GraphQLInt },
     },
-    where: (parliamentarySessionTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-      if (args.id) {
-        whereClause.push(`${parliamentarySessionTable}.id = ?`);
-        values.push(args.id);
-      }
-      if (args.parliament_id) {
-        whereClause.push(`${parliamentarySessionTable}.parliament_id = ?`);
-        values.push(args.parliament_id);
-      }
-      if (args.number) {
-        whereClause.push(`${parliamentarySessionTable}.number = ?`);
-        values.push(args.number);
-      }
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (parliamentarySessionTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(parliamentarySessionTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) => db.one(sql)),
   },
 };
-
-export { parliamentQueries };

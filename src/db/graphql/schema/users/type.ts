@@ -7,12 +7,11 @@ import {
   GraphQLBoolean,
 } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
-
-import { BillType, CategoryType } from "@graphql";
-
+import { Bill } from "../bills";
+import { Category } from "../categories";
 import { NotificationEnumType } from "../../enums";
 
-const UserType: GraphQLObjectType = new GraphQLObjectType({
+const User: GraphQLObjectType = new GraphQLObjectType({
   name: "User",
   extensions: {
     joinMonster: {
@@ -43,7 +42,7 @@ const UserType: GraphQLObjectType = new GraphQLObjectType({
     created_at: { type: GraphQLDateTime, sqlColumn: "created_at" },
     bills: {
       description: "Bills followed by this user",
-      type: new GraphQLList(BillType),
+      type: new GraphQLList(Bill),
       junction: {
         sqlTable: "user_bills",
         sqlJoins: [
@@ -56,7 +55,7 @@ const UserType: GraphQLObjectType = new GraphQLObjectType({
     },
     categories: {
       description: "Categories followed by this user",
-      type: new GraphQLList(CategoryType),
+      type: new GraphQLList(Category),
       junction: {
         sqlTable: "user_categories",
         sqlJoins: [
@@ -70,4 +69,4 @@ const UserType: GraphQLObjectType = new GraphQLObjectType({
   }),
 });
 
-export { UserType };
+export { User };

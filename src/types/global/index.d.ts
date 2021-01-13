@@ -7,14 +7,24 @@ declare global {
   type GraphQLFields = {
     [key: string]: JoinMonsterQuery;
   };
+
   interface JoinMonsterQuery
     extends GraphQLFieldConfig<
       GraphQLObjectType,
       GraphQLRequestContext,
-      { [argName: string]: any }
+      GraphQLArgs
     > {
+    extensions?: {
+      joinMonster: {
+        where?: Where<GraphQLRequestContext, { [argName: string]: any }>;
+      };
+    };
+    //REMOVE THIS ONCE MOVED TO PGP QUERY STRING CREATION
     where?: Where<GraphQLRequestContext, { [argName: string]: any }>;
+    //REMOVE THIS ONCE MOVED TO PGP QUERY STRING CREATION
   }
+
+  type GraphQLArgs = { [argName: string]: any };
 
   // Base Service Params
   interface CreateParams<T> {

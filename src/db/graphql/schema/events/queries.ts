@@ -1,66 +1,43 @@
 import joinMonster from "join-monster";
-import sqlString from "sqlstring";
 import { GraphQLInt, GraphQLList, GraphQLString } from "graphql";
-
-import { db } from "@config";
-
+import { db, QueryUtils } from "@db";
 import { DateScalar } from "../../scalars";
-import { EventType } from "./types";
+import { Event } from "./type";
 
-const eventQueries: GraphQLFields = {
+export const eventQueries: GraphQLFields = {
   events: {
-    type: new GraphQLList(EventType),
+    type: new GraphQLList(Event),
     args: {
       id: { type: GraphQLInt },
       bill_code: { type: GraphQLString },
       title: { type: GraphQLString },
       publication_date: { type: DateScalar },
     },
-    where: (eventsTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-
-      Object.entries(args).forEach(([arg, value]) => {
-        whereClause.push(`${eventsTable}.${arg} = ?`);
-        values.push(value);
-      });
-
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (eventsTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(eventsTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) => db.any(sql)),
   },
 
   event: {
-    type: EventType,
+    type: Event,
     args: {
       id: { type: GraphQLInt },
       bill_code: { type: GraphQLString },
       title: { type: GraphQLString },
       publication_date: { type: DateScalar },
     },
-    where: (eventTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-
-      Object.entries(args).forEach(([arg, value]) => {
-        whereClause.push(`${eventTable}.${arg} = ?`);
-        values.push(value);
-      });
-
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (eventTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(eventTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) => db.one(sql)),
   },
 };
-
-export { eventQueries };

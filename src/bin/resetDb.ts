@@ -4,7 +4,7 @@ dotenv.config({ node_env: "dev" });
 
 // other dependencies
 import fs from "fs";
-import { db } from "../config";
+import { db } from "../db";
 
 // PG connection setup
 const connectionString = `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@localhost:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;

@@ -1,20 +1,17 @@
-import joinMonster from "join-monster";
-import sqlString from "sqlstring";
 import {
   GraphQLBoolean,
   GraphQLInt,
   GraphQLList,
   GraphQLString,
 } from "graphql";
-
-import { db } from "@config";
-
+import joinMonster from "join-monster";
+import { db, QueryUtils } from "@db";
 import { DateScalar } from "../../scalars";
-import { BillType } from "./types";
+import { Bill } from "./type";
 
 const billQueries: GraphQLFields = {
   bills: {
-    type: new GraphQLList(BillType),
+    type: new GraphQLList(Bill),
     args: {
       id: { type: GraphQLInt },
       parliamentary_session_id: { type: GraphQLInt },
@@ -24,27 +21,18 @@ const billQueries: GraphQLFields = {
       introduced_date: { type: DateScalar },
       passed: { type: GraphQLBoolean },
     },
-    where: (billsTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-
-      Object.entries(args).forEach(([arg, value]) => {
-        whereClause.push(`${billsTable}.${arg} = ?`);
-        values.push(value);
-      });
-
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (billsTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(billsTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: async (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, async (sql: string) => db.any(sql)),
   },
 
   bill: {
-    type: BillType,
+    type: Bill,
     args: {
       id: { type: GraphQLInt },
       parliamentary_session_id: { type: GraphQLInt },
@@ -54,23 +42,14 @@ const billQueries: GraphQLFields = {
       introduced_date: { type: DateScalar },
       passed: { type: GraphQLBoolean },
     },
-    where: (billTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-
-      Object.entries(args).forEach(([arg, value]) => {
-        whereClause.push(`${billTable}.${arg} = ?`);
-        values.push(value);
-      });
-
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (billsTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(billsTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) => db.one(sql)),
   },
 };
 

@@ -1,9 +1,7 @@
 import { GraphQLInt, GraphQLNonNull } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
-
-import { db } from "@config";
-
-import { UserCategoryType } from "./types";
+import { db } from "@db";
+import { UserCategoryType } from "./type";
 
 export const userCategoryMutations: GraphQLFields = {
   addUserCategory: {
@@ -19,7 +17,9 @@ export const userCategoryMutations: GraphQLFields = {
           VALUES ($1, $2, (to_timestamp(${Date.now()} / 1000.0))) 
           RETURNING *`;
         const values = [args.user_id, args.category_id];
-        const response = await db.query(query, values);
+
+        const response = await db.one(query, values);
+
         console.log("Successfully added user category.");
         return response[0];
       } catch (err) {
@@ -40,7 +40,9 @@ export const userCategoryMutations: GraphQLFields = {
         const query = `DELETE FROM user_bills 
           WHERE (user_id = $1) AND (category_id = $2)`;
         const values = [args.user_id, args.category_id];
-        const response = await db.query(query, values);
+
+        const response = await db.one(query, values);
+
         console.log("Successfully deleted user category.");
         return response[0];
       } catch (err) {

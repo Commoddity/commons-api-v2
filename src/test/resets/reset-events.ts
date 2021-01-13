@@ -1,4 +1,4 @@
-import { db } from "@config";
+import { db } from "@db";
 
 const restEventsSQL = `
 DROP TABLE IF EXISTS events CASCADE;

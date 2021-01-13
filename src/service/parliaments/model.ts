@@ -1,55 +1,68 @@
 import { keys } from "ts-transformer-keys";
 
-export interface BillInterface {
-  parliamentary_session_id: number;
-  code: string;
-  title: string;
-  description: string;
-  introduced_date: Date;
-  summary_url: string;
-  page_url: string;
-  full_text_url: string;
-  passed: boolean;
+export interface ParliamentInterface {
+  id: string;
+  start_date: string;
+  end_date: string;
   created_at: Date;
 }
 
-export class Bill implements BillInterface {
-  parliamentary_session_id;
-  code;
-  title;
-  description;
-  introduced_date;
-  summary_url;
-  page_url;
-  full_text_url;
-  passed;
+export class Parliament implements ParliamentInterface {
+  id;
+  start_date;
+  end_date;
   created_at;
 
   static getColumnNames(): string[] {
-    return keys<BillInterface>();
+    return keys<ParliamentInterface>();
   }
 
   constructor({
-    parliamentary_session_id = null,
-    code = null,
-    title = null,
-    description = null,
-    introduced_date = null,
-    summary_url = null,
-    page_url = null,
-    full_text_url = null,
-    passed = null,
+    id = null,
+    start_date = null,
+    end_date = null,
     created_at = null,
   } = {}) {
-    this.parliamentary_session_id = parliamentary_session_id;
-    this.code = code;
-    this.title = title;
-    this.description = description;
-    this.introduced_date = introduced_date;
-    this.summary_url = summary_url;
-    this.page_url = page_url;
-    this.full_text_url = full_text_url;
-    this.passed = passed;
+    this.id = id;
+    this.start_date = start_date;
+    this.end_date = end_date;
+    this.created_at = created_at;
+  }
+}
+export interface ParliamentarySessionInterface {
+  id: string;
+  parliament_id: string;
+  number: string;
+  start_date: string;
+  end_date: string;
+  created_at: Date;
+}
+
+export class ParliamentarySession implements ParliamentarySessionInterface {
+  id;
+  parliament_id;
+  number;
+  start_date;
+  end_date;
+  created_at;
+
+  static getColumnNames(): string[] {
+    return keys<ParliamentarySessionInterface>();
+  }
+
+  constructor({
+    id = null,
+    parliament_id = null,
+    number = null,
+    start_date = null,
+    end_date = null,
+    created_at = null,
+  } = {}) {
+    this.id = id;
+    this.parliament_id = parliament_id;
+    this.number = number;
+    this.start_date = start_date;
+    this.end_date = end_date;
     this.created_at = created_at;
   }
 }

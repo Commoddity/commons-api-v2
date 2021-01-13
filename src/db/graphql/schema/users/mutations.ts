@@ -5,15 +5,13 @@ import {
   GraphQLString,
 } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
-
-import { db } from "@config";
-
+import { db } from "@db";
 import { NotificationEnumType } from "../../enums";
-import { UserType } from "./types";
+import { User } from "./type";
 
 export const userMutations: GraphQLFields = {
   addUser: {
-    type: UserType,
+    type: User,
     args: {
       first_name: { type: GraphQLNonNull(GraphQLString) },
       last_name: { type: GraphQLNonNull(GraphQLString) },
@@ -43,7 +41,9 @@ export const userMutations: GraphQLFields = {
           args.sms_notification,
           true,
         ];
-        const response = await db.query(query, values);
+
+        const response = await db.one(query, values);
+
         console.log(
           `Successfully added user ${args.first_name} ${args.last_name} to database.`,
         );
@@ -56,7 +56,7 @@ export const userMutations: GraphQLFields = {
   },
 
   deleteUser: {
-    type: UserType,
+    type: User,
     args: {
       id: { type: GraphQLNonNull(GraphQLInt) },
     },
@@ -65,7 +65,9 @@ export const userMutations: GraphQLFields = {
         const query = `DELETE FROM users 
                       WHERE (id = $1)`;
         const values = [args.id];
+
         const response = await db.query(query, values);
+
         console.log(
           `Successfully deleted user with id ${args.id} from database.`,
         );

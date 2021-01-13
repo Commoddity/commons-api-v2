@@ -1,20 +1,17 @@
-import joinMonster from "join-monster";
-import sqlString from "sqlstring";
 import {
   GraphQLBoolean,
   GraphQLList,
   GraphQLInt,
   GraphQLString,
 } from "graphql";
-
-import { db } from "@config";
-
-import { UserType } from "./types";
+import joinMonster from "join-monster";
+import { db, QueryUtils } from "@db";
+import { User } from "./type";
 import { NotificationEnumType } from "../../enums";
 
-const userQueries: GraphQLFields = {
+export const userQueries: GraphQLFields = {
   users: {
-    type: new GraphQLList(UserType),
+    type: new GraphQLList(User),
     args: {
       id: { type: GraphQLInt },
       first_name: { type: GraphQLString },
@@ -26,27 +23,18 @@ const userQueries: GraphQLFields = {
       sms_notification: { type: NotificationEnumType },
       active: { type: GraphQLBoolean },
     },
-    where: (usersTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-
-      Object.entries(args).forEach(([arg, value]) => {
-        whereClause.push(`${usersTable}.${arg} = ?`);
-        values.push(value);
-      });
-
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (usersTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(usersTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) => db.query(sql)),
   },
 
   user: {
-    type: UserType,
+    type: User,
     args: {
       id: { type: GraphQLInt },
       first_name: { type: GraphQLString },
@@ -58,24 +46,13 @@ const userQueries: GraphQLFields = {
       sms_notification: { type: NotificationEnumType },
       active: { type: GraphQLBoolean },
     },
-    where: (userTable, args, _context, _resolveInfo) => {
-      const whereClause: string[] = [];
-      const values: any[] = [];
-
-      Object.entries(args).forEach(([arg, value]) => {
-        whereClause.push(`${userTable}.${arg} = ?`);
-        values.push(value);
-      });
-
-      const escapedString = sqlString.format(whereClause.join(" AND "), values);
-      return escapedString;
+    extensions: {
+      joinMonster: {
+        where: (userTable, args, _context) =>
+          QueryUtils.createGraphQLWhereClause(userTable, args),
+      },
     },
-    resolve: (_parent, _args, _context, resolveInfo) => {
-      return joinMonster(resolveInfo, {}, (sql: string) => {
-        return db.query(sql);
-      });
-    },
+    resolve: (_parent, _args, _context, resolveInfo) =>
+      joinMonster(resolveInfo, {}, (sql: string) => db.query(sql)),
   },
 };
-
-export { userQueries };

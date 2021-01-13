@@ -1,40 +1,35 @@
-// Load in .env variables
-import dotenv from "dotenv";
-
+import dotenv from "dotenv-flow";
 import express from "express";
-import { ApolloServer } from "apollo-server-express";
+import { graphqlHTTP } from "express-graphql";
 import cors from "cors";
 
-import { serverConfig } from "@config";
-import { schema as graphQLSchema } from "@db";
+import { schema as GraphQLSchema } from "@db";
+import { serverConfig } from "./server.config";
 
-dotenv.config();
+dotenv.config({ node_env: process.env.NODE_ENV });
 
 const NODE_ENV = process.env.NODE_ENV || "dev";
 
-// Create an express server
-const app = express();
-
-// Setup CORS options
 const corsOptions = {
   origin: process.env.COMMONS_FRONT_END,
   credentials: true,
 };
+
+const app = express();
+
 app.use(cors(corsOptions));
+app.use(
+  "/api",
+  graphqlHTTP({
+    schema: GraphQLSchema,
+    graphiql: true,
+  }),
+);
 
-// Create a GraphQL endpoint
-const server = new ApolloServer({
-  schema: graphQLSchema,
-  playground: NODE_ENV === "dev" ? true : false,
-});
-
-server.applyMiddleware({ app, path: "/api", cors: false });
-
-// Server launch code
 app.listen(serverConfig.SERVER_PORT, () =>
   console.log(
     `Commons App Express GraphQL API now running ...\nServer running in [${NODE_ENV.toUpperCase()}] mode and listening on port ${
       serverConfig.SERVER_PORT
-    } ...`,
+    } ...\nConnected to database: ${process.env.POSTGRES_DB} ...`,
   ),
 );

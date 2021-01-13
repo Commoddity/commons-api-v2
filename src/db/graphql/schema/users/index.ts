@@ -1,3 +1,3 @@
 export { userMutations } from "./mutations";
 export { userQueries } from "./queries";
-export * from "./types";
+export * from "./type";

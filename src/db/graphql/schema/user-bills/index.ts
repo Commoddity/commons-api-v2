@@ -1,2 +1,2 @@
-export { userBillMutations } from "./mutations";
-export * from "./types";
+export * from "./mutations";
+export * from "./type";

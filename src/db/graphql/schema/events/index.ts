@@ -1,3 +1,2 @@
-export { eventMutations } from "./mutations";
-export { eventQueries } from "./queries";
-export * from "./types";
+export * from "./queries";
+export * from "./type";
