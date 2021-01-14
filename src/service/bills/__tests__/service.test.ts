@@ -102,8 +102,6 @@ describe(`BillsService methods`, () => {
     it(`Updates a bill's summary_url field`, async () => {
       const billsUpdated = await new BillsService().updateSummaryUrls();
 
-      console.log(billsUpdated);
-
       // No bills from the actual Summaries site are in the Test DB
       expect(billsUpdated).toEqual(0);
     });

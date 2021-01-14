@@ -24,14 +24,14 @@ export const Parliament: GraphQLObjectType = new GraphQLObjectType({
     created_at: { type: GraphQLDateTime },
     parliamentary_sessions: {
       description: "Parliamentary sessions for this parliament",
-      type: GraphQLList(Bill),
+      type: GraphQLList(ParliamentarySession),
       extensions: {
         joinMonster: {
           sqlJoin: (
-            parliamentarySessionTable: string,
             parliamentTable: string,
+            parliamentarySessionTable: string,
           ) =>
-            `${parliamentarySessionTable}.parliament_id = ${parliamentTable}.id`,
+            `${parliamentTable}.id = ${parliamentarySessionTable}.parliament_id`,
         },
       },
     },
@@ -42,24 +42,13 @@ export const ParliamentarySession: GraphQLObjectType = new GraphQLObjectType({
   name: "ParliamentarySession",
   extensions: {
     joinMonster: {
-      sqlTable: "ParliamentarySession",
+      sqlTable: "parliamentary_sessions",
       uniqueKey: "id",
     },
   },
   fields: () => ({
     id: { type: GraphQLNonNull(GraphQLInt) },
-    parliament_id: {
-      type: Parliament,
-      extensions: {
-        joinMonster: {
-          sqlJoin: (
-            parliamentarySessionTable: string,
-            parliamentTable: string,
-          ) =>
-            `${parliamentarySessionTable}.parliament_id = ${parliamentTable}.id`,
-        },
-      },
-    },
+    parliament_id: { type: GraphQLNonNull(GraphQLInt) },
     number: { type: GraphQLNonNull(GraphQLString) },
     start_date: { type: DateScalar },
     end_date: { type: DateScalar },
@@ -69,8 +58,8 @@ export const ParliamentarySession: GraphQLObjectType = new GraphQLObjectType({
       type: GraphQLList(Bill),
       extensions: {
         joinMonster: {
-          sqlJoin: (billTable: string, parliamentarySessionTable: string) =>
-            `${billTable}.parliamentary_session_id = ${parliamentarySessionTable}.id`,
+          sqlJoin: (parliamentarySessionTable: string, billTable: string) =>
+            `${parliamentarySessionTable}.id = ${billTable}.parliamentary_session_id`,
         },
       },
     },
