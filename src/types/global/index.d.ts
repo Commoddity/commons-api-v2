@@ -19,9 +19,6 @@ declare global {
         where?: Where<GraphQLRequestContext, { [argName: string]: any }>;
       };
     };
-    //REMOVE THIS ONCE MOVED TO PGP QUERY STRING CREATION
-    where?: Where<GraphQLRequestContext, { [argName: string]: any }>;
-    //REMOVE THIS ONCE MOVED TO PGP QUERY STRING CREATION
   }
 
   type GraphQLArgs = { [argName: string]: any };
