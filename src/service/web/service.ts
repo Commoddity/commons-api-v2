@@ -1,9 +1,7 @@
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
 import { parseString } from "xml2js";
-
-import { BaseService } from "../base-service";
-
+import { BaseService } from "@services";
 import { Bill, createBill } from "../bills";
 import { Event } from "../events";
 import { FormatUtils } from "@utils";

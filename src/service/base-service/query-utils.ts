@@ -95,8 +95,6 @@ export class QueryUtils {
     let query: string;
     let values: string[] = [];
 
-    console.log("INSIDE", where);
-
     if (Array.isArray(where)) {
       query = where.reduce<string>((whereString, whereClause, index) => {
         const [pairs] = Object.entries(whereClause);

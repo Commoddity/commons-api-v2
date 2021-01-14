@@ -1,6 +1,4 @@
-import { BaseService } from "../base-service";
-import { BillsService } from "../bills";
-
+import { BaseService, BillsService } from "@services";
 import { EventInterface as Event } from "./model";
 
 export class EventsService extends BaseService<Event> {

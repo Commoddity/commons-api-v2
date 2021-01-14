@@ -1,4 +1,4 @@
-import { BaseService } from "../base-service";
+import { BaseService } from "@services";
 import { UserInterface as User } from "./model";
 
 export class UsersService extends BaseService<User> {

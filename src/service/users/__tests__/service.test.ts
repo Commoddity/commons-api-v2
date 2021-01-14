@@ -1,4 +1,4 @@
-// import { UsersService } from "..";
+// import { UsersService } from "@services";
 
 describe(`UsersService methods`, () => {
   // beforeEach(async () => {

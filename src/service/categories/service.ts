@@ -1,5 +1,4 @@
-import { BaseService } from "../base-service";
-
+import { BaseService } from "@services";
 import { CategoryInterface as Category } from "./model";
 
 export class CategoriesService extends BaseService<Category> {

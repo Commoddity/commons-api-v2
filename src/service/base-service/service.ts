@@ -81,17 +81,8 @@ export class BaseService<T> {
     }
   }
 
-  async findMany({
-    table,
-    where,
-    arraySearch = true,
-  }: WhereParams): Promise<T[]> {
-    let whereClause: string;
-    if (arraySearch) {
-      whereClause = QueryUtils.createWhereClauseFromArray(where);
-    } else {
-      whereClause = QueryUtils.createWhereClause(where);
-    }
+  async findMany({ table, where, operator }: WhereParams): Promise<T[]> {
+    const whereClause = QueryUtils.createWhereClause(where, operator);
 
     const query = QueryUtils.createSelectQuery(table, whereClause, true);
 
@@ -225,7 +216,7 @@ export class BaseService<T> {
   }
 
   async many<T>(query: string): Promise<T[]> {
-    return await db.many<T>(query);
+    return await db.any<T>(query);
   }
 
   async none(query: string): Promise<null> {

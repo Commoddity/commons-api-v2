@@ -1,4 +1,4 @@
-import { BaseService } from "..";
+import { BaseService } from "@services";
 
 describe(`Base Service Methods`, () => {
   describe(`findAllValues`, () => {

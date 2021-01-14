@@ -1,4 +1,4 @@
-import { CategoriesService } from "..";
+import { CategoriesService } from "@services";
 
 describe(`CategoriesService methods`, () => {
   describe(`Find Category`, () => {

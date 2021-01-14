@@ -96,7 +96,7 @@ declare global {
   interface WhereParams {
     table: string;
     where: WhereCondition | WhereCondition[] | any[];
-    arraySearch?: boolean;
+    operator?: "AND" | "OR";
   }
 
   // Model types

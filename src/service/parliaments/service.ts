@@ -1,4 +1,4 @@
-import { BaseService } from "../base-service";
+import { BaseService } from "@services";
 import {
   ParliamentInterface as Parliament,
   ParliamentarySessionInterface as ParliamentarySession,

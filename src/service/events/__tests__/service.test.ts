@@ -1,5 +1,4 @@
-import { BillsService } from "../../bills";
-import { EventsService } from "..";
+import { BillsService, EventsService } from "@services";
 import { resetEvents, testEvents } from "@test";
 
 describe(`EventsService methods`, () => {

@@ -1,4 +1,4 @@
-import { QueryUtils } from "..";
+import { QueryUtils } from "@services";
 import { testBills } from "@test";
 
 describe(`Base Service Methods`, () => {

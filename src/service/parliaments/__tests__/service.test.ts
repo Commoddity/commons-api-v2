@@ -1,4 +1,4 @@
-// import { EventsService } from "..";
+// import { EventsService } from "@services";
 // import { testBills } from "@test";
 
 describe(`ParliamentsService methods`, () => {

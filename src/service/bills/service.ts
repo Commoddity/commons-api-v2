@@ -1,7 +1,9 @@
-import { BaseService } from "../base-service";
-import { CategoriesService, Category } from "../categories";
-import { WebService } from "../web";
-
+import {
+  BaseService,
+  CategoriesService,
+  Category,
+  WebService,
+} from "@services";
 import { BillInterface as Bill } from "./model";
 
 export class BillsService extends BaseService<Bill> {
@@ -42,11 +44,11 @@ export class BillsService extends BaseService<Bill> {
   async updateSummaryUrls(): Promise<number> {
     let billsUpdated = 0;
     const billSummaryMaps = await new WebService().getSummaries();
-    const whereCondition = billSummaryMaps.map(({ code }) => code);
-
-    const billsWithSummaries = await this.findManyBills({
-      code: whereCondition,
+    const whereCondition = billSummaryMaps.map(({ code }) => {
+      return { code };
     });
+
+    const billsWithSummaries = await this.findManyBills(whereCondition, "OR");
     const billsWithNewSummaries = billsWithSummaries
       ?.filter(({ summary_url }) => !summary_url)
       ?.map(({ code }) => code);
@@ -107,8 +109,11 @@ export class BillsService extends BaseService<Bill> {
     return await super.findOne({ table: this.table, where: { code } });
   }
 
-  async findManyBills(where: WhereCondition): Promise<Bill[]> {
-    return await super.findMany({ table: this.table, where });
+  async findManyBills(
+    where: WhereCondition,
+    operator: "AND" | "OR",
+  ): Promise<Bill[]> {
+    return await super.findMany({ table: this.table, where, operator });
   }
 
   // GraphQL methods
