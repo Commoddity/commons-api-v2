@@ -12,7 +12,6 @@ const runSchemaFiles = async function (): Promise<void> {
 
   const schemaFiles: string[] = fs.readdirSync("./src/db/psql/schema");
 
-  console.log(schemaFiles);
   for await (const schemaFile of schemaFiles) {
     const sqlQuery = sql(`./schema/${schemaFile}`);
 
