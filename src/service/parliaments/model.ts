@@ -40,10 +40,6 @@ export class ParliamentarySession implements ParliamentarySessionInterface {
   end_date;
   created_at;
 
-  static getColumnNames(): string[] {
-    return keys<ParliamentarySessionInterface>();
-  }
-
   constructor({
     id = null,
     parliament_id = null,

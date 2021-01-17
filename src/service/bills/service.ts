@@ -72,7 +72,7 @@ export class BillsService extends BaseService<Bill> {
     categories,
   }: UpdateBillCategoriesParams): Promise<boolean> {
     try {
-      const bill = await super.findOne({
+      const bill = await super.findOne<Bill>({
         table: this.table,
         where: { code },
       });
