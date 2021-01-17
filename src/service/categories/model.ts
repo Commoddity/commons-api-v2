@@ -1,5 +1,3 @@
-import { keys } from "ts-transformer-keys";
-
 export interface CategoryInterface {
   id?: string;
   name: string;
@@ -12,10 +10,6 @@ export class Category implements CategoryInterface {
   name: string;
   class_code: string;
   created_at?: Date;
-
-  static getColumnNames(): string[] {
-    return keys<CategoryInterface>();
-  }
 
   constructor({ id, name, class_code, created_at }) {
     this.id = id;

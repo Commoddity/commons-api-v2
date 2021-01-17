@@ -3,7 +3,7 @@ import { QueryUtils } from ".";
 
 export class BaseService<T> {
   /* Create methods */
-  async createOne({ table, tableValues }: CreateParams<T>): Promise<T> {
+  async createOne<T>({ table, tableValues }: CreateParams<T>): Promise<T> {
     const query: string = QueryUtils.createInsertQuery(tableValues, table);
 
     try {
@@ -70,7 +70,7 @@ export class BaseService<T> {
   }
 
   /* Read methods */
-  async findOne({ table, where }: ReadParams): Promise<T> {
+  async findOne<T>({ table, where }: ReadParams): Promise<T> {
     const whereClause = QueryUtils.createWhereClause(where);
     const query = QueryUtils.createSelectQuery(table, whereClause);
 
@@ -81,7 +81,7 @@ export class BaseService<T> {
     }
   }
 
-  async findMany({ table, where, operator }: WhereParams): Promise<T[]> {
+  async findMany<T>({ table, where, operator }: WhereParams): Promise<T[]> {
     const whereClause = QueryUtils.createWhereClause(where, operator);
 
     const query = QueryUtils.createSelectQuery(table, whereClause, true);

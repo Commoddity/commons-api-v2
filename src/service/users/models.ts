@@ -1,7 +1,5 @@
-import { keys } from "ts-transformer-keys";
-
 export interface UserInterface {
-  id?: string;
+  id: string;
   first_name: string;
   last_name: string;
   username: string;
@@ -39,6 +37,7 @@ export class User implements UserInterface {
   mp;
   party;
   riding_name;
+  credentials;
   created_at;
 
   constructor({
@@ -60,6 +59,7 @@ export class User implements UserInterface {
     mp = null,
     party = null,
     riding_name = null,
+    credentials = null,
   } = {}) {
     this.id = id;
     this.first_name = first_name;
@@ -78,11 +78,8 @@ export class User implements UserInterface {
     this.mp = mp;
     this.party = party;
     this.riding_name = riding_name;
+    this.credentials = credentials;
     this.created_at = created_at;
-  }
-
-  static getColumnNames(): string[] {
-    return keys<UserInterface>();
   }
 
   get fullName(): string {
@@ -92,4 +89,29 @@ export class User implements UserInterface {
   get fullAddress(): string {
     return `${this.address} ${this.street} ${this.city} ${this.province} ${this.postal_code}`;
   }
+}
+
+interface CredentialsInterface {
+  user_id: string;
+  type: string;
+}
+
+export class UserCredentials implements CredentialsInterface {
+  user_id: string;
+  type: string;
+
+  constructor(args: CredentialsInterface) {
+    this.user_id = args.user_id;
+    this.type = args.type;
+  }
+
+  static get CredentialTypes() {
+    return CredentialTypes;
+  }
+}
+
+enum CredentialTypes {
+  Apple = "apple",
+  Facebook = "facebook",
+  Username = "username",
 }

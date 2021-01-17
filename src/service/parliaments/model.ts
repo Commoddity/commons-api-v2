@@ -1,5 +1,3 @@
-import { keys } from "ts-transformer-keys";
-
 export interface ParliamentInterface {
   id: string;
   start_date: string;
@@ -12,10 +10,6 @@ export class Parliament implements ParliamentInterface {
   start_date;
   end_date;
   created_at;
-
-  static getColumnNames(): string[] {
-    return keys<ParliamentInterface>();
-  }
 
   constructor({
     id = null,

@@ -1,4 +1,3 @@
-import { keys } from "ts-transformer-keys";
 import { FormatUtils } from "@utils";
 export interface EventInterface {
   bill_code: string;
@@ -14,10 +13,6 @@ export class Event implements EventInterface {
   publication_date: string | undefined;
   id?: string;
   created_at?: Date;
-
-  static getColumnNames(): string[] {
-    return keys<EventInterface>();
-  }
 
   constructor({ description, title, pubDate }: BillEvent) {
     this.bill_code = FormatUtils.formatCode(description);

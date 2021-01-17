@@ -1,6 +1,5 @@
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
-import { keys } from "ts-transformer-keys";
 
 import { FormatUtils } from "@utils";
 import { ParliamentsService } from "../parliaments";
@@ -38,10 +37,6 @@ export class Bill implements BillInterface {
     this.page_url = link;
     this.summary_url = undefined;
     this.passed = undefined;
-  }
-
-  static getColumnNames(): string[] {
-    return keys<BillInterface>();
   }
 
   // Performs all sync operations needed to initialize a new Bill from the Legisinfo data
