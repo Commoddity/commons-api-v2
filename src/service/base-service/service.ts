@@ -116,6 +116,20 @@ export class BaseService<T> {
     }
   }
 
+  async findOneId({ table, where }: ReadParams): Promise<string> {
+    const whereClause = QueryUtils.createWhereClause(where);
+    const query = pgp.as.format("SELECT id FROM $1:raw $2:raw", [
+      table,
+      whereClause,
+    ]);
+
+    try {
+      return this.one<string>(query);
+    } catch (error) {
+      throw new Error(`[FIND LATEST ID ERROR]: ${error}`);
+    }
+  }
+
   async findAllValues({
     table,
     column,

@@ -126,4 +126,19 @@ declare global {
   }
   type ColumnValue<T> = { [key: string]: T };
   type Value = string | number | boolean | Date;
+  interface ParsedUserIdentities {
+    providerName: "Facebook" | "Google" | "SignInWithApple";
+    userId: string;
+  }
+
+  interface UserAttributes {
+    userAttributes: {
+      identities: string;
+      email: string;
+      name: string;
+      given_name: string;
+      family_name: string;
+      username: string;
+    };
+  }
 }

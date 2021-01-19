@@ -1,21 +1,18 @@
-import AWS from "aws-sdk";
+import { CognitoIdentityServiceProvider, AWSError } from "aws-sdk";
 
 import { BaseService } from "@services";
-import {
-  UserInterface as User,
-  UserCredentials,
-  User as UserType,
-} from "./models";
+import { UserCredentials, User } from "./models";
+
 export class UsersService extends BaseService<User> {
   private table = "users";
   private credentialsTable = "user_credentials";
 
-  private cognitoServiceObject;
+  private cognitoServiceObject: CognitoIdentityServiceProvider;
 
   private initCognitoServiceObject() {
     if (!this.cognitoServiceObject) {
-      this.cognitoServiceObject = new AWS.CognitoIdentityServiceProvider({
-        region: "ca-central-1",
+      this.cognitoServiceObject = new CognitoIdentityServiceProvider({
+        region: process.env.AWS_REGION,
       });
     }
     return this.cognitoServiceObject;
@@ -38,6 +35,10 @@ export class UsersService extends BaseService<User> {
     return super.findOne({ table: this.table, where });
   }
 
+  async findUserId(username: string): Promise<string> {
+    return super.findOneId({ table: this.table, where: { username } });
+  }
+
   async findUserCredentials(userId: string): Promise<UserCredentials[]> {
     return super.findMany<UserCredentials>({
       table: this.credentialsTable,
@@ -55,7 +56,7 @@ export class UsersService extends BaseService<User> {
   }
 
   // Cognito methods
-  async cognitoSignUp({ userAttributes }) {
+  async cognitoSignUp({ userAttributes }: UserAttributes): Promise<void> {
     if (userAttributes.identities) {
       await this.cognitoSignUpSocial({ userAttributes });
     } else {
@@ -63,18 +64,22 @@ export class UsersService extends BaseService<User> {
     }
   }
 
-  async cognitoSignUpSocial({ userAttributes }) {
-    const identities = JSON.parse(userAttributes.identities);
+  async cognitoSignUpSocial({ userAttributes }: UserAttributes): Promise<void> {
+    const { providerName }: ParsedUserIdentities = JSON.parse(
+      userAttributes.identities,
+    );
 
-    if (identities[0].providerName === "Facebook") {
+    if (providerName === "Facebook") {
       await this.cognitoSignUpFacebook({ userAttributes });
-    } else if (identities[0].providerName === "SignInWithApple") {
+    } else if (providerName === "SignInWithApple") {
       await this.cognitoSignUpApple({ userAttributes });
     }
   }
 
-  async cognitoSignUpApple({ userAttributes }) {
-    const identities = JSON.parse(userAttributes.identities);
+  async cognitoSignUpApple({ userAttributes }: UserAttributes): Promise<User> {
+    const { userId }: ParsedUserIdentities = JSON.parse(
+      userAttributes.identities,
+    )[0];
 
     let user: User;
 
@@ -88,14 +93,14 @@ export class UsersService extends BaseService<User> {
 
       const appleCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Apple,
-        user_id: user.id!,
+        user_id: user.id,
       });
       await this.createUserCredentials(appleCredentials);
     } else {
       const firstName = userAttributes.name.split(" ")[0];
       const lastName = userAttributes.name.split(" ")[1];
 
-      const newUser = new UserType({
+      const newUser = new User({
         email: userAttributes.email.trim().toLowerCase(),
         first_name: firstName,
         last_name: lastName,
@@ -105,34 +110,36 @@ export class UsersService extends BaseService<User> {
 
       const appleCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Apple,
-        user_id: user.id!,
+        user_id: user.id,
       });
       await this.createUserCredentials(appleCredentials);
     }
 
-    await this.initCognitoServiceObject();
+    this.initCognitoServiceObject();
 
     await this.updateCognitoUserAttribute(
       "custom:userid",
       String(user.id),
-      `signinwithapple_${identities[0].userId}`,
+      `signinwithapple_${userId}`,
     );
     await this.updateCognitoUserAttribute(
       "given_name",
       String(user.first_name),
-      `signinwithapple_${identities[0].userId}`,
+      `signinwithapple_${userId}`,
     );
     await this.updateCognitoUserAttribute(
       "family_name",
       String(user.last_name),
-      `signinwithapple_${identities[0].userId}`,
+      `signinwithapple_${userId}`,
     );
 
     return user;
   }
 
-  async cognitoSignUpFacebook({ userAttributes }) {
-    const identities = JSON.parse(userAttributes.identities);
+  async cognitoSignUpFacebook({
+    userAttributes,
+  }: UserAttributes): Promise<User> {
+    const { userId } = JSON.parse(userAttributes.identities)[0];
 
     let user: User;
 
@@ -146,14 +153,14 @@ export class UsersService extends BaseService<User> {
 
       const facebookCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Facebook,
-        user_id: user.id!,
+        user_id: user.id,
       });
       await this.createUserCredentials(facebookCredentials);
     } else {
       const firstName: string = userAttributes.name.split(" ")[0];
       const lastName: string = userAttributes.name.split(" ")[1];
 
-      const newUser = new UserType({
+      const newUser = new User({
         email: userAttributes.email.trim().toLowerCase(),
         first_name: firstName,
         last_name: lastName,
@@ -163,33 +170,35 @@ export class UsersService extends BaseService<User> {
 
       const facebookCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Facebook,
-        user_id: user.id!,
+        user_id: user.id,
       });
       await this.createUserCredentials(facebookCredentials);
     }
 
-    await this.initCognitoServiceObject();
+    this.initCognitoServiceObject();
 
     await this.updateCognitoUserAttribute(
       "custom:userid",
       String(user.id),
-      `signinwithfacebook_${identities[0].userId}`,
+      `signinwithfacebook_${userId}`,
     );
     await this.updateCognitoUserAttribute(
       "given_name",
       String(user.first_name),
-      `signinwithfacebook_${identities[0].userId}`,
+      `signinwithfacebook_${userId}`,
     );
     await this.updateCognitoUserAttribute(
       "family_name",
       String(user.last_name),
-      `signinwithfacebook_${identities[0].userId}`,
+      `signinwithfacebook_${userId}`,
     );
 
     return user;
   }
 
-  async cognitoSignUpWithEmail({ userAttributes }) {
+  async cognitoSignUpWithEmail({
+    userAttributes,
+  }: UserAttributes): Promise<User | undefined> {
     const userExists = await super.findIfRowExists({
       table: this.table,
       where: { email: userAttributes.email },
@@ -214,11 +223,11 @@ export class UsersService extends BaseService<User> {
 
       const usernameCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Username,
-        user_id: user.id!,
+        user_id: user.id,
       });
       await this.createUserCredentials(usernameCredentials);
 
-      await this.initCognitoServiceObject();
+      this.initCognitoServiceObject();
 
       await this.updateCognitoUserAttribute(
         "custom:userid",
@@ -229,10 +238,10 @@ export class UsersService extends BaseService<User> {
       return user;
     } else if (!userExists) {
       // DEV NOTE --> Rename attributes when I figure out what they're called when returned from Cognito
-      const newUser = new UserType({
+      const newUser = new User({
         email: userAttributes.email.trim().toLowerCase(),
-        first_name: userAttributes.firstName,
-        last_name: userAttributes.lastName,
+        first_name: userAttributes.given_name,
+        last_name: userAttributes.family_name,
         username: userAttributes.username,
       });
 
@@ -240,12 +249,12 @@ export class UsersService extends BaseService<User> {
 
       const usernameCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Username,
-        user_id: user.id!,
+        user_id: user.id,
       });
 
       await this.createUserCredentials(usernameCredentials);
 
-      await this.initCognitoServiceObject();
+      this.initCognitoServiceObject();
 
       await this.updateCognitoUserAttribute(
         "custom:userid",
@@ -259,8 +268,12 @@ export class UsersService extends BaseService<User> {
     }
   }
 
-  async updateCognitoUserAttribute(name, value, username) {
-    const userPoolId = "THIS IS NOT A USER ID";
+  async updateCognitoUserAttribute(
+    name: string,
+    value: string,
+    username: string,
+  ): Promise<CognitoIdentityServiceProvider.Types.AdminUpdateUserAttributesResponse> {
+    const userPoolId = process.env.COGNITO_USER_POOL_ID;
 
     return new Promise((resolve, reject) => {
       const params = {
@@ -270,13 +283,16 @@ export class UsersService extends BaseService<User> {
             Value: value, // the new attribute value
           },
         ],
-        UserPoolId: userPoolId,
+        UserPoolId: userPoolId!,
         Username: username,
       };
 
       this.cognitoServiceObject.adminUpdateUserAttributes(
         params,
-        (error, data) => (error ? reject(error) : resolve(data)),
+        (
+          error: AWSError,
+          data: CognitoIdentityServiceProvider.Types.AdminUpdateUserAttributesResponse,
+        ) => (error ? reject(error) : resolve(data)),
       );
     });
   }

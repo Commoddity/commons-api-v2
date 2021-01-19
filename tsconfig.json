@@ -21,6 +21,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
+    "strictPropertyInitialization": false,
     "typeRoots": ["./src/types", "./node_modules/@types"]
   }
 }

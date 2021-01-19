@@ -1,22 +1,24 @@
+import { UsersService } from "./service";
+
 export interface UserInterface {
-  id?: string;
+  id: string;
   first_name: string;
   last_name: string;
   username: string;
   email: string;
-  email_notification?: number;
-  sms_notification?: number;
-  active?: boolean;
-  phone_number?: string;
-  address?: string;
-  street?: string;
-  city?: string;
-  province?: string;
-  postal_code?: string;
-  mp?: string;
-  party?: string;
-  riding_name?: string;
-  created_at?: Date;
+  email_notification: number;
+  sms_notification: number;
+  active: boolean;
+  phone_number: string;
+  address: string;
+  street: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  mp: string;
+  party: string;
+  riding_name: string;
+  created_at: Date;
 }
 
 interface CognitoUserInput {
@@ -27,24 +29,24 @@ interface CognitoUserInput {
 }
 
 export class User implements UserInterface {
-  id?: string;
+  id: string;
   first_name: string;
   last_name: string;
   username: string;
   email: string;
-  email_notification?: number;
-  sms_notification?: number;
-  active?: boolean;
-  phone_number?: string;
-  address?: string;
-  street?: string;
-  city?: string;
-  province?: string;
-  postal_code?: string;
-  mp?: string;
-  party?: string;
-  riding_name?: string;
-  created_at?: Date;
+  email_notification: number;
+  sms_notification: number;
+  active: boolean;
+  phone_number: string;
+  address: string;
+  street: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  mp: string;
+  party: string;
+  riding_name: string;
+  created_at: Date;
 
   constructor({ first_name, last_name, username, email }: CognitoUserInput) {
     this.first_name = first_name;
@@ -60,6 +62,10 @@ export class User implements UserInterface {
   get fullAddress(): string {
     return `${this.address} ${this.street} ${this.city} ${this.province} ${this.postal_code}`;
   }
+
+  async getId() {
+    return await new UsersService().findUserId(this.username);
+  }
 }
 
 interface CredentialsInterface {
@@ -68,6 +74,7 @@ interface CredentialsInterface {
 }
 
 export class UserCredentials implements CredentialsInterface {
+  id: string;
   user_id: string;
   type: CredentialTypes;
 

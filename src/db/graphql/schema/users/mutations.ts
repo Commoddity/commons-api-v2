@@ -1,7 +1,7 @@
 import { GraphQLInt, GraphQLNonNull, GraphQLString } from "graphql";
 import { User } from "./type";
 
-import { UsersService, UserInterface } from "@services";
+import { UsersService, User as UserClass } from "@services";
 
 export const userMutations: GraphQLFields = {
   addUser: {
@@ -13,7 +13,7 @@ export const userMutations: GraphQLFields = {
       email: { type: GraphQLNonNull(GraphQLString) },
     },
     resolve: async (_parent, args, _context, _resolveInfo) =>
-      new UsersService().createUser(args as UserInterface),
+      new UsersService().createUser(args as UserClass),
   },
 
   deleteUser: {
