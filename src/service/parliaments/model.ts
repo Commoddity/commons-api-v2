@@ -1,5 +1,6 @@
 export interface ParliamentInterface {
   id: string;
+  number: number;
   start_date: string;
   end_date: string;
   created_at: Date;
@@ -7,17 +8,20 @@ export interface ParliamentInterface {
 
 export class Parliament implements ParliamentInterface {
   id;
+  number;
   start_date;
   end_date;
   created_at;
 
   constructor({
     id = null,
+    number = null,
     start_date = null,
     end_date = null,
     created_at = null,
   } = {}) {
     this.id = id;
+    this.number = number;
     this.start_date = start_date;
     this.end_date = end_date;
     this.created_at = created_at;

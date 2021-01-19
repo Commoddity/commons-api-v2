@@ -33,7 +33,7 @@ export const Bill = new GraphQLObjectType({
     passed: { type: GraphQLBoolean },
     created_at: { type: GraphQLDateTime },
     events: {
-      description: "Events related this this bill",
+      description: "Events related to this bill",
       type: GraphQLList(Event),
       extensions: {
         joinMonster: {

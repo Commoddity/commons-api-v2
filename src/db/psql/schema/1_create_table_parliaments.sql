@@ -1,14 +1,28 @@
 DROP TABLE IF EXISTS parliaments CASCADE;
 
+CREATE OR REPLACE FUNCTION generate_uid(size INT) RETURNS TEXT AS $$
+DECLARE
+  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  bytes BYTEA := gen_random_bytes(size);
+  l INT := length(characters);
+  i INT := 0;
+  output TEXT := '';
+BEGIN
+  WHILE i < size LOOP
+    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
+    i := i + 1;
+  END LOOP;
+  RETURN output;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
 CREATE TABLE parliaments (
-  id SERIAL PRIMARY KEY,
+  id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
+  number INT,
   start_date DATE,
   end_date DATE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (number)
 );
 
-ALTER SEQUENCE parliaments_id_seq RESTART WITH 43;
-
 GRANT ALL PRIVILEGES ON TABLE parliaments TO commoddity;
-
-GRANT ALL ON SEQUENCE parliaments_id_seq TO commoddity;

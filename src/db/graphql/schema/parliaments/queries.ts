@@ -9,6 +9,7 @@ export const parliamentQueries: GraphQLFields = {
     type: new GraphQLList(Parliament),
     args: {
       id: { type: GraphQLNonNull(GraphQLInt) },
+      number: { type: GraphQLNonNull(GraphQLInt) },
     },
     extensions: {
       joinMonster: {

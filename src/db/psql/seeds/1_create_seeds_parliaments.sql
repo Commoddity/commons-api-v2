@@ -1,2 +1,4 @@
-INSERT INTO parliaments (start_date, end_date)
-VALUES ('2019-12-05', null);
+INSERT INTO parliaments 
+  (number, start_date, end_date)
+VALUES 
+  (43, '2019-12-05', null);

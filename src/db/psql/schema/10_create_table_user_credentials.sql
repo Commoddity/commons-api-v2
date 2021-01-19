@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS user_credentials CASCADE;
 
 CREATE OR REPLACE FUNCTION generate_uid(size INT) RETURNS TEXT AS $$
 DECLARE
@@ -16,11 +16,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
-CREATE TABLE categories (
+CREATE TABLE user_credentials (
   id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
-  name VARCHAR (555) NOT NULL,
-  class_code VARCHAR (555) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  user_id TEXT NOT NULL REFERENCES users (id),
+  type VARCHAR(55),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (user_id, type)
 );
 
-GRANT ALL PRIVILEGES ON TABLE categories TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE user_credentials TO commoddity;

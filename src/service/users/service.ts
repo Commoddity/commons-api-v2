@@ -88,7 +88,7 @@ export class UsersService extends BaseService<User> {
 
       const appleCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Apple,
-        user_id: user.id,
+        user_id: user.id!,
       });
       await this.createUserCredentials(appleCredentials);
     } else {
@@ -105,7 +105,7 @@ export class UsersService extends BaseService<User> {
 
       const appleCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Apple,
-        user_id: user.id,
+        user_id: user.id!,
       });
       await this.createUserCredentials(appleCredentials);
     }
@@ -146,12 +146,12 @@ export class UsersService extends BaseService<User> {
 
       const facebookCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Facebook,
-        user_id: user.id,
+        user_id: user.id!,
       });
       await this.createUserCredentials(facebookCredentials);
     } else {
-      const firstName = userAttributes.name.split(" ")[0];
-      const lastName = userAttributes.name.split(" ")[1];
+      const firstName: string = userAttributes.name.split(" ")[0];
+      const lastName: string = userAttributes.name.split(" ")[1];
 
       const newUser = new UserType({
         email: userAttributes.email.trim().toLowerCase(),
@@ -163,7 +163,7 @@ export class UsersService extends BaseService<User> {
 
       const facebookCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Facebook,
-        user_id: user.id,
+        user_id: user.id!,
       });
       await this.createUserCredentials(facebookCredentials);
     }
@@ -214,7 +214,7 @@ export class UsersService extends BaseService<User> {
 
       const usernameCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Username,
-        user_id: user.id,
+        user_id: user.id!,
       });
       await this.createUserCredentials(usernameCredentials);
 
@@ -240,7 +240,7 @@ export class UsersService extends BaseService<User> {
 
       const usernameCredentials = new UserCredentials({
         type: UserCredentials.CredentialTypes.Username,
-        user_id: user.id,
+        user_id: user.id!,
       });
 
       await this.createUserCredentials(usernameCredentials);
