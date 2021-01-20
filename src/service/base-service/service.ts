@@ -154,13 +154,13 @@ export class BaseService<T> {
 
   async findIfRowExists({ table, where }: ReadParams): Promise<boolean> {
     const whereClause = QueryUtils.createWhereClause(where);
-    const query = pgp.as.format("SELECT EXISTS(SELECT 1 FROM $1:raw $2:raw", [
+    const query = pgp.as.format("SELECT EXISTS(SELECT 1 FROM $1:raw $2:raw)", [
       table,
       whereClause,
     ]);
 
     try {
-      return this.one<boolean>(query);
+      return (await this.one<{ exists: boolean }>(query)).exists;
     } catch (error) {
       throw new Error(`[FIND ROW EXISTS ERROR]: ${error}`);
     }

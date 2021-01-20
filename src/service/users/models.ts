@@ -1,10 +1,7 @@
-import { UsersService } from "./service";
-
 export interface UserInterface {
   id: string;
   first_name: string;
   last_name: string;
-  username: string;
   email: string;
   email_notification: number;
   sms_notification: number;
@@ -24,7 +21,6 @@ export interface UserInterface {
 interface CognitoUserInput {
   first_name: string;
   last_name: string;
-  username: string;
   email: string;
 }
 
@@ -32,7 +28,6 @@ export class User implements UserInterface {
   id: string;
   first_name: string;
   last_name: string;
-  username: string;
   email: string;
   email_notification: number;
   sms_notification: number;
@@ -48,10 +43,9 @@ export class User implements UserInterface {
   riding_name: string;
   created_at: Date;
 
-  constructor({ first_name, last_name, username, email }: CognitoUserInput) {
+  constructor({ first_name, last_name, email }: CognitoUserInput) {
     this.first_name = first_name;
     this.last_name = last_name;
-    this.username = username;
     this.email = email;
   }
 
@@ -61,10 +55,6 @@ export class User implements UserInterface {
 
   get fullAddress(): string {
     return `${this.address} ${this.street} ${this.city} ${this.province} ${this.postal_code}`;
-  }
-
-  async getId() {
-    return await new UsersService().findUserId(this.username);
   }
 }
 

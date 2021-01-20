@@ -13,6 +13,8 @@ export class UsersService extends BaseService<User> {
     if (!this.cognitoServiceObject) {
       this.cognitoServiceObject = new CognitoIdentityServiceProvider({
         region: process.env.AWS_REGION,
+        accessKeyId: process.env.AWS_IAM_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_IAM_SECRET_ACCESS_KEY,
       });
     }
     return this.cognitoServiceObject;
@@ -23,27 +25,20 @@ export class UsersService extends BaseService<User> {
     return super.createOne({ table: this.table, tableValues: user });
   }
 
+  async findOneUser(where: WhereCondition | WhereCondition[]): Promise<User> {
+    return super.findOne({ table: this.table, where });
+  }
+
+  async findUserId(email: string): Promise<string> {
+    return super.findOneId({ table: this.table, where: { email } });
+  }
+
   async updateUser({ id, values }): Promise<User> {
     return super.updateOne({ table: this.table, data: { id, ...values } });
   }
 
   async deleteUser(id: string): Promise<boolean> {
     return super.deleteOne({ table: this.table, where: { id } });
-  }
-
-  async findOneUser(where: WhereCondition | WhereCondition[]): Promise<User> {
-    return super.findOne({ table: this.table, where });
-  }
-
-  async findUserId(username: string): Promise<string> {
-    return super.findOneId({ table: this.table, where: { username } });
-  }
-
-  async findUserCredentials(userId: string): Promise<UserCredentials[]> {
-    return super.findMany<UserCredentials>({
-      table: this.credentialsTable,
-      where: { user_id: userId },
-    });
   }
 
   async createUserCredentials(
@@ -55,40 +50,63 @@ export class UsersService extends BaseService<User> {
     });
   }
 
+  async findUserCredentials(userId: string): Promise<UserCredentials[]> {
+    return super.findMany<UserCredentials>({
+      table: this.credentialsTable,
+      where: { user_id: userId },
+    });
+  }
+
   // Cognito methods
   async cognitoSignUp({ userAttributes }: UserAttributes): Promise<void> {
     if (userAttributes.identities) {
-      await this.cognitoSignUpSocial({ userAttributes });
+      await this.cognitoSignUpSocial({
+        userAttributes,
+      } as SocialUserAttributes);
     } else {
-      await this.cognitoSignUpWithEmail({ userAttributes });
+      await this.cognitoSignUpWithEmail({
+        userAttributes,
+      } as EmailUserAttributes);
     }
   }
 
-  async cognitoSignUpSocial({ userAttributes }: UserAttributes): Promise<void> {
+  async cognitoSignUpSocial({
+    userAttributes,
+  }: SocialUserAttributes): Promise<void> {
     const { providerName }: ParsedUserIdentities = JSON.parse(
       userAttributes.identities,
-    );
+    )[0];
 
-    if (providerName === "Facebook") {
-      await this.cognitoSignUpFacebook({ userAttributes });
-    } else if (providerName === "SignInWithApple") {
-      await this.cognitoSignUpApple({ userAttributes });
-    }
+    const createSocialUser: () => Promise<User> = {
+      SignInWithApple: async () =>
+        await this.cognitoSignUpApple({
+          userAttributes,
+        } as AppleUserAttributes),
+
+      Facebook: async () =>
+        await this.cognitoSignUpFacebook({
+          userAttributes,
+        } as FacebookUserAttributes),
+    }[providerName];
+
+    await createSocialUser();
   }
 
-  async cognitoSignUpApple({ userAttributes }: UserAttributes): Promise<User> {
+  async cognitoSignUpApple({
+    userAttributes,
+  }: AppleUserAttributes): Promise<User> {
     const { userId }: ParsedUserIdentities = JSON.parse(
       userAttributes.identities,
     )[0];
 
     let user: User;
 
-    if (
-      await super.findIfRowExists({
-        table: this.table,
-        where: { email: userAttributes.email },
-      })
-    ) {
+    const userExists = await super.findIfRowExists({
+      table: this.table,
+      where: { email: userAttributes.email },
+    });
+
+    if (userExists) {
       user = await this.findOneUser({ email: userAttributes.email });
 
       const appleCredentials = new UserCredentials({
@@ -104,7 +122,6 @@ export class UsersService extends BaseService<User> {
         email: userAttributes.email.trim().toLowerCase(),
         first_name: firstName,
         last_name: lastName,
-        username: userAttributes.username,
       });
       user = await this.createUser(newUser);
 
@@ -120,17 +137,17 @@ export class UsersService extends BaseService<User> {
     await this.updateCognitoUserAttribute(
       "custom:userid",
       String(user.id),
-      `signinwithapple_${userId}`,
+      userId,
     );
     await this.updateCognitoUserAttribute(
       "given_name",
       String(user.first_name),
-      `signinwithapple_${userId}`,
+      userId,
     );
     await this.updateCognitoUserAttribute(
       "family_name",
       String(user.last_name),
-      `signinwithapple_${userId}`,
+      userId,
     );
 
     return user;
@@ -138,17 +155,17 @@ export class UsersService extends BaseService<User> {
 
   async cognitoSignUpFacebook({
     userAttributes,
-  }: UserAttributes): Promise<User> {
+  }: FacebookUserAttributes): Promise<User> {
     const { userId } = JSON.parse(userAttributes.identities)[0];
 
     let user: User;
 
-    if (
-      await super.findIfRowExists({
-        table: this.table,
-        where: { email: userAttributes.email },
-      })
-    ) {
+    const userExists = await super.findIfRowExists({
+      table: this.table,
+      where: { email: userAttributes.email },
+    });
+
+    if (userExists) {
       user = await this.findOneUser({ email: userAttributes.email });
 
       const facebookCredentials = new UserCredentials({
@@ -157,14 +174,12 @@ export class UsersService extends BaseService<User> {
       });
       await this.createUserCredentials(facebookCredentials);
     } else {
-      const firstName: string = userAttributes.name.split(" ")[0];
-      const lastName: string = userAttributes.name.split(" ")[1];
+      const { given_name, family_name } = userAttributes;
 
       const newUser = new User({
         email: userAttributes.email.trim().toLowerCase(),
-        first_name: firstName,
-        last_name: lastName,
-        username: userAttributes.username,
+        first_name: given_name,
+        last_name: family_name,
       });
       user = await this.createUser(newUser);
 
@@ -180,17 +195,17 @@ export class UsersService extends BaseService<User> {
     await this.updateCognitoUserAttribute(
       "custom:userid",
       String(user.id),
-      `signinwithfacebook_${userId}`,
+      userId,
     );
     await this.updateCognitoUserAttribute(
       "given_name",
       String(user.first_name),
-      `signinwithfacebook_${userId}`,
+      userId,
     );
     await this.updateCognitoUserAttribute(
       "family_name",
       String(user.last_name),
-      `signinwithfacebook_${userId}`,
+      userId,
     );
 
     return user;
@@ -198,7 +213,7 @@ export class UsersService extends BaseService<User> {
 
   async cognitoSignUpWithEmail({
     userAttributes,
-  }: UserAttributes): Promise<User | undefined> {
+  }: EmailUserAttributes): Promise<User | undefined> {
     const userExists = await super.findIfRowExists({
       table: this.table,
       where: { email: userAttributes.email },
@@ -237,12 +252,10 @@ export class UsersService extends BaseService<User> {
 
       return user;
     } else if (!userExists) {
-      // DEV NOTE --> Rename attributes when I figure out what they're called when returned from Cognito
       const newUser = new User({
         email: userAttributes.email.trim().toLowerCase(),
         first_name: userAttributes.given_name,
         last_name: userAttributes.family_name,
-        username: userAttributes.username,
       });
 
       user = await this.createUser(newUser);
@@ -264,14 +277,14 @@ export class UsersService extends BaseService<User> {
 
       return user;
     } else if (userExists && userWithEmailCredentialsExists) {
-      throw new Error("user already exists");
+      throw new Error("[COGNITO EMAIL SIGN IN]: User already exists.");
     }
   }
 
   async updateCognitoUserAttribute(
     name: string,
     value: string,
-    username: string,
+    email: string,
   ): Promise<CognitoIdentityServiceProvider.Types.AdminUpdateUserAttributesResponse> {
     const userPoolId = process.env.COGNITO_USER_POOL_ID;
 
@@ -279,12 +292,12 @@ export class UsersService extends BaseService<User> {
       const params = {
         UserAttributes: [
           {
-            Name: name, // name of attribute
-            Value: value, // the new attribute value
+            Name: name, // Name of attribute
+            Value: value, // The new attribute value
           },
         ],
         UserPoolId: userPoolId!,
-        Username: username,
+        Username: email,
       };
 
       this.cognitoServiceObject.adminUpdateUserAttributes(

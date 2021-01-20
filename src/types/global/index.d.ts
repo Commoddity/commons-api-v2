@@ -131,14 +131,35 @@ declare global {
     userId: string;
   }
 
-  interface UserAttributes {
+  type UserAttributes = {
+    userAttributes: {
+      email: string;
+      identities?: string;
+      given_name?: string;
+      family_name?: string;
+      name?: string;
+    };
+  };
+
+  type SocialUserAttributes = AppleUserAttributes | FacebookUserAttributes;
+
+  interface EmailUserAttributes {
+    userAttributes: {
+      email: string;
+      given_name: string;
+      family_name: string;
+    };
+  }
+
+  interface AppleUserAttributes {
+    userAttributes: { identities: string; email: string; name: string };
+  }
+  interface FacebookUserAttributes {
     userAttributes: {
       identities: string;
       email: string;
-      name: string;
       given_name: string;
       family_name: string;
-      username: string;
     };
   }
 }

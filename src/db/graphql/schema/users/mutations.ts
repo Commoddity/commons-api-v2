@@ -9,7 +9,6 @@ export const userMutations: GraphQLFields = {
     args: {
       first_name: { type: GraphQLNonNull(GraphQLString) },
       last_name: { type: GraphQLNonNull(GraphQLString) },
-      username: { type: GraphQLNonNull(GraphQLString) },
       email: { type: GraphQLNonNull(GraphQLString) },
     },
     resolve: async (_parent, args, _context, _resolveInfo) =>

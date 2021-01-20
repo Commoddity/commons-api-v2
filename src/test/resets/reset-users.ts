@@ -23,7 +23,6 @@ CREATE TABLE users (
   id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
   first_name VARCHAR (255) NOT NULL,
   last_name VARCHAR (255) NOT NULL,
-  username VARCHAR (255) NOT NULL UNIQUE,
   email VARCHAR (255) NOT NULL UNIQUE,
   phone_number BIGINT,
   postal_code VARCHAR (255),
@@ -48,11 +47,11 @@ CREATE TABLE user_credentials (
 GRANT ALL PRIVILEGES ON TABLE user_credentials TO commoddity;
 
 INSERT INTO users 
-  (first_name, last_name, username, email, phone_number, postal_code, email_notification, sms_notification, active)
+  (first_name, last_name, email, phone_number, postal_code, email_notification, sms_notification, active)
 VALUES 
-  ('Greg', 'Winter', 'highballer42', 'greg@winter.com', 7781234567, 'ABC 123', 1, 2, true), 
-  ('Mary', 'Jane', 'highlife42', 'buddy@friend.com', 2504530123, 'GFH 542', 1, 1, true), 
-  ('Gerald', 'Grundy', 'jimbo_jones', 'gerald@thegod.com', 2503215421, 'QWS 591', 2, 2, false);
+  ('Greg', 'Winter', 'greg@winter.com', 7781234567, 'ABC 123', 1, 2, true), 
+  ('Mary', 'Jane', 'buddy@friend.com', 2504530123, 'GFH 542', 1, 1, true), 
+  ('Gerald', 'Grundy', 'gerald@thegod.com', 2503215421, 'QWS 591', 2, 2, false);
 
 INSERT INTO user_credentials 
   (user_id, type)

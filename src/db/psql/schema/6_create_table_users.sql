@@ -20,7 +20,6 @@ CREATE TABLE users (
   id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
   first_name VARCHAR (255) NOT NULL,
   last_name VARCHAR (255) NOT NULL,
-  username VARCHAR (255) NOT NULL UNIQUE,
   email VARCHAR (255) NOT NULL UNIQUE,
   email_notification INT,
   sms_notification INT,
@@ -35,7 +34,6 @@ CREATE TABLE users (
   party VARCHAR (255),
   riding_name VARCHAR (255),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (username)
 );
 
 GRANT ALL PRIVILEGES ON TABLE users TO commoddity;

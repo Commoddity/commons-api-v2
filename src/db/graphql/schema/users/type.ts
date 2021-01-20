@@ -23,7 +23,6 @@ const User: GraphQLObjectType = new GraphQLObjectType({
     id: { type: GraphQLNonNull(GraphQLInt) },
     first_name: { type: GraphQLNonNull(GraphQLString) },
     last_name: { type: GraphQLNonNull(GraphQLString) },
-    username: { type: GraphQLNonNull(GraphQLString) },
     email: { type: GraphQLNonNull(GraphQLString) },
     phone_number: { type: GraphQLString },
     email_notification: { type: NotificationEnumType },
