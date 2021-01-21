@@ -5,7 +5,7 @@ import {
 } from "./model";
 
 export class ParliamentsService extends BaseService<Parliament> {
-  async queryLatestParliamentarySession(): Promise<number> {
+  async queryLatestParliamentarySession(): Promise<string> {
     return await super.findLatestId({ table: `parliamentary_sessions` });
   }
 

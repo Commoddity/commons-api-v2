@@ -9,7 +9,7 @@ export interface BillInterface {
   title: string;
   page_url: string;
   id?: string;
-  parliamentary_session_id?: number;
+  parliamentary_session_id?: string;
   description?: string;
   introduced_date?: string;
   summary_url?: string;
@@ -23,7 +23,7 @@ export class Bill implements BillInterface {
   title: string;
   page_url: string;
   id?: string;
-  parliamentary_session_id?: number;
+  parliamentary_session_id?: string;
   description?: string;
   introduced_date?: string;
   summary_url?: string;
@@ -41,8 +41,7 @@ export class Bill implements BillInterface {
 
   // Performs all sync operations needed to initialize a new Bill from the Legisinfo data
   async insertFetchedValues(pageUrl: string, billCode: string) {
-    this.parliamentary_session_id =
-      (await new ParliamentsService().queryLatestParliamentarySession()) || 0;
+    this.parliamentary_session_id = await new ParliamentsService().queryLatestParliamentarySession();
     this.introduced_date = await this.fetchIntroducedDate({
       pageUrl,
       billCode,

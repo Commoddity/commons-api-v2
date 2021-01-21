@@ -1,13 +1,12 @@
-// import { EventsService } from "@services";
-// import { testBills } from "@test";
+import { ParliamentsService } from "@services";
 
 describe(`ParliamentsService methods`, () => {
-  // beforeEach(async () => {
-  // });
+  describe(`Test queryLatestParliamentarySession`, () => {
+    it(`gets the latest parilamentary session id`, async () => {
+      const latestParliamentarySessionId = await new ParliamentsService().queryLatestParliamentarySession();
 
-  describe(`Create Parliament`, () => {
-    it(`Creates a new parliament in the DB `, async () => {
-      (() => undefined)();
+      expect(latestParliamentarySessionId).toBeTruthy;
+      expect(typeof latestParliamentarySessionId).toEqual("string");
     });
   });
 });

@@ -9,4 +9,4 @@ CREATE TABLE user_bills (
 
 
 
-GRANT ALL PRIVILEGES ON TABLE user_bills TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE user_bills TO commons_admin;

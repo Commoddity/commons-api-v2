@@ -7,4 +7,4 @@ CREATE TABLE user_categories (
   UNIQUE (user_id, category_id)
 );
 
-GRANT ALL PRIVILEGES ON TABLE user_categories TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE user_categories TO commons_admin;

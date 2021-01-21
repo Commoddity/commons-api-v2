@@ -7,4 +7,4 @@ CREATE TABLE bill_categories (
   UNIQUE (bill_id, category_id)
 );
 
-GRANT ALL PRIVILEGES ON TABLE bill_categories TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE bill_categories TO commons_admin;

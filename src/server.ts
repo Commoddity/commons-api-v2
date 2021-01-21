@@ -1,6 +1,8 @@
 import dotenv from "dotenv-flow";
 import express from "express";
 import { graphqlHTTP } from "express-graphql";
+// import serverless from "serverless-http";
+
 import cors from "cors";
 import { serverConfig } from "./server.config";
 import { schema as GraphQLSchema } from "@db";
@@ -28,8 +30,10 @@ app.use(
 app.listen(serverConfig.SERVER_PORT, () =>
   console.log(
     `Commons App Express GraphQL API now running ...\n
-    Server running in environment [${NODE_ENV.toUpperCase()}] ...\n 
+    Server running in environment [${NODE_ENV.toUpperCase()}] ...\n
     Connected to database: ${process.env.POSTGRES_DB} ...\n
     Listening on port ${serverConfig.SERVER_PORT} ...`,
   ),
 );
+
+// exports.handler = serverless(app);

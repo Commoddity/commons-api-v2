@@ -32,7 +32,7 @@ CREATE TABLE users (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-GRANT ALL PRIVILEGES ON TABLE users TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE users TO commons_admin;
 
 DROP TABLE IF EXISTS user_credentials CASCADE;
 
@@ -44,7 +44,7 @@ CREATE TABLE user_credentials (
   UNIQUE (user_id, type)
 );
 
-GRANT ALL PRIVILEGES ON TABLE user_credentials TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE user_credentials TO commons_admin;
 
 INSERT INTO users 
   (first_name, last_name, email, phone_number, postal_code, email_notification, sms_notification, active)

@@ -1,13 +1,10 @@
-// load .env data into process.env
+// Load .env data into process.env
 import dotenv from "dotenv-flow";
 dotenv.config({ node_env: "dev" });
 
-// other dependencies
+// Other dependencies
 import fs from "fs";
 import { db, sql } from "../db";
-
-// PG connection setup
-const connectionString = `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@localhost:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;
 
 // Loads the schema files from db/schema
 const runSchemaFiles = async function (): Promise<void> {
@@ -15,7 +12,6 @@ const runSchemaFiles = async function (): Promise<void> {
 
   const schemaFiles: string[] = fs.readdirSync("./src/db/psql/schema");
 
-  console.log(schemaFiles);
   for await (const schemaFile of schemaFiles) {
     const sqlQuery = sql(`./schema/${schemaFile}`);
 
@@ -32,7 +28,7 @@ const runSeedFiles = async function (): Promise<void> {
   for await (const schemaFile of schemaFiles) {
     const sqlQuery = sql(`./seeds/${schemaFile}`);
 
-    console.log(`\t[LOCAL DATABASE RESET] -> Running ${schemaFile}`);
+    console.log(`\t[dev - LOCAL DATABASE RESET] -> Running ${schemaFile}`);
     await db.none(sqlQuery);
   }
 };
@@ -40,7 +36,7 @@ const runSeedFiles = async function (): Promise<void> {
 (async (): Promise<void> => {
   try {
     console.log(
-      `[dev - LOCAL DATABASE RESET] -> Connecting to PG using ${connectionString} ...`,
+      `[dev - LOCAL DATABASE RESET] -> Connecting to PG using pg-promise ...`,
     );
     await runSchemaFiles();
     await runSeedFiles();

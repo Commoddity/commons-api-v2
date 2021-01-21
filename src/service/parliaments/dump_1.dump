@@ -1,0 +1,951 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 13.1
+-- Dumped by pg_dump version 13.1
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
+--
+-- Name: generate_uid(integer); Type: FUNCTION; Schema: public; Owner: commons_admin
+--
+
+CREATE FUNCTION public.generate_uid(size integer) RETURNS text
+    LANGUAGE plpgsql
+    AS $$ DECLARE characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; bytes BYTEA := gen_random_bytes(size); l INT := length(characters); i INT := 0; output TEXT := ''; BEGIN WHILE i < size LOOP output := output || substr(characters, get_byte(bytes, i) % l + 1, 1); i := i + 1; END LOOP; RETURN output; END; $$;
+
+
+ALTER FUNCTION public.generate_uid(size integer) OWNER TO commons_admin;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: bill_categories; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.bill_categories (
+    bill_id text NOT NULL,
+    category_id text NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.bill_categories OWNER TO commons_admin;
+
+--
+-- Name: bills; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.bills (
+    id text DEFAULT public.generate_uid(20) NOT NULL,
+    parliamentary_session_id text NOT NULL,
+    code character varying(7) NOT NULL,
+    title character varying(555) NOT NULL,
+    description text,
+    introduced_date character varying(555),
+    summary_url character varying(555),
+    page_url character varying(555),
+    full_text_url character varying(555),
+    passed boolean,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.bills OWNER TO commons_admin;
+
+--
+-- Name: categories; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.categories (
+    id text DEFAULT public.generate_uid(20) NOT NULL,
+    name character varying(555) NOT NULL,
+    class_code character varying(555) NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.categories OWNER TO commons_admin;
+
+--
+-- Name: events; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.events (
+    id text DEFAULT public.generate_uid(20) NOT NULL,
+    bill_code character varying(7) NOT NULL,
+    title character varying(555) NOT NULL,
+    publication_date date,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.events OWNER TO commons_admin;
+
+--
+-- Name: parliamentary_sessions; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.parliamentary_sessions (
+    id text DEFAULT public.generate_uid(20) NOT NULL,
+    parliament integer NOT NULL,
+    number integer,
+    start_date date,
+    end_date date,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.parliamentary_sessions OWNER TO commons_admin;
+
+--
+-- Name: parliaments; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.parliaments (
+    id text DEFAULT public.generate_uid(20) NOT NULL,
+    number integer,
+    start_date date,
+    end_date date,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.parliaments OWNER TO commons_admin;
+
+--
+-- Name: user_bills; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.user_bills (
+    user_id text NOT NULL,
+    bill_id text NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.user_bills OWNER TO commons_admin;
+
+--
+-- Name: user_categories; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.user_categories (
+    user_id text NOT NULL,
+    category_id text NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.user_categories OWNER TO commons_admin;
+
+--
+-- Name: user_credentials; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.user_credentials (
+    id text DEFAULT public.generate_uid(20) NOT NULL,
+    user_id text NOT NULL,
+    type character varying(20) NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.user_credentials OWNER TO commons_admin;
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: commons_admin
+--
+
+CREATE TABLE public.users (
+    id text DEFAULT public.generate_uid(20) NOT NULL,
+    first_name character varying(255) NOT NULL,
+    last_name character varying(255) NOT NULL,
+    email character varying(255) NOT NULL,
+    email_notification integer,
+    sms_notification integer,
+    active boolean,
+    phone_number bigint,
+    address character varying(255),
+    street character varying(255),
+    city character varying(255),
+    province character varying(255),
+    postal_code character varying(7),
+    mp character varying(255),
+    party character varying(255),
+    riding_name character varying(255),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO commons_admin;
+
+--
+-- Data for Name: bill_categories; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.bill_categories (bill_id, category_id, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: bills; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.bills (id, parliamentary_session_id, code, title, description, introduced_date, summary_url, page_url, full_text_url, passed, created_at) FROM stdin;
+TaOqPY2mxGHECzRkBoBl	QCiRdvLxwhYaAt5OHPG7	S-209	An Act to amend the Canada Elections Act and the Regulation Adapting the Canada Elections Act for the Purposes of a Referendum (voting age)	This enactment amends the Canada Elections Act and the Regulation Adapting the Canada Elections Act for the Purposes of a Referendum to lower the voting age from 18 years to 16.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873553	https://parl.ca/DocumentViewer/en/10873555	\N	2021-01-21 01:04:18.191823
+T3VtPNDbp4jKAgGadif0	QCiRdvLxwhYaAt5OHPG7	S-207	An Act to amend the Criminal Code (independence of the judiciary)	This enactment amends the Criminal Code to give a court the discretion to vary the punishment to be imposed in respect of an offence for which the punishment — or different degrees or kinds of punishment — is prescribed in an enactment. It allows a court to decide to not make a mandatory prohibition order provided for under a provision of that Act — or to add conditions or vary any of the conditions set out in that provision — if the court considers it just and reasonable to do so. It requires the court to provide its reasons for making such a decision. It requires a court to consider all available options prior to imposing a minimum punishment of imprisonment or period of parole ineligibility under a provision of that Act, and to provide written reasons for imposing a minimum punishment of imprisonment or period of parole ineligibility. It gives a court discretion in the treatment or counselling program that a person who has been found guilty of an offence may attend and removes the requirement for the Attorney General to give his or her consent in order to delay sentencing under subsection 720(2) of that Act. It provides that a judge is to take into consideration the recommendation of the jury in setting the period of parole ineligibility for a person who has been found guilty of first or second degree murder.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873552	https://parl.ca/DocumentViewer/en/10873560	\N	2021-01-21 01:04:18.191823
+9UDQm80P40KtYBu11gv1	QCiRdvLxwhYaAt5OHPG7	S-206	An Act to change the name of the electoral district of Châteauguay—Lacolle	This enactment changes the name of the electoral district of Châteauguay—Lacolle to “Châteauguay—Les Jardins-de-Napierville”.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873550	https://parl.ca/DocumentViewer/en/10873551	\N	2021-01-21 01:04:18.191823
+qDECsBBYJjtveDjUfYjz	QCiRdvLxwhYaAt5OHPG7	S-205	An Act to amend the Parliament of Canada Act (Parliamentary Visual Artist Laureate)	This enactment creates the position of Parliamentary Visual Artist Laureate. It also corrects a reference to the Canada Council for the Arts in the English version of the Parliament of Canada Act.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873546	https://parl.ca/DocumentViewer/en/10873548	\N	2021-01-21 01:04:18.191823
+OQKxhQglQtvlS4GvWx1p	QCiRdvLxwhYaAt5OHPG7	S-203	An Act to restrict young persons’ online access to sexually explicit material	This enactment makes it an offence to make sexually explicit material available to young persons on the Internet. It also enables the Minister of Public Safety and Emergency Preparedness to require that steps be taken by Internet service providers to prevent sexually explicit material from being made available to young persons on the Internet.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873545	https://parl.ca/DocumentViewer/en/10873549	\N	2021-01-21 01:04:18.191823
+OsYmW1nGP7bJwxxDqyKH	QCiRdvLxwhYaAt5OHPG7	S-204	An Act to amend the Criminal Code and the Immigration and Refugee Protection Act (trafficking in human organs)	This enactment amends the Criminal Code to create new offences in relation to trafficking in human organs. It also amends the Immigration and Refugee Protection Act to provide that a permanent resident or foreign national is inadmissible to Canada if the Minister of Citizenship and Immigration is of the opinion that they have engaged in any activities relating to trafficking in human organs.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873542	https://parl.ca/DocumentViewer/en/10873543	\N	2021-01-21 01:04:18.191823
+e17jvIic5zn5nOK7Cpmj	QCiRdvLxwhYaAt5OHPG7	S-202	An Act to amend the Assisted Human Reproduction Act	This enactment amends the Assisted Human Reproduction Act to decriminalize payment for sperm or ovum donation and for surrogacy in certain circumstances. The enactment also amends the Act to allow for the purchase of other human reproductive material.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873540	https://parl.ca/DocumentViewer/en/10873541	\N	2021-01-21 01:04:18.191823
+uz8kSHXHCsf9S7eEsuZW	QCiRdvLxwhYaAt5OHPG7	S-201	An Act to amend the Constitution Act, 1867 and the Parliament of Canada Act (Speaker of the Senate)	This enactment amends the Constitution Act, 1867 to provide for the election of the Speaker and the Deputy Speaker of the Senate and their participation in votes. It also makes related amendments to the Parliament of Canada Act.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873527	https://parl.ca/DocumentViewer/en/10873528	\N	2021-01-21 01:04:18.191823
+tmUpcTS3yLTVE4mfqBQE	QCiRdvLxwhYaAt5OHPG7	S-208	An Act to amend the Criminal Records Act, to make consequential amendments to other Acts and to repeal a regulation	This enactment amends the Criminal Records Act to provide for the expiry of criminal records. It also makes consequential amendments to other Acts and repeals a regulation.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873562	https://parl.ca/DocumentViewer/en/10873568	\N	2021-01-21 01:04:18.191823
+vXUv1peIdUhrPEA6AOiY	QCiRdvLxwhYaAt5OHPG7	S-210	An Act to establish the Office of the Commissioner for Children and Youth in Canada	This enactment provides for the establishment of the Office of the Commissioner for Children and Youth in Canada. It also makes consequential amendments to other Acts.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873559	https://parl.ca/DocumentViewer/en/10873561	\N	2021-01-21 01:04:18.191823
+MQ9qE6Jt1obHBLwtFXAl	QCiRdvLxwhYaAt5OHPG7	C-246	An Act to amend the Income Tax Act and the Canada Student Financial Assistance Act	This enactment provides for financial assistance for Canadians with disabilities to improve their access to post-secondary education.	2020/09/30	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866372	https://parl.ca/DocumentViewer/en/10873795	\N	2021-01-21 01:04:18.191823
+qZ19xaZYUiIANu1JBYNp	QCiRdvLxwhYaAt5OHPG7	S-215	An Act to amend the Citizenship Act and the Immigration and Refugee Protection Act	This enactment amends the Citizenship Act to provide citizenship for certain persons when they transition out of the care of a child welfare agency or foster parent. It also amends the Immigration and Refugee Protection Act to provide that, in certain circumstances, a removal order cannot be enforced against a person who was not a citizen when they transitioned out of such care.	2020/10/28	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10919225	https://parl.ca/DocumentViewer/en/10919235	\N	2021-01-21 01:04:18.191823
+vhha95qsTfY3MBuzzSfj	QCiRdvLxwhYaAt5OHPG7	C-224	An Act to amend An Act to authorize the making of certain fiscal payments to provinces, and to authorize the entry into tax collection agreements with provinces	This enactment amends An Act to authorize the making of certain fiscal payments to provinces, and to authorize the entry into tax collection agreements with provinces to provide that the Minister of Finance may enter into an agreement with the government of a province under which the government of the province will collect the federal personal and corporation income taxes on behalf of the Government of Canada. It also requires that the Minister of Finance undertake discussions with the Government of Quebec in order to enter into such an agreement.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866168	https://parl.ca/DocumentViewer/en/10868478	\N	2021-01-21 01:04:18.191823
+ES1Mr4H6RnQHCSGEQrKG	QCiRdvLxwhYaAt5OHPG7	C-12	An Act respecting transparency and accountability in Canada's efforts to achieve net-zero greenhouse gas emissions by the year 2050	This enactment requires that national targets for the reduction of greenhouse gas emissions in Canada be set, with the objective of attaining net-zero emissions by 2050. The targets are to be set by the Minister of the Environment for 2030, 2035, 2040 and 2045. In order to promote transparency and accountability in relation to meeting those targets, the enactment also (a) requires that an emissions reduction plan, a progress report and an assessment report with respect to each target be tabled in each House of Parliament; (b) provides for public participation; (c) establishes an advisory body to provide the Minister of the Environment with advice with respect to achieving net-zero emissions by 2050 and matters that are referred to it by the Minister; (d) requires the Minister of Finance to prepare an annual report respecting key measures that the federal public administration has taken to manage its financial risks and opportunities related to climate change; and (e) requires the Commissioner of the Environment and Sustainable Development to, at least once every 5 years, examine and report on the Government of Canada’s implementation of measures aimed at mitigating climate change.	2020/11/19	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10959361	https://parl.ca/DocumentViewer/en/10965187	\N	2021-01-21 01:04:18.191823
+30NzBp4mFEyCSo01SqyB	QCiRdvLxwhYaAt5OHPG7	C-208	An Act to amend the Income Tax Act (transfer of small business or family farm or fishing corporation)	This enactment amends the Income Tax Act in order to provide that, in the case of qualified small business corporation shares and shares of the capital stock of a family farm or fishing corporation, siblings are deemed not to be dealing at arm’s length and to be related, and that, under certain conditions, the transfer of those shares by a taxpayer to the taxpayer’s child or grandchild who is 18 years of age or older is to be excluded from the anti-avoidance rule of section 84.‍1.	2020/02/19	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866042	https://parl.ca/DocumentViewer/en/10868399	\N	2021-01-21 01:04:18.191823
+aIXhsFsioNQtFxB5MtSF	QCiRdvLxwhYaAt5OHPG7	C-255	An Act respecting the development of a national employment strategy for persons with disabilities	This enactment provides for the development of a national employment strategy to increase the economic participation of persons with disabilities.	2020/11/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10937172	https://parl.ca/DocumentViewer/en/10987723	\N	2021-01-21 01:04:18.191823
+ZfiGU3Ok4bBJco2SU85p	QCiRdvLxwhYaAt5OHPG7	S-1	An Act relating to railways	\N	2020/09/23	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10867804	\N	\N	2021-01-21 01:04:18.191823
+gOtKpFZIp9YKNr305a4j	QCiRdvLxwhYaAt5OHPG7	C-243	An Act to amend the Payment Card Networks Act (credit card acceptance fees)	This enactment amends the Payment Card Networks Act to confer on the Governor in Council the power to set a limit on the credit card acceptance fees that a payment card network operator may charge a merchant.	2020/07/20	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866530	https://parl.ca/DocumentViewer/en/10868559	\N	2021-01-21 01:04:18.191823
+0B4JeKX6RawMcnQVVwMq	QCiRdvLxwhYaAt5OHPG7	C-242	An Act to amend the Employment Insurance Act (illness, injury or quarantine)	This enactment amends the Employment Insurance Act to increase from 15 to 50 the maximum number of weeks for which benefits may be paid because of illness, injury or quarantine.	2020/04/20	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866522	https://parl.ca/DocumentViewer/en/10868558	\N	2021-01-21 01:04:18.191823
+CiBBJ0Xhb1gOgtS0SdxI	QCiRdvLxwhYaAt5OHPG7	C-241	An Act to amend the Parliament of Canada Act (change of political affiliation)	This enactment amends the Parliament of Canada Act to provide that a member’s seat in the House of Commons is vacated and a by-election called for that seat if the member, having been elected to the House as a member of a registered party or as an independent, changes parties or becomes a member of a party, as the case may be.	2020/03/12	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866517	https://parl.ca/DocumentViewer/en/10868557	\N	2021-01-21 01:04:18.191823
+pqXmvn8jRLl2lEOJn3Hw	QCiRdvLxwhYaAt5OHPG7	C-240	An Act to amend the Canada Elections Act (voting age)	This enactment amends the Canada Elections Act to lower the federal voting age in Canada from 18 to 16 years of age.	2020/03/12	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866508	https://parl.ca/DocumentViewer/en/10868555	\N	2021-01-21 01:04:18.191823
+jUCpf2GeMFcs5VDCDDgI	QCiRdvLxwhYaAt5OHPG7	C-239	An Act to establish a national cycling strategy	This enactment provides for the development and implementation of a national strategy on cycling.	2020/03/11	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866499	https://parl.ca/DocumentViewer/en/10868554	\N	2021-01-21 01:04:18.191823
+G7cDWjkw0VzdYgofnoWW	QCiRdvLxwhYaAt5OHPG7	C-235	An Act to amend the Controlled Drugs and Substances Act and to make consequential amendments to other Acts	This enactment amends the Controlled Drugs and Substances Act to repeal a provision that makes it an offence to possess certain substances. It also makes consequential amendments to other Acts.	2020/02/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866484	https://parl.ca/DocumentViewer/en/10868534	\N	2021-01-21 01:04:18.191823
+asuvzMRwe3sgx2hdJglU	QCiRdvLxwhYaAt5OHPG7	C-233	An Act to amend the Criminal Code (sex-selective abortion)	This enactment amends the Criminal Code to make it an offence for a medical practitioner to perform an abortion knowing that the abortion is sought solely on the grounds of the child’s genetic sex. It also requires the Minister of Health, after consultation with representatives of the provincial governments responsible for health, to establish guidelines respecting information provided by a medical practitioner in relation to a request for an abortion.	2020/02/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866477	https://parl.ca/DocumentViewer/en/10868528	\N	2021-01-21 01:04:18.191823
+PCGF8NvZqm0JdgE6gj57	QCiRdvLxwhYaAt5OHPG7	C-227	An Act to amend the Employment Equity Act	This enactment amends the Employment Equity Act to provide that the lesbian, gay, bisexual, transgender, queer and two-spirit communities are included in the designated groups for the purposes of the Act.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866468	https://parl.ca/DocumentViewer/en/10868500	\N	2021-01-21 01:04:18.191823
+7E3Y15VzPSqUzpxUdDPX	QCiRdvLxwhYaAt5OHPG7	C-219	An Act to amend the Criminal Code (sexual exploitation)	This enactment amends the Criminal Code to increase sentences for offences of sexual exploitation and to add as an aggravating circumstance the fact that the victim is a person with a disability for the purpose of sentencing.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866461	https://parl.ca/DocumentViewer/en/10868459	\N	2021-01-21 01:04:18.191823
+GwSzFiRRrFVsqjZTEcAB	QCiRdvLxwhYaAt5OHPG7	C-212	An Act to amend the Employment Insurance Act (special benefits)	This enactment amends the Employment Insurance Act to extend the maximum period for which benefits for illness, injury or quarantine may be paid from 15 weeks to 50.	2020/02/20	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866455	https://parl.ca/DocumentViewer/en/10868407	\N	2021-01-21 01:04:18.191823
+CzAiIWPnzgCoDDzpsDys	QCiRdvLxwhYaAt5OHPG7	C-211	An Act to amend the Criminal Code (assaults against health care professionals and first responders)	This enactment amends the Criminal Code to require a court to consider the fact that the victim of an assault is a health care professional or a first responder to be an aggravating circumstance for the purposes of sentencing.	2020/02/20	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866449	https://parl.ca/DocumentViewer/en/10868405	\N	2021-01-21 01:04:18.191823
+fTpohyTEQ7pOYvrs1cYT	QCiRdvLxwhYaAt5OHPG7	C-209	An Act to amend the Copyright Act (Crown copyright)	This enactment amends the Copyright Act to specify that, without prejudice to any rights or privileges of the Crown, no copyright subsists in any work that is, or has been, prepared or published by or under the direction or control of Her Majesty or any government department.	2020/02/19	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866443	https://parl.ca/DocumentViewer/en/10868400	\N	2021-01-21 01:04:18.191823
+6AJvf15u5WYE4QMKZVan	QCiRdvLxwhYaAt5OHPG7	C-207	An Act to amend the Criminal Code (presentence report)	This enactment amends the Criminal Code to require that a presentence report contain information on any aspect of the offender’s mental condition that is relevant for sentencing purposes.	2020/02/19	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866438	https://parl.ca/DocumentViewer/en/10868398	\N	2021-01-21 01:04:18.191823
+GrNqxma80by5rSek2Ggc	QCiRdvLxwhYaAt5OHPG7	C-203	An Act to amend the National Defence Act (maiming or injuring self or another)	This enactment amends the National Defence Act to repeal the offence of maiming or injuring oneself or another person to render oneself or that other person unfit for service.	2020/02/06	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866433	https://parl.ca/DocumentViewer/en/10867736	\N	2021-01-21 01:04:18.191823
+oazV17iwWBhUdU5nSEHN	QCiRdvLxwhYaAt5OHPG7	C-202	An Act to amend the Criminal Code (assault against a health care worker)	This enactment amends the Criminal Code to require a court to consider the fact that the victim of an assault is a health care worker to be an aggravating circumstance for the purposes of sentencing.	2020/02/04	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866428	https://parl.ca/DocumentViewer/en/10867721	\N	2021-01-21 01:04:18.191823
+Xc4tmvxlNfqByALTbcCF	QCiRdvLxwhYaAt5OHPG7	C-201	An Act to develop a national school food program for children	This enactment provides for the development of a national school food program to ensure that all children in Canada have access to healthy food.	2020/02/04	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866419	https://parl.ca/DocumentViewer/en/10867720	\N	2021-01-21 01:04:18.191823
+rHVRIMtxTSuxP0pkugAQ	QCiRdvLxwhYaAt5OHPG7	C-238	An Act to amend the Criminal Code (possession of unlawfully imported firearms)	This enactment amends the Criminal Code to provide that a person who is charged with an offence in respect of the possession of a firearm that is alleged to have been unlawfully imported into Canada is required to demonstrate that their pre-trial detention is not justified. It also increases the mandatory minimum penalty for the possession of such weapons.	2020/02/27	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866292	https://parl.ca/DocumentViewer/en/10868547	\N	2021-01-21 01:04:18.191823
+oRJs19oEBLglS7ZdkZGS	QCiRdvLxwhYaAt5OHPG7	C-237	An Act to establish a national framework for diabetes	This enactment provides for the development of a national framework designed to support improved access for Canadians to diabetes prevention and treatment.	2020/02/27	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866280	https://parl.ca/DocumentViewer/en/10868538	\N	2021-01-21 01:04:18.191823
+bbTJKUiFQU7l1hZ41G0W	QCiRdvLxwhYaAt5OHPG7	C-236	An Act to amend the Controlled Drugs and Substances Act (evidence-based diversion measures)	This enactment amends the Controlled Drugs and Substances Act to require peace officers to consider measures other than judicial proceedings to deal with individuals alleged to have been in possession of certain substances. It also sets out principles to be taken into account in the determination of the most appropriate measures to take.	2020/02/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866272	https://parl.ca/DocumentViewer/en/10868535	\N	2021-01-21 01:04:18.191823
+V11YCGoMIQlqDrKefOhx	QCiRdvLxwhYaAt5OHPG7	C-234	An Act to amend the Income Tax Act (home security measures)	This enactment amends the Income Tax Act in order to establish the home security tax credit.	2020/02/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866262	https://parl.ca/DocumentViewer/en/10868531	\N	2021-01-21 01:04:18.191823
+XHnwcR9CzIHTyAxL5Qkj	QCiRdvLxwhYaAt5OHPG7	C-232	An Act respecting a Climate Emergency Action Framework	This enactment provides for the development and implementation of a climate emergency action framework.	2020/02/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866248	https://parl.ca/DocumentViewer/en/10868527	\N	2021-01-21 01:04:18.191823
+MnKU9bzTdR2s15Llf7PT	QCiRdvLxwhYaAt5OHPG7	C-230	An Act respecting the development of a national strategy to redress environmental racism	This enactment requires the Minister of the Environment, in consultation with representatives of provincial and municipal governments, of Indigenous communities and of other affected communities, to develop a national strategy to promote efforts across Canada to redress the harm caused by environmental racism. It also provides for reporting requirements in relation to the strategy.	2020/02/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866225	https://parl.ca/DocumentViewer/en/10868506	\N	2021-01-21 01:04:18.191823
+jgiogu9myL3KUZTYNKBp	QCiRdvLxwhYaAt5OHPG7	C-229	An Act to repeal certain restrictions on shipping	This enactment repeals the Oil Tanker Moratorium Act.	2020/02/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866217	https://parl.ca/DocumentViewer/en/10868505	\N	2021-01-21 01:04:18.191823
+xbF2yPsPPXVPSonLobEa	QCiRdvLxwhYaAt5OHPG7	C-231	An Act to amend the Canada Pension Plan Investment Board Act (investments)	This enactment amends the Canada Pension Plan Investment Board Act to specify that the investment policies, standards and procedures established by the board of directors shall provide that no investment may be made or held in any entity that engages in certain practices.	2020/02/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866238	https://parl.ca/DocumentViewer/en/10868517	\N	2021-01-21 01:04:18.191823
+v15iCCKESzIWrkzweBXH	QCiRdvLxwhYaAt5OHPG7	C-215	An Act respecting Canada’s fulfillment of its greenhouse gas emissions reduction obligations	This enactment enacts the Climate Change Accountability Act, which provides for the development of an action plan to ensure that Canada fulfills its obligations under the Paris Agreement, including by means of targets for reducing Canadian greenhouse gas emissions and accountability mechanisms for emissions reduction.	2020/02/24	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866095	https://parl.ca/DocumentViewer/en/10868437	\N	2021-01-21 01:04:18.191823
+vJYSHgXAN5lr6nt1AVgZ	QCiRdvLxwhYaAt5OHPG7	C-216	An Act to amend the Department of Foreign Affairs, Trade and Development Act (supply management)	This enactment amends the Department of Foreign Affairs, Trade and Development Act so that the Minister of Foreign Affairs cannot make certain commitments with respect to international trade regarding certain goods.	2020/02/24	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866114	https://parl.ca/DocumentViewer/en/10868457	\N	2021-01-21 01:04:18.191823
+OZqvo8UnF1QUC14S6SG6	QCiRdvLxwhYaAt5OHPG7	C-218	An Act to amend the Criminal Code (sports betting)	This enactment repeals paragraph 207(4)‍(b) of the Criminal Code to make it lawful for the government of a province, or a person or entity licensed by the Lieutenant Governor in Council of that province, to conduct and manage a lottery scheme in the province that involves betting on a race or fight or on a single sport event or athletic contest.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866122	https://parl.ca/DocumentViewer/en/10868458	\N	2021-01-21 01:04:18.191823
+MB4fZaol9sA0HlJTjaQH	QCiRdvLxwhYaAt5OHPG7	C-213	An Act to enact the Canada Pharmacare Act	This enactment enacts the Canada Pharmacare Act, which establishes criteria and conditions in respect of drug insurance plans established under the law of a province that must be met before a cash contribution may be made.	2020/02/24	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866059	https://parl.ca/DocumentViewer/en/10868418	\N	2021-01-21 01:04:18.191823
+7i8NOUW32XFEVhMgKfgo	QCiRdvLxwhYaAt5OHPG7	C-205	An Act to amend the Health of Animals Act	This enactment amends the Health of Animals Act to make it an offence to enter, without lawful authority or excuse, a place in which animals are kept if doing so could result in the exposure of the animals to a disease or toxic substance that is capable of affecting or contaminating them.	2020/02/18	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866025	https://parl.ca/DocumentViewer/en/10868393	\N	2021-01-21 01:04:18.191823
+a4GMHjy0Yjrvy8X7HTmO	QCiRdvLxwhYaAt5OHPG7	C-206	An Act to amend the Greenhouse Gas Pollution Pricing Act (qualifying farming fuel)	This enactment amends the Greenhouse Gas Pollution Pricing Act to extend the exemption for qualifying farming fuel to marketable natural gas and propane.	2020/02/18	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866034	https://parl.ca/DocumentViewer/en/10868397	\N	2021-01-21 01:04:18.191823
+1zYzlyb5Df2jnhSVSAPB	QCiRdvLxwhYaAt5OHPG7	C-204	An Act to amend the Canadian Environmental Protection Act, 1999 (final disposal of plastic waste)	This enactment amends the Canadian Environmental Protection Act, 1999 to prohibit the export of certain types of plastic waste to foreign countries for final disposal.	2020/02/07	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866014	https://parl.ca/DocumentViewer/en/10868391	\N	2021-01-21 01:04:18.191823
+5tYWeyDCW18v8O5CZC8p	QCiRdvLxwhYaAt5OHPG7	C-210	An Act to amend the Canada Revenue Agency Act (organ and tissue donors)	This enactment amends the Canada Revenue Agency Act to authorize the Canada Revenue Agency to enter into an agreement with a province or a territory regarding the collection and disclosure of information required for establishing or maintaining an organ and tissue donor registry in the province or territory.	2020/02/19	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866051	https://parl.ca/DocumentViewer/en/10868403	\N	2021-01-21 01:04:18.191823
+V8O1NZRJGiIv03Q5Fb6m	QCiRdvLxwhYaAt5OHPG7	C-223	An Act to amend the Citizenship Act (adequate knowledge of French in Quebec)	This enactment amends the Citizenship Act to require that permanent residents who ordinarily reside in Quebec must have an adequate knowledge of French in order to obtain citizenship.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866160	https://parl.ca/DocumentViewer/en/10867719	\N	2021-01-21 01:04:18.191823
+8FlLB7JfCPUAwlaQXyGR	QCiRdvLxwhYaAt5OHPG7	C-221	An Act to amend the Income Tax Act (oil and gas wells)	This enactment amends the Income Tax Act to establish a tax credit for the closure of oil and gas wells. It also sets out a requirement for the Minister of Finance to make an assessment respecting the implementation of possible tax incentives for the closure of oil and gas wells.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866141	https://parl.ca/DocumentViewer/en/10868463	\N	2021-01-21 01:04:18.191823
+GBFySmNgRumvHn9qgWJu	QCiRdvLxwhYaAt5OHPG7	C-222	An Act to amend the Expropriation Act (protection of private property)	This enactment amends the Expropriation Act to provide that the power of the Governor in Council to waive the requirement for a public hearing in respect of an objection to the intended expropriation of an interest in land or immovable real right may not be exercised in certain circumstances.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866151	https://parl.ca/DocumentViewer/en/10868464	\N	2021-01-21 01:04:18.191823
+myi6XhF12WWEEaRxQaqe	QCiRdvLxwhYaAt5OHPG7	C-220	An Act to amend the Canada Labour Code (compassionate care leave)	This enactment amends the Canada Labour Code to extend the period during which an employee may take compassionate care leave.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866132	https://parl.ca/DocumentViewer/en/10868460	\N	2021-01-21 01:04:18.191823
+fuhbHrK96vCcmo66qCtG	QCiRdvLxwhYaAt5OHPG7	C-225	An Act to amend the Aeronautics Act, the Fishing and Recreational Harbours Act and other Acts (application of provincial law)	This enactment amends certain acts to subordinate the exercise of certain powers to the applicable provincial laws concerning land use and development and environmental protection.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866178	https://parl.ca/DocumentViewer/en/10868489	\N	2021-01-21 01:04:18.191823
+rkRERs6ShaZtllQMma0M	QCiRdvLxwhYaAt5OHPG7	C-226	An Act to amend the Canadian Multiculturalism Act (non-application in Quebec)	This enactment amends the Canadian Multiculturalism Act to provide that it does not apply in Quebec.	2020/02/25	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866196	https://parl.ca/DocumentViewer/en/10868494	\N	2021-01-21 01:04:18.191823
+yQcPGOF8LedQkwI5B2fQ	QCiRdvLxwhYaAt5OHPG7	C-228	An Act to establish a federal framework to reduce recidivism	This enactment provides for the development and implementation of a federal framework to reduce recidivism.	2020/02/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866205	https://parl.ca/DocumentViewer/en/10868502	\N	2021-01-21 01:04:18.191823
+bvQskRHBV89Uxj4WXtLd	QCiRdvLxwhYaAt5OHPG7	C-245	An Act respecting the development of a national strategy in relation to fresh water	This enactment provides for the development of a national strategy in relation to fresh water.	2020/07/21	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866541	https://parl.ca/DocumentViewer/en/10868562	\N	2021-01-21 01:04:18.191823
+nwizruUrGwwPmwgBwukJ	QCiRdvLxwhYaAt5OHPG7	C-244	An Act to amend the Canadian Navigable Waters Act (North Thames River, Middle Thames River and Thames River)	This enactment amends the Canadian Navigable Waters Act in order to add the North Thames River, the Middle Thames River and the Thames River to the navigable waters listed in the schedule to that Act.	2020/07/21	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866535	https://parl.ca/DocumentViewer/en/10868561	\N	2021-01-21 01:04:18.191823
+FBJimzh0MxM4IU78WBpx	QCiRdvLxwhYaAt5OHPG7	C-1	An Act respecting the administration of oaths of office	\N	2020/09/23	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10867841	\N	\N	2021-01-21 01:04:18.191823
+5mckXFjPFhP2NJrB4nHX	QCiRdvLxwhYaAt5OHPG7	C-252	An Act to provide for transparency in entering trade agreements and foreign investment protection agreements	This enactment enacts the Trade and Foreign Investment Protection Agreements Transparency Act, which provides for consultation and assessment processes in relation to trade and foreign investment protection agreements, including public consultations, publication of negotiation documents and assessments of the impacts of the trade or foreign investment protection agreements.	2020/11/18	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10952173	https://parl.ca/DocumentViewer/en/10962621	\N	2021-01-21 01:04:18.191823
+GHc79whgVBnYgGlEMWK0	QCiRdvLxwhYaAt5OHPG7	C-10	An Act to amend the Broadcasting Act and to make related and consequential amendments to other Acts	This enactment amends the Broadcasting Act to, among other things, (a) add online undertakings — undertakings for the transmission or retransmission of programs over the Internet — as a distinct class of broadcasting undertakings; (b) update the broadcasting policy for Canada set out in section 3 of that Act by, among other things, providing that the Canadian broadcasting system should serve the needs and interests of all Canadians — including Canadians from racialized communities and Canadians of diverse ethnocultural backgrounds — and should provide opportunities for Indigenous persons, programming that reflects Indigenous cultures and that is in Indigenous languages, and programming that is accessible without barriers to persons with disabilities; (c) specify that the Canadian Radio-television and Telecommunications Commission (the “Commission”) must regulate and supervise the Canadian broadcasting system in a manner that (i) takes into account the different characteristics of Indigenous language broadcasting and the different conditions under which broadcasting undertakings that provide Indigenous language programming operate, (ii) is fair and equitable as between broadcasting undertakings providing similar services, (iii) facilitates the provision of programs that are accessible without barriers to persons with disabilities, and (iv) takes into account the variety of broadcasting undertakings to which that Act applies and avoids imposing obligations on a class of broadcasting undertakings if doing so will not contribute in a material manner to the implementation of the broadcasting policy; (d) amend the procedure relating to the issuance by the Governor in Council of policy directions to the Commission; (e) replace the Commission’s power to impose conditions on a licence with a power to make orders imposing conditions on the carrying on of broadcasting undertakings; (f) provide the Commission with the power to require that persons carrying on broadcasting undertakings make expenditures to support the Canadian broadcasting system; (g) authorize the Commission to provide information to the Minister responsible for that Act, the Chief Statistician of Canada and the Commissioner of Competition, and set out in that Act a process by which a person who submits certain types of information to the Commission may designate the information as confidential; (h) amend the procedure by which the Governor in Council may, under section 28 of that Act, set aside a decision of the Commission to issue, amend or renew a licence or refer such a decision back to the Commission for reconsideration and hearing; (i) specify that a person shall not carry on a broadcasting undertaking, other than an online undertaking, unless they do so in accordance with a licence or they are exempt from the requirement to hold a licence; (j) harmonize the punishments for offences under Part II of that Act and clarify that a due diligence defence applies to the existing offences set out in that Act; and (k) allow for the imposition of administrative monetary penalties for violations of certain provisions of that Act or of the Accessible Canada Act. The enactment also makes related and consequential amendments to other Acts.	2020/11/03	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-10&lang=en_CA&parlSession=432	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10926636	https://parl.ca/DocumentViewer/en/10931327	\N	2021-01-21 01:04:18.191823
+c42GOVLcHVj1BdmnPvYF	QCiRdvLxwhYaAt5OHPG7	S-2	An Act to amend the Chemical Weapons Convention Implementation Act	This enactment amends the Chemical Weapons Convention Implementation Act by deleting the schedule to that Act and the references to that schedule in that Act, in order to avoid potential discrepancies between the Convention on the Prohibition of the Development, Production, Stockpiling and Use of Chemical Weapons and on their Destruction, as amended from time to time, and the portions of that Convention that are reproduced in that schedule.	2020/10/27	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10916380	https://parl.ca/DocumentViewer/en/11056310	\N	2021-01-21 01:04:18.191823
+8hBBIxlcKt0erJVcXwkq	QCiRdvLxwhYaAt5OHPG7	C-18	An Act to implement the Agreement on Trade Continuity between Canada and the United Kingdom of Great Britain and Northern Ireland	Her Excellency the Governor General recommends to the House of Commons the appropriation of public revenue under the circumstances, in the manner and for the purposes set out in a measure entitled “An Act to implement the Agreement on Trade Continuity between Canada and the United Kingdom of Great Britain and Northern Ireland”.  This enactment implements the Agreement on Trade Continuity between Canada and the United Kingdom of Great Britain and Northern Ireland. The general provisions of the enactment set out rules of interpretation and specify that no recourse is to be taken on the basis of sections 10 to 15 or any order made under those sections, or on the basis of the provisions of the Agreement, without the consent of the Attorney General of Canada. Part 1 approves the Agreement, provides for the payment by Canada of its share of the expenditures associated with the operation of the institutional and administrative aspects of the Agreement and gives the Governor in Council the power to make orders in accordance with the Agreement. Part 2 amends certain Acts to bring them into conformity with Canada’s obligations under the Agreement and contains a transitional provision. Part 3 contains a coordinating amendment and the coming-into-force provision.	2020/12/09	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11026784	https://parl.ca/DocumentViewer/en/11036867	\N	2021-01-21 01:04:18.191823
+ipryFhowte7SgXpfGxdv	QCiRdvLxwhYaAt5OHPG7	C-261	An Act to amend the Canada Shipping Act, 2001 (thermal coal)	This enactment amends the Canada Shipping Act, 2001 to prohibit vessels from loading, at a port or marine installation in Canada, any thermal coal that is to be transported outside Canada.	2020/12/09	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11020420	https://parl.ca/DocumentViewer/en/11036961	\N	2021-01-21 01:04:18.191823
+3KPL5izvhzX2fqXCAUeq	QCiRdvLxwhYaAt5OHPG7	S-220	An Act to amend the Department of Public Works and Government Services Act (use of wood)	This enactment amends the Department of Public Works and Government Services Act to require that the Minister may, in developing requirements for public works, allow the use of wood or any other thing that achieves environmental benefits.	2020/12/02	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11010176	https://parl.ca/DocumentViewer/en/11010177	\N	2021-01-21 01:04:18.191823
+mLdCM45JRM2DGt5nV3NJ	QCiRdvLxwhYaAt5OHPG7	S-214	An Act to amend the Constitution Act, 1867 (property qualifications of Senators)	This enactment amends the Constitution Act, 1867 to eliminate the requirement that Senators have a personal net worth of at least $4,000 and to eliminate the real property requirement for Senators representing a province other than Quebec.	2020/10/27	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10916722	https://parl.ca/DocumentViewer/en/10916806	\N	2021-01-21 01:04:18.191823
+SduVmXZlkl3R729m0j29	QCiRdvLxwhYaAt5OHPG7	C-16	An Act for granting to Her Majesty certain sums of money for the federal public administration for the fiscal year ending March 31, 2021	This enactment grants the sum of $26,138,756,442 towards defraying charges and expenses of the federal public administration for the fiscal year ending March 31, 2021 that are not otherwise provided for.	2020/12/07	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11019580	https://parl.ca/DocumentViewer/en/11045581	t	2021-01-21 01:04:18.191823
+BHJmcLZ5DPaE1FOAuF0W	QCiRdvLxwhYaAt5OHPG7	C-3	An Act to amend the Judges Act and the Criminal Code	This enactment amends the Judges Act to restrict eligibility for judicial appointment to persons who undertake to participate in continuing education on matters related to sexual assault law and social context. It also amends the Judges Act to provide that the Canadian Judicial Council should report on seminars offered for the continuing education of judges on matters related to sexual assault law and social context. Finally, it amends the Criminal Code to require that judges provide reasons for decisions in sexual assault proceedings.	2020/09/25	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-3&lang=en_CA&parlSession=432	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10867694	https://parl.ca/DocumentViewer/en/10978280	\N	2021-01-21 01:04:18.191823
+jJ04RDNZyECiOxi2XU0P	QCiRdvLxwhYaAt5OHPG7	S-213	An Act to amend the Department for Women and Gender Equality Act 	This enactment amends the Department for Women and Gender Equality Act to require the Minister for Women and Gender Equality to examine the potential effects of certain bills and amendments on women and to report to Parliament accordingly.	2020/10/27	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10916700	https://parl.ca/DocumentViewer/en/10916757	\N	2021-01-21 01:04:18.191823
+U7Rm3j6dUg4hcaB8zcEy	QCiRdvLxwhYaAt5OHPG7	S-212	An Act to amend the Criminal Code (disclosure of information by jurors)	This enactment amends the Criminal Code to provide that the prohibition against the disclosure of information relating to jury proceedings does not, in certain circumstances, apply in respect of disclosure by jurors to health care professionals.	2020/10/27	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10916651	https://parl.ca/DocumentViewer/en/10916690	\N	2021-01-21 01:04:18.191823
+Wzh7wNfXs6AWU62Q3Co7	QCiRdvLxwhYaAt5OHPG7	S-211	An Act to establish International Mother Language Day	This enactment designates the 21st day of February in each and every year as “International Mother Language Day”.	2020/10/27	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10916472	https://parl.ca/DocumentViewer/en/10916527	\N	2021-01-21 01:04:18.191823
+XXpqaGqAfUa7gYEHCKAJ	QCiRdvLxwhYaAt5OHPG7	C-254	An Act to amend the Canada Labour Code, the Official Languages Act and the Canada Business Corporations Act	This enactment amends the Canada Labour Code, the Official Languages Act and the Canada Business Corporations Act to clarify the application of the Charter of the French Language in Quebec.	2020/11/24	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10969284	https://parl.ca/DocumentViewer/en/10980144	\N	2021-01-21 01:04:18.191823
+sYWItv1ckCWcI5polEpv	QCiRdvLxwhYaAt5OHPG7	C-11	An Act to enact the Consumer Privacy Protection Act and the Personal Information and Data Protection Tribunal Act and to make consequential and related amendments to other Acts	Part 1 enacts the Consumer Privacy Protection Act to protect the personal information of individuals while recognizing the need of organizations to collect, use or disclose personal information in the course of commercial activities. In consequence, it repeals Part 1 of the Personal Information Protection and Electronic Documents Act and changes the short title of that Act to the Electronic Documents Act. It also makes consequential and related amendments to other Acts. Part 2 enacts the Personal Information and Data Protection Tribunal Act, which establishes an administrative tribunal to hear appeals of certain decisions made by the Privacy Commissioner under the Consumer Privacy Protection Act and to impose penalties for the contravention of certain provisions of that Act. It also makes a related amendment to the Administrative Tribunals Support Service of Canada Act.	2020/11/17	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10950130	https://parl.ca/DocumentViewer/en/10957018	\N	2021-01-21 01:04:18.191823
+TvRdu22cbsRU1HoSIW8g	QCiRdvLxwhYaAt5OHPG7	S-218	An Act to amend the Criminal Code and the Wild Animal and Plant Protection and Regulation of International and Interprovincial Trade Act (great apes, elephants and certain other animals)	This enactment amends the Criminal Code to create offences respecting great apes, elephants and certain other non-domesticated animals in captivity. It also amends the Wild Animal and Plant Protection and Regulation of International and Interprovincial Trade Act to require a permit for the import, export or interprovincial travel of great apes, elephants and certain other non-domesticated animals and to prohibit the importation or exportation of elephant ivory, with certain limited exceptions.	2020/11/17	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10957640	https://parl.ca/DocumentViewer/en/10957684	\N	2021-01-21 01:04:18.191823
+X4qMyC6w0JmI53iKHckY	QCiRdvLxwhYaAt5OHPG7	S-1001	An Act respecting Girl Guides of Canada	This enactment replaces An Act to Incorporate The Canadian Council of The Girl Guides Association, chapter 77 of the Statutes of Canada, 1917, with a new Act that continues the corporation known as “Girl Guides of Canada” and makes changes relating to its administration.	2020/11/17	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10922248	https://parl.ca/DocumentViewer/en/10959382	\N	2021-01-21 01:04:18.191823
+O7I4OM7mmqfu4cL6882o	QCiRdvLxwhYaAt5OHPG7	S-216	An Act to enact the Modern Slavery Act and to amend the Customs Tariff	This enactment enacts the Modern Slavery Act, which imposes an obligation on certain entities to report on the measures taken to prevent and reduce the risk that forced labour or child labour is used at any step in the production of goods in Canada or elsewhere by the entity or in the production of goods imported into Canada. The Act provides for an inspection regime and gives the Minister the power to require an entity to provide certain information. This enactment also amends the Customs Tariff to allow for a prohibition on the importation of goods manufactured or produced, in whole or in part, by forced labour or child labour as those terms are defined in the Modern Slavery Act.	2020/10/29	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10922230	https://parl.ca/DocumentViewer/en/10922237	\N	2021-01-21 01:04:18.191823
+iSaSGQDOoQ2N8S4er2qw	QCiRdvLxwhYaAt5OHPG7	S-221	An Act to amend the Criminal Code (mischief related to memorials to first responders)	This enactment amends the Criminal Code to provide for the offence of committing mischief in relation to a monument or similar structure that honours first responders.	2020/12/08	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11030739	https://parl.ca/DocumentViewer/en/11030747	\N	2021-01-21 01:04:18.191823
+sbUIWUf7U5UbyrWelA4X	QCiRdvLxwhYaAt5OHPG7	C-260	An Act to amend the Canada Post Corporation Act	This enactment amends the Canada Post Corporation Act to provide that the Corporation shall not refuse to provide a postal service for the collection, transmission and delivery, direct to consumers, from one province to another, of beer, wine or spirits. It also provides for exceptions.	2020/12/08	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10929012	https://parl.ca/DocumentViewer/en/11029031	\N	2021-01-21 01:04:18.191823
+18sGhbfRy6XsCQPoqFPW	QCiRdvLxwhYaAt5OHPG7	S-3	An Act to amend the Offshore Health and Safety Act	This enactment amends the Offshore Health and Safety Act to postpone the repeal of its transitional regulations.	2020/12/01	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11006628	https://parl.ca/DocumentViewer/en/11006673	\N	2021-01-21 01:04:18.191823
+mBs2zEHuDEhNHDcXZxFj	QCiRdvLxwhYaAt5OHPG7	S-219	An Act to amend the Corrections and Conditional Release Act (disclosure of information to victims)	This enactment amends the Corrections and Conditional Release Act to provide that information disclosed to the victim of an offence regarding eligibility dates and review dates applicable to the offender in respect of temporary absences, parole or statutory releases or must include an explanation of how the dates were determined.	2020/12/01	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11006703	https://parl.ca/DocumentViewer/en/11006731	\N	2021-01-21 01:04:18.191823
+rLdTHzLD9AyfubBSxa6H	QCiRdvLxwhYaAt5OHPG7	C-256	Act to amend the Income Tax Act (donations involving private corporation shares or real estate)	This enactment amends the Income Tax Act to provide an exemption from capital gains tax in respect of certain arm’s length dispositions of real estate or private corporation shares to charities.	2020/11/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10976426	https://parl.ca/DocumentViewer/en/10990860	\N	2021-01-21 01:04:18.191823
+szNeBTBpDYAyBUtGquPy	QCiRdvLxwhYaAt5OHPG7	C-2	An Act relating to economic recovery in response to COVID-19	Her Excellency the Governor General recommends to the House of Commons the appropriation of public revenue under the circumstances, in the manner and for the purposes set out in a measure entitled “An Act relating to economic recovery in response to COVID-19”.  Part 1 enacts the Canada Recovery Benefits Act to authorize the payment of the Canada recovery benefit, the Canada recovery sickness benefit and the Canada recovery caregiving benefit to support Canada’s economic recovery in response to COVID-19. It also makes consequential amendments to the Income Tax Act and the Income Tax Regulations. Part 2 amends the Canada Labour Code to, among other things, (a) amend the reasons for which an employee is entitled to take leave related to COVID-19, and the number of weeks of that leave that an employee may take for each of those reasons; and (b) give the Governor in Council the power, until September 25, 2021, to make regulations in certain circumstances to provide that any requirements or conditions, set out in certain provisions of Part III of that Act, respecting certificates issued by a health care practitioner do not apply and to provide for alternative requirements and conditions. This Part also makes related amendments to the COVID-19 Emergency Response Act to ensure that employees may continue to take leave related to COVID-19 until September 25, 2021. Finally, it makes related amendments to regulations and contains coordinating amendments. Part 3 amends the Public Health Events of National Concern Payments Act to limit, as of October 1, 2020, the payments that may be made out of the Consolidated Revenue Fund under that Act to those in respect of specified measures related to COVID-19, up to specified amounts. It also postpones the repeal of that Act until December 31, 2020.	2020/09/24	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10867434	https://parl.ca/DocumentViewer/en/10868708	\N	2021-01-21 01:04:18.191823
+4diKBmxGLlUAZDVS4C31	QCiRdvLxwhYaAt5OHPG7	C-19	An Act to amend the Canada Elections Act (COVID-19 response)	This enactment adds a new Part to the Canada Elections Act that provides for temporary rules to ensure the safe administration of an election in the context of the coronavirus disease 2019 (COVID-19) pandemic. The new Part, among other things, (a) extends the Chief Electoral Officer’s power to adapt the provisions of that Act to ensure the health or safety of electors or election officers; (b) authorizes a returning officer to constitute polling divisions that consist of a single institution where seniors or persons with a disability reside, or a part of such an institution, and to set the days and hours that a polling station established there will be open; (c) provides for a polling period of three consecutive days consisting of a Saturday, Sunday and Monday; (d) provides for the hours of voting during the polling period; (e) provides for the opening and closing measures at polling stations; (f) sets the days for voting at advance polling stations; (g) authorizes the Chief Electoral Officer to modify the day on which certain things are authorized or required to be done before the polling period by moving that day backward or forward by up to two days or the starting date or ending date of a period in which certain things are authorized or required to be done by up to two days; (h) provides that an elector may submit an application for registration and special ballot under Division 4 of Part 11 in writing or in electronic form; (i) provides that an elector whose application for registration and special ballot was accepted by the returning officer in their electoral district may deposit the outer envelope containing their special ballot in a secure reception box or ballot box for the deposit of outer envelopes; and (j) prohibits installing a secure reception box for the deposit of outer envelopes unless by or under the authority of the Chief Electoral Officer or a returning officer and prohibits destroying, taking, opening or otherwise interfering with a secure reception box installed by a returning officer. The enactment also provides for the repeal of the new Part six months after the publication of a notice confirming that the temporary rules in that Part are no longer required to ensure the safe administration of an election in the context of the COVID-19 pandemic.	2020/12/10	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11031427	https://parl.ca/DocumentViewer/en/11040118	\N	2021-01-21 01:04:18.191823
+a7VrYKXg0DKoDSZ9R9Ij	QCiRdvLxwhYaAt5OHPG7	C-248	An Act to amend the Financial Administration Act (composition of boards of directors)	This enactment amends the Financial Administration Act to provide that the boards of directors of parent Crown corporations are not to be composed of fewer women than men.	2020/10/08	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10873217	https://parl.ca/DocumentViewer/en/10879694	\N	2021-01-21 01:04:18.191823
+hQ3NKDrAcLRmc3aUI307	QCiRdvLxwhYaAt5OHPG7	S-217	An Act to amend the Canada Labour Code (successive contracts for services)	This enactment amends Part I of the Canada Labour Code in order to add employment categories to the section on the awarding of successive contracts for services in the air transportation sector.	2020/11/05	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10938159	https://parl.ca/DocumentViewer/en/10938169	\N	2021-01-21 01:04:18.191823
+1CtnCTBSIF1Vqc0nDNzA	QCiRdvLxwhYaAt5OHPG7	C-251	An Act to continue VIA Rail Canada Inc. under the name VIA Rail Canada and to make consequential amendments to other Acts		2020/11/05	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866301	https://parl.ca/DocumentViewer/en/10937623	\N	2021-01-21 01:04:18.191823
+tgy1wcMJBpSr3gBzAZMk	QCiRdvLxwhYaAt5OHPG7	C-15	An Act respecting the United Nations Declaration on the Rights of Indigenous Peoples	This enactment provides that the Government of Canada must take all measures necessary to ensure that the laws of Canada are consistent with the United Nations Declaration on the Rights of Indigenous Peoples, and must prepare and implement an action plan to achieve the objectives of the Declaration.	2020/12/03	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11007812	https://parl.ca/DocumentViewer/en/11014870	\N	2021-01-21 01:04:18.191823
+ATJdenX6fylvZoquIM1B	QCiRdvLxwhYaAt5OHPG7	C-258	An Act to amend the Canada Labour Code (replacement workers)	This enactment amends the Canada Labour Code to make it an offence for employers to use replacement workers to perform all or part of the duties of employees who are on strike or locked out.	2020/12/03	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866336	https://parl.ca/DocumentViewer/en/11015866	\N	2021-01-21 01:04:18.191823
+LdIlJ6pnrDCLZXv01Mnl	QCiRdvLxwhYaAt5OHPG7	C-13	An Act to amend the Criminal Code (single event sport betting)	This enactment amends paragraph 207(4)‍(b) of the Criminal Code to make it lawful for the government of a province or territory, or a licensed person or entity, to conduct and manage in the province or territory a lottery scheme that involves betting on a race — other than a horse-race — or fight, or on a single sport event or athletic contest.	2020/11/26	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-13&lang=en_CA&parlSession=432	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10983057	https://parl.ca/DocumentViewer/en/10990765	\N	2021-01-21 01:04:18.191823
+WRlfo9Hi453gyIeW5t9i	QCiRdvLxwhYaAt5OHPG7	C-259	An Act to amend the Bankruptcy and Insolvency Act, the Companies’ Creditors Arrangement Act and the Pension Benefits Standards Act, 1985 (pension plans and group insurance programs)	This enactment amends the Bankruptcy and Insolvency Act and the Companies’ Creditors Arrangement Act to ensure that claims in respect of unfunded liabilities or solvency deficiencies of a pension plan are accorded priority in the event of bankruptcy proceedings. It also provides that an employer has to maintain group insurance programs that provide benefits to or in respect of its employees or former employees. This enactment also amends the Pension Benefits Standards Act, 1985 to empower the Superintendent of Financial Institutions to determine that the funding of a pension plan is impaired or that the pension plan administrator is at risk and to set out measures to be taken by the employer in respect of the funding of the plan in such cases.	2020/12/03	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10949570	https://parl.ca/DocumentViewer/en/11015262	\N	2021-01-21 01:04:18.191823
+lr3JlsRgHD4Agr74wMPI	QCiRdvLxwhYaAt5OHPG7	C-250	An Act to amend the Canada Shipping Act, 2001 (anchorage prohibition)	This enactment amends the Canada Shipping Act, 2001 to prohibit the anchoring of vessels within certain waters.	2020/10/26	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10901736	https://parl.ca/DocumentViewer/en/10914437	\N	2021-01-21 01:04:18.191823
+px60yy1Z2GBG0JETvGLd	QCiRdvLxwhYaAt5OHPG7	C-253	An Act to amend the Bankruptcy and Insolvency Act and the Companies’ Creditors Arrangement Act (pension plans and group insurance plans)	This enactment amends the Bankruptcy and Insolvency Act and the Companies’ Creditors Arrangement Act to ensure that claims in respect of unfunded liabilities or solvency deficiencies of pension plans and claims relating to the cessation of an employer’s participation in group insurance plans are paid in priority in the event of bankruptcy proceedings.	2020/11/23	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10971487	https://parl.ca/DocumentViewer/en/10978221	\N	2021-01-21 01:04:18.191823
+pGXSGLl9bRI10Tuh7ecR	QCiRdvLxwhYaAt5OHPG7	C-247	An Act to amend the Criminal Code (controlling or coercive conduct)	This enactment amends the Criminal Code to create an offence of engaging in controlling or coercive conduct that has a significant impact on the person towards whom the conduct is directed, including a fear of violence, a decline in their physical or mental health and a substantial adverse effect on their day-to-day activities.	2020/10/05	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10868507	https://parl.ca/DocumentViewer/en/10876942	\N	2021-01-21 01:04:18.191823
+guBeFwSpcTCNb90F4mr8	QCiRdvLxwhYaAt5OHPG7	C-257	An Act to amend the Fisheries Act (closed containment aquaculture)	This enactment amends the Fisheries Act to prohibit finfish aquaculture for commercial purposes in Canadian fisheries waters off the Pacific Coast except when it is carried out in closed containment facilities. It also requires the Minister of Fisheries and Oceans to prepare, table in Parliament and implement a plan to support the transition to the use of closed containment facilities and to protect the jobs and financial security of workers in that sector.	2020/11/27	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10877483	https://parl.ca/DocumentViewer/en/10998081	\N	2021-01-21 01:04:18.191823
+NlkT9r2PcfGB19EHS11N	QCiRdvLxwhYaAt5OHPG7	C-249	An Act to amend the Canada Transportation Act (refund – cancelled air service)	This enactment amends the Canada Transportation Act in order to add a declaratory provision specifying that the carrier who cancels an air service must refund the passenger for the air service not received.	2020/10/23	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10901962	https://parl.ca/DocumentViewer/en/10909708	\N	2021-01-21 01:04:18.191823
+qVZcGyFYexWN05ErApnH	QCiRdvLxwhYaAt5OHPG7	C-262	An Act to amend the Income Tax Act (capture and utilization or storage of greenhouse gases)	This enactment amends the Income Tax Act to establish a tax credit for the capture and utilization or storage of certain greenhouse gases.	2020/12/11	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11035886	https://parl.ca/DocumentViewer/en/11045518	\N	2021-01-21 01:04:18.191823
+kdZ7TYBqTbZtpZxUyage	QCiRdvLxwhYaAt5OHPG7	C-9	An Act to amend the Income Tax Act (Canada Emergency Rent Subsidy and Canada Emergency Wage Subsidy)	Her Excellency the Governor General recommends to the House of Commons the appropriation of public revenue under the circumstances, in the manner and for the purposes set out in a measure entitled “An Act to amend the Income Tax Act (Canada Emergency Rent Subsidy and Canada Emergency Wage Subsidy)”.  This enactment amends the Income Tax Act to revise the eligibility criteria, as well as the level of subsidization, under the Canada Emergency Wage Subsidy (CEWS) as part of the response to the coronavirus disease 2019. It also extends the CEWS to June 30, 2021. The enactment further amends the Income Tax Act to introduce the Canada Emergency Rent Subsidy (CERS) in order to support those hardest hit by the coronavirus disease 2019. This subsidy provides relief in respect of rent and interest on debt obligations incurred to acquire real property used by businesses, charities and not-for-profit organizations in the course of their businesses or other activities. The rent subsidy is effective as of September 27, 2020.	2020/11/02	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10926615	https://parl.ca/DocumentViewer/en/10969081	t	2021-01-21 01:04:18.191823
+CDgKzFPICBDqnYpeKvTG	QCiRdvLxwhYaAt5OHPG7	C-214	An Act to amend the Income Tax Act (qualifying environmental trust)	This enactment amends the Income Tax Act to include, in the definition “qualifying environmental trust”, trusts that are maintained for the sole purpose of funding the reclamation of an oil or gas well operated for the purpose of producing petroleum or natural gas.	2020/02/24	\N	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866085	https://parl.ca/DocumentViewer/en/10868420	f	2021-01-21 01:04:18.191823
+RBW4PwLaTKSt9J6LdqFr	QCiRdvLxwhYaAt5OHPG7	C-17	An Act for granting to Her Majesty certain sums of money for the federal public administration for the fiscal year ending March 31, 2021	This enactment grants the sum of $20,874,356,291 towards defraying charges and expenses of the federal public administration for the fiscal year ending March 31, 2021 that are not otherwise provided for.	2020/12/07	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-17&lang=en_CA&parlSession=431	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11019471	https://parl.ca/DocumentViewer/en/11044462	t	2021-01-21 01:04:18.191823
+UwTGcHTf2osD0pW5vKhG	QCiRdvLxwhYaAt5OHPG7	C-7	An Act to amend the Criminal Code (medical assistance in dying)	This enactment amends the Criminal Code to, among other things, (a) repeal the provision that requires a person’s natural death be reasonably foreseeable in order for them to be eligible for medical assistance in dying; (b) specify that persons whose sole underlying medical condition is a mental illness are not eligible for medical assistance in dying; (c) create two sets of safeguards that must be respected before medical assistance in dying may be provided to a person, the application of which depends on whether the person’s natural death is reasonably foreseeable; (d) permit medical assistance in dying to be provided to a person who has been found eligible to receive it, whose natural death is reasonably foreseeable and who has lost the capacity to consent before medical assistance in dying is provided, on the basis of a prior agreement they entered into with the medical practitioner or nurse practitioner; and (e) permit medical assistance in dying to be provided to a person who has lost the capacity to consent to it as a result of the self-administration of a substance that was provided to them under the provisions governing medical assistance in dying in order to cause their own death.	2020/10/05	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-7&lang=en_CA&parlSession=432	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10875380	https://parl.ca/DocumentViewer/en/11044218	\N	2021-01-21 01:04:18.191823
+nkiKCcO8kiUQHLMpV6YH	QCiRdvLxwhYaAt5OHPG7	C-6	An Act to amend the Criminal Code (conversion therapy)	This enactment amends the Criminal Code to, among other things, create the following offences: (a) causing a person to undergo conversion therapy without the person’s consent; (b) causing a child to undergo conversion therapy; (c) doing anything for the purpose of removing a child from Canada with the intention that the child undergo conversion therapy outside Canada; (d) promoting or advertising an offer to provide conversion therapy; and (e) receiving a financial or other material benefit from the provision of conversion therapy. It also amends the Criminal Code to authorize courts to order that advertisements for conversion therapy be disposed of or deleted.	2020/10/01	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-6&lang=en_CA&parlSession=432	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10871883	https://parl.ca/DocumentViewer/en/11045746	\N	2021-01-21 01:04:18.191823
+HnJfbmyqyYe2LeWSB4Fq	QCiRdvLxwhYaAt5OHPG7	C-5	An Act to amend the Bills of Exchange Act, the Interpretation Act and the Canada Labour Code (National Day for Truth and Reconciliation)	This enactment amends certain Acts to add a new holiday, namely, National Day for Truth and Reconciliation, which is observed on September 30.	2020/09/29	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-5&lang=en_CA&parlSession=432	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10870098	https://parl.ca/DocumentViewer/en/10871693	\N	2021-01-21 01:04:18.191823
+sfsjF1NzZcdlbl6EJisB	QCiRdvLxwhYaAt5OHPG7	C-14	An Act to implement certain provisions of the economic statement tabled in Parliament on November 30, 2020 and other measures	Part 1 amends the Income Tax Act to provide additional support to families with young children as the coronavirus disease 2019 (COVID-19) pandemic progresses. It also amends the Children’s Special Allowances Act to provide a similar benefit in respect of young children under that Act. As part of the Government’s response to COVID-19, it amends the Income Tax Act to provide that an expense can qualify as a qualifying rent expense for the purposes of the Canada Emergency Rent Subsidy (CERS) when it becomes due rather than when it is paid, provided certain conditions are met. Part 2 amends the Canada Student Loans Act to provide that, during the period that begins on April 1, 2021 and ends on March 31, 2022, no interest is payable by a borrower on a guaranteed student loan and no amount on account of interest is required to be paid by the borrower. Part 3 amends the Canada Student Financial Assistance Act to provide that, during the period that begins on April 1, 2021 and ends on March 31, 2022, no interest is payable by a borrower on a student loan and no amount on account of interest is required to be paid by the borrower. Part 4 amends the Apprentice Loans Act to provide that, during the period that begins on April 1, 2021 and ends on March 31, 2022, no interest is payable by a borrower on an apprentice loan and no amount on account of interest is required to be paid by a borrower. Part 5 amends the Food and Drugs Act to authorize the Governor in Council to make regulations (a) requiring persons to provide information to the Minister of Health; and (b) preventing shortages of therapeutic products in Canada or alleviating those shortages or their effects, in order to protect human health. It also amends that Act to provide that any prescribed provisions of regulations made under that Act apply to food, drugs, cosmetics and devices intended for export that would otherwise be exempt from the application of that Act. Part 6 authorizes payments to be made out of the Consolidated Revenue Fund (a) to the Government of Canada’s regional development agencies for the Regional Relief and Recovery Fund; (b) in respect of specified initiatives related to health; and (c) for the purpose of making income support payments under section 4 of the Canada Emergency Response Benefit Act. Part 7 amends the Borrowing Authority Act to, among other things, increase the maximum amount of certain borrowings and include certain borrowings that were previously excluded in the calculation of that amount. It also makes a related amendment to the Financial Administration Act.	2020/12/02	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-14&lang=en_CA&parlSession=432	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=11003629	https://parl.ca/DocumentViewer/en/11011285	\N	2021-01-21 01:04:18.191823
+oazymXAuLkynxWHlSIEz	QCiRdvLxwhYaAt5OHPG7	C-8	An Act to amend the Citizenship Act (Truth and Reconciliation Commission of Canada's call to action number 94)	This enactment amends the Citizenship Act to include, in the Oath or Affirmation of Citizenship, a solemn promise to respect the Aboriginal and treaty rights of First Nations, Inuit and Métis peoples, in order to respond to the Truth and Reconciliation Commission of Canada’s call to action number 94.	2020/10/22	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-8&lang=en_CA&parlSession=432	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10901123	https://parl.ca/DocumentViewer/en/10905908	\N	2021-01-21 01:04:18.191823
+kIsODIhVFkieHa8GnDEB	QCiRdvLxwhYaAt5OHPG7	C-4	An Act relating to certain measures in response to COVID-19	Her Excellency the Governor General recommends to the House of Commons the appropriation of public revenue under the circumstances, in the manner and for the purposes set out in a measure entitled “An Act relating to certain measures in response to COVID-19”.  Part 1 enacts the Canada Recovery Benefits Act to authorize the payment of the Canada recovery benefit, the Canada recovery sickness benefit and the Canada recovery caregiving benefit to support Canada’s economic recovery in response to COVID-19. It also makes consequential amendments to the Income Tax Act and the Income Tax Regulations. Part 2 amends the Canada Labour Code to, among other things, (a) amend the reasons for which an employee is entitled to take leave related to COVID-19, and the number of weeks of that leave that an employee may take for each of those reasons; and (b) give the Governor in Council the power, until September 25, 2021, to make regulations in certain circumstances to provide that any requirements or conditions, set out in certain provisions of Part III of that Act, respecting certificates issued by a health care practitioner do not apply and to provide for alternative requirements and conditions. This Part also makes related amendments to the COVID-19 Emergency Response Act to ensure that employees may continue to take leave related to COVID-19 until September 25, 2021. Finally, it makes related amendments to regulations and contains coordinating amendments. Part 3 amends the Public Health Events of National Concern Payments Act to limit, as of October 1, 2020, the payments that may be made out of the Consolidated Revenue Fund under that Act to those in respect of specified measures related to COVID-19, up to specified amounts. It also postpones the repeal of that Act until December 31, 2020.	2020/09/28	https://loppublicservices.parl.ca/PublicWebsiteProxy/Publication/GoToLS?billNumber=C-4&lang=en_CA&parlSession=432	https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10867435	https://parl.ca/DocumentViewer/en/10876137	t	2021-01-21 01:04:18.191823
+\.
+
+
+--
+-- Data for Name: categories; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.categories (id, name, class_code, created_at) FROM stdin;
+C74DAML0U7LrMZKbi9kZ	Agriculture, environment, fisheries and natural resources	agriculture_environment	2021-01-21 00:58:17.942165
+5VkF4V0XJjvzfOhXymLV	Arts, culture and entertainment	arts_culture	2021-01-21 00:58:17.942165
+BiYBt4Q8J4ltdaHsfTCR	Business, industry and trade	business_industry	2021-01-21 00:58:17.942165
+1rCLH1Tpoui7ZvrqAwVh	Economics and finance	economics_finance	2021-01-21 00:58:17.942165
+pBKnK0u4BJSu6Q94Ly7C	Education, language and training	education_language	2021-01-21 00:58:17.942165
+63EvRrV7Uo7XSEhX1LIA	Employment and labour	employment_labour	2021-01-21 00:58:17.942165
+L6uRpnYA32NC7XgU2fGs	Government, Parliament and politics	government_politics	2021-01-21 00:58:17.942165
+yQMyubRS85DvIPWiS37j	Health and safety	health_safety	2021-01-21 00:58:17.942165
+oOuvlvcXYVGGBptEUL1V	Indigenous affairs	indigenous_affairs	2021-01-21 00:58:17.942165
+DYJJWal7mgdea4jwCFfK	Information and communications	information_communications	2021-01-21 00:58:17.942165
+r5plIAppqoP27o0y7yvM	International affairs and defence	international_affairs	2021-01-21 00:58:17.942165
+rMM6eiKzLCT4mVRhVRUt	Law, justice and rights	law_justice	2021-01-21 00:58:17.942165
+I2jFlD1BF0RGCO3BN4Jq	Science and technology	science_technology	2021-01-21 00:58:17.942165
+BMGOrildIFI7evowLA9q	Social affairs and population	social_affairs	2021-01-21 00:58:17.942165
+\.
+
+
+--
+-- Data for Name: events; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.events (id, bill_code, title, publication_date, created_at) FROM stdin;
+3k4SrnZO2BKJmh60yKDh	S-209	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+ViclBjj8UkAPJr0tpxvB	S-207	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+Aqmk6ymxsJVsQP4cnnS2	S-206	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+c4vNr1QC9k1eVJxIvOuT	S-205	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+nLiLonHNEV71582zMdJm	S-203	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+ZkgqHxRxl4nfYHpNrL0C	S-204	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+MXvNf6rC9F8CuiMyrhFx	S-202	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+L2ZIYEeneEZUVUwYKb3W	S-201	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+vdjus413EwATDViOdHcj	S-208	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+9cMh8QCiDgclhvR4cEgB	S-210	Introduction and First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+pxCswSRK5HcsEgrlmdqE	C-4	First Reading in the Senate	2020-09-30	2021-01-21 01:04:18.217226
+H52yIRhu8JLRbRXrL4zy	C-246	Introduction and First Reading in the House of Commons	2020-09-30	2021-01-21 01:04:18.217226
+6D6ngTFuCmR9xbf6ov49	S-215	Introduction and First Reading in the Senate	2020-10-28	2021-01-21 01:04:18.217226
+bNj6MKRr4JCD9keBwJlt	C-7	Debate at Second Reading in the House of Commons	2020-10-28	2021-01-21 01:04:18.217226
+TEkHZi3BYq7brGCsuivZ	C-224	Debate at Second Reading in the House of Commons	2020-10-28	2021-01-21 01:04:18.217226
+9u12e1n6VZqXcbsB1COF	C-6	Second Reading and Referral to Committee in the House of Commons	2020-10-28	2021-01-21 01:04:18.217226
+GE58Bq08bF7qRBeJ3GzX	C-5	Committee Reporting the Bill without Amendment in the House of Commons	2020-11-25	2021-01-21 01:04:18.217226
+GtPNFWbEfC7IJJ4tvMnn	C-12	Debate at Second Reading in the House of Commons	2020-11-25	2021-01-21 01:04:18.217226
+he1dbpaswWoQPYS2BKqA	C-208	Debate at Second Reading in the House of Commons	2020-11-25	2021-01-21 01:04:18.217226
+SKqhgEfQegpi3ebb6DhF	C-7	Committee Reporting the Bill with Amendments in the House of Commons	2020-11-25	2021-01-21 01:04:18.217226
+T8kLeSN8EuteKse0i9Ew	C-255	Introduction and First Reading in the House of Commons	2020-11-25	2021-01-21 01:04:18.217226
+W3RSasK0uJntPVFJl6TD	S-1	Introduction and First Reading in the Senate	2020-09-23	2021-01-21 01:04:18.217226
+QtE5UGguH0uzMNogIw9N	C-243	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+8L0BP5tinABizcgAHP2p	C-242	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+oKungANXgmcA80to7Rb5	C-241	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+EoSdHAEuT4dJiRBLXhEk	C-240	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+DHpg8BmJqRU7u9Rj9k9E	C-239	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+X3BEP9RJvilQcy0fssEY	C-235	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+BLE4h1KBa9DgLs5gcL5P	C-233	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+4qIGfPAFkPIvemA6tAFz	C-227	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+OpY4sDSYM4bMnTShygu0	C-219	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+Rsw2HhDvoaISWV5ZjMPA	C-212	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+9DfJfHutnzHdmLFE1l71	C-211	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+I7vP3dHTki2bsUDxJnR9	C-209	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+Pd5uiVoLVn5mpwwYRrCz	C-207	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+BzsW79TvWD2DcXtqP7x9	C-203	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+ZwtSzJcfQJNeyyS9Ogwf	C-202	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+jB0oII4uFEXZVRcMyHb8	C-201	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+bqnLJEaeUUaMcrrnCO77	C-238	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+ZWGJN7FvPXeCnaykhZlZ	C-237	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+XZ0bckQwuAd1gsyESS28	C-236	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+jFRkWFq19D1TuCS25KQu	C-234	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+7q6CPJPCFKPqNzJOAzOP	C-232	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+wMdvDvVCdPOhJcPuOdJE	C-230	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+7X4vBd6Kavyw1kgVZ40c	C-229	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+Bcxy6DipEB8TUqSrlCZU	C-231	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+dPWxBabkHWRK4F2MiVmz	C-215	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+xvatbcLE9OGzzAM77WTr	C-216	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+FBrCAhy3eXFg8yQZU5Lu	C-218	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+ypp0C2XA2btRPQWYBBck	C-213	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+NiHjBBkqsN9lp8yXVUEX	C-214	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+uiWtlZEhSnDak6VikZFH	C-205	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+Btm8bS3LnTlzvnfGJs29	C-206	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+LiAfVfr6e80oiwdwmk0G	C-204	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+MOS15HHtBzphivLBsTWa	C-208	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+aUvwdXjrdm7Omi45lpZ6	C-210	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+Hv3B92yKQVsG03JkXGq9	C-224	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+lGWkRf1B0mQGKMwLev4s	C-223	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+Oenhf2vX68JFdD0qdEga	C-221	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+p30cMhC2txM6q5FkHBVC	C-222	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+tQWEI1L4LlhrXZS4nYWm	C-220	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+QLK9QGFrDWB8PFbw1Z5O	C-225	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+sgDPVFlbQRbhTs1jHi02	C-226	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+RJDGlRCZdn9gmuRz9TEb	C-228	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+DsmiOUvFhceomo4IPGW1	C-245	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+hJajzVwl3pZX9VNG3LfU	C-244	Reinstated from previous session in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+vjJ8eAhS0D8NjxDpy5du	C-228	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+8sYCzL5zuQ6nVZKqmVlA	C-226	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+PH0MyQbOCJSOUtown8ER	C-225	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+zPAi0AJNrQid4gaXJMNt	C-224	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+WWb4HjmocDukaVgGWUQr	C-223	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+dQxL5DK4AV7MHABbHMis	C-222	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+HZ721vi4TAq0q2DH4hM1	C-221	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+AgdcLzi3iz62TcdHgiAA	C-220	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+rTSQGQQPAsEvy3KIGqmL	C-218	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+KP98ZztEdC1a1w8OQ93n	C-216	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+lrQI5aW1w5673nfLwG1A	C-215	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+SarYsA1gKKVUOj0siuVm	C-214	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+4f4xioMNw5N18gTAnIvw	C-213	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+614vPnQS5eS2X0CERBuR	C-210	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+YDkbYUq4yOieN9QtqHqM	C-208	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+5typ1gca7Geeqei5EmrI	C-206	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+WN5LCtjTwaQ3qPHFs9xC	C-205	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+50NO0YbdetIDenfrocNu	C-204	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+v7mtSABdUL4j8hEBYF0y	C-238	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+xkkipshMzhA5V15LWKJa	C-237	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+uSs30bvTI2Csqj73iPok	C-236	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+VKmH0uvgdpaUKYp9Efia	C-234	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+r1q6XHd1JZAxFDuVh2eS	C-232	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+xUsknzkPWg6mhg6Kykwz	C-231	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+EWj317jT4myi37BBdmBy	C-230	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+uT7VSbwAjz0s37OkZ0D1	C-229	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+V028XqbSvZpRqVAedBgw	C-1	Introduction and First Reading in the House of Commons	2020-09-23	2021-01-21 01:04:18.217226
+mE8085woA99vFpSwDxe1	C-7	Debate at Second Reading in the House of Commons	2020-10-21	2021-01-21 01:04:18.217226
+DafCEJvSxGDNB5NmcVyU	C-9	Debate at 3rd Reading in the Senate	2020-11-18	2021-01-21 01:04:18.217226
+B4uiez0WVomxZI4XtowW	C-10	Debate at Second Reading in the House of Commons	2020-11-18	2021-01-21 01:04:18.217226
+dy6rVZFC0zlNpWbMJ5Cs	C-252	Introduction and First Reading in the House of Commons	2020-11-18	2021-01-21 01:04:18.217226
+92BCqGkehTIaVYC2DTKa	C-213	Debate at Second Reading in the House of Commons	2020-11-18	2021-01-21 01:04:18.217226
+nCVBSPlUIyTYBKUkGOfv	C-7	Debate at Second Reading in the Senate	2020-12-16	2021-01-21 01:04:18.217226
+ac4xiTw2yEEnrEOLhXOX	S-2	Committee Report Presented without Amendment in the Senate	2020-12-16	2021-01-21 01:04:18.217226
+bRasiHUcVuEjpdwmg5Pi	C-17	Debate at Second Reading in the Senate	2020-12-09	2021-01-21 01:04:18.217226
+BSjk0yEccAst4JSwPLLD	C-7	Debate at 3rd Reading in the House of Commons	2020-12-09	2021-01-21 01:04:18.217226
+awTeACrPIwLDBXBw6zFz	C-16	Debate at Second Reading in the Senate	2020-12-09	2021-01-21 01:04:18.217226
+CmBSoShN0VCJGLhMLz8P	C-16	Second Reading in the Senate	2020-12-09	2021-01-21 01:04:18.217226
+zglf1kQL3RyQzfgq3Bb5	C-18	Introduction and First Reading in the House of Commons	2020-12-09	2021-01-21 01:04:18.217226
+r6pe1n1CQWbLmVkgZlFa	C-261	Introduction and First Reading in the House of Commons	2020-12-09	2021-01-21 01:04:18.217226
+T6ORbN7B5GgoaOhu88Oq	C-226	Debate at Second Reading in the House of Commons	2020-12-09	2021-01-21 01:04:18.217226
+DCToKD4YXCGgEbYkAOqo	C-3	Debate at Second Reading in the House of Commons	2020-10-07	2021-01-21 01:04:18.217226
+Tr1k1JIjzr2bKsfMraP6	C-9	Debate at Second Reading in the House of Commons	2020-11-04	2021-01-21 01:04:18.217226
+P13BpAKsEGhH3GkpBaOQ	C-215	Debate at Second Reading in the House of Commons	2020-11-04	2021-01-21 01:04:18.217226
+ZC8CHB9modyqV0vWrAGs	S-220	Introduction and First Reading in the Senate	2020-12-02	2021-01-21 01:04:18.217226
+VVJUIymXNjbT3Ez1lzej	S-2	Debate at Second Reading in the Senate	2020-12-02	2021-01-21 01:04:18.217226
+wENAhvxqZnMe3tPFCmRe	S-2	Second Reading in the Senate	2020-12-02	2021-01-21 01:04:18.217226
+N2AxGaIEvply3pZWmuXa	S-2	Referral to Committee in the Senate	2020-12-02	2021-01-21 01:04:18.217226
+3APPE6i3JMSRfSZHm2UG	C-14	Introduction and First Reading in the House of Commons	2020-12-02	2021-01-21 01:04:18.217226
+2alpAfXIJg6QaZCpX3Mp	C-236	Debate at Second Reading in the House of Commons	2020-12-02	2021-01-21 01:04:18.217226
+lqsKSiYWgkFXuGCRzrsh	C-7	Debate at Report Stage in the House of Commons	2020-12-02	2021-01-21 01:04:18.217226
+9JlwYLHrZjsaWHNr11lW	C-5	Introduction and First Reading in the House of Commons	2020-09-29	2021-01-21 01:04:18.217226
+7vNPvFTQ8aBKi0pDBZyx	C-4	Debate at Second Reading in the House of Commons	2020-09-29	2021-01-21 01:04:18.217226
+qoD3AHNk8KOAf6H2GiLK	C-4	Second Reading and Referral to Committee in the House of Commons	2020-09-29	2021-01-21 01:04:18.217226
+KvnPL9KmwtXxOHxmyOHv	C-4	Committee Reporting the Bill without Amendment in the House of Commons	2020-09-29	2021-01-21 01:04:18.217226
+V5QPzQFQji0KEZynIy9L	C-4	Concurrence at Report Stage in the House of Commons	2020-09-29	2021-01-21 01:04:18.217226
+xP6C1SaH7nDc17rHFCkO	C-4	Debate at 3rd Reading in the House of Commons	2020-09-29	2021-01-21 01:04:18.217226
+PVIuF6w55UahhvCrKKPv	C-4	Third Reading in the House of Commons	2020-09-29	2021-01-21 01:04:18.217226
+tvPZz0cTtvnPHCZ1JgnQ	S-207	Debate at Second Reading in the Senate	2020-10-27	2021-01-21 01:04:18.217226
+GS7CBLoJmVNMHU9nSB2p	S-214	Introduction and First Reading in the Senate	2020-10-27	2021-01-21 01:04:18.217226
+d6WDRmVCtyaiEHtIJfIH	S-213	Introduction and First Reading in the Senate	2020-10-27	2021-01-21 01:04:18.217226
+7sz6Gdvc0sP19KnpIM4C	S-212	Introduction and First Reading in the Senate	2020-10-27	2021-01-21 01:04:18.217226
+96F8pyQrxfoUIqLXyvNX	S-211	Introduction and First Reading in the Senate	2020-10-27	2021-01-21 01:04:18.217226
+9CQJPXkTx1T5RLwpsUGV	S-2	Introduction and First Reading in the Senate	2020-10-27	2021-01-21 01:04:18.217226
+NkUndbg6JKzjIKPYmBTD	S-210	Debate at Second Reading in the Senate	2020-10-27	2021-01-21 01:04:18.217226
+kJeF3dhAMkiA7S7ZwA3Z	C-6	Debate at Second Reading in the House of Commons	2020-10-27	2021-01-21 01:04:18.217226
+o7UBegESGLo8N6DIJXhE	C-238	Debate at Second Reading in the House of Commons	2020-10-27	2021-01-21 01:04:18.217226
+BMNcj3OCskwvgbHHhFXK	C-6	Debate at Second Reading in the House of Commons	2020-10-27	2021-01-21 01:04:18.217226
+lBGIjPyXJXXeFGZsaB0d	C-7	Debate at Second Reading in the House of Commons	2020-10-27	2021-01-21 01:04:18.217226
+fTAZxuhcAmWYol8EMb8r	C-254	Introduction and First Reading in the House of Commons	2020-11-24	2021-01-21 01:04:18.217226
+Z0l2D2P6Nc5smcRJkgfi	C-11	Debate at Second Reading in the House of Commons	2020-11-24	2021-01-21 01:04:18.217226
+fQZGTqCbdsV3wI1PNzTU	C-11	Debate at Second Reading in the House of Commons	2020-11-24	2021-01-21 01:04:18.217226
+3S3MT9yf7mEBgTsPAvxv	C-216	Debate at Second Reading in the House of Commons	2020-11-24	2021-01-21 01:04:18.217226
+qep0dHSgSlfMWYgQF7bF	C-11	Debate at Second Reading in the House of Commons	2020-11-24	2021-01-21 01:04:18.217226
+SyvJ4yo39asdFp38UQvV	S-207	Debate at Second Reading in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+SunKSCu69ucgJritdVYt	S-205	Debate at Second Reading in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+6fS9jo0R1eiWbyuG5BHW	S-203	Debate at Second Reading in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+lU13hi0IAh3xFZ4U8tSs	S-218	Introduction and First Reading in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+ASCkFmBtC2SoGGc4ukaC	C-11	Introduction and First Reading in the House of Commons	2020-11-17	2021-01-21 01:04:18.217226
+tmf8tosnMEC6T2G2dAI4	C-9	Committee Report on Subject-Matter of Bill Tabled in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+lCMqLfoXcaDGp6asKEVA	C-9	First Reading in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+acHuhBHU5dZF9lBBlcr9	C-9	Debate at Second Reading in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+PXxDwx8eHOF8Hd12sCO6	C-222	Debate at Second Reading in the House of Commons	2020-11-17	2021-01-21 01:04:18.217226
+5X4mGPz4t19djIWccUup	C-9	Second Reading in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+86fCXFdZA1EytgZ1wqyb	S-1001	Debate at 3rd Reading in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+5jeCQ7fc954Hm5yRpmgG	S-1001	Third Reading in the Senate	2020-11-17	2021-01-21 01:04:18.217226
+zH2luVs7vdirLRDDdAPy	S-1001	First Reading in the House of Commons	2020-11-17	2021-01-21 01:04:18.217226
+OEAQLEaXXKqB5vCACoiD	C-7	Debate at Second Reading in the Senate	2020-12-15	2021-01-21 01:04:18.217226
+pwGpkPpC2iruHedhRB2U	S-216	Debate at Second Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+ZCLxofrXHHZYA0hHzRGD	S-210	Debate at Second Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+IWjs0EpOHbh4O0Y0jPEB	S-209	Debate at Second Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+6UVez23wgyTW3PPLWDnZ	C-17	First Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+64Bn6qBl5VHlMj0oezVx	C-16	First Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+WGlPEeSngvIAnHF65n19	S-207	Debate at Second Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+ylRc8RF4ClDLeMQDHqeO	C-3	Debate at Second Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+NzvsGnDsIwFoeEwuEyOl	S-221	Introduction and First Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+z2sxhA21gEKVlp3fpQeZ	C-7	Debate at 3rd Reading in the House of Commons	2020-12-08	2021-01-21 01:04:18.217226
+95AOw9uq0rqxUIN3cu9H	C-260	Introduction and First Reading in the House of Commons	2020-12-08	2021-01-21 01:04:18.217226
+Pm4xPhh2aOusCHD8VCC1	C-7	Debate at 3rd Reading in the House of Commons	2020-12-08	2021-01-21 01:04:18.217226
+JjJdTHObv2Z5ayXLBM4a	S-3	Debate at Second Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+ZxPCJL2bDmRZhoLv7i0g	S-3	Second Reading in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+6ve6Xx5woA2aqLt8aIL6	S-3	Referral to Committee in the Senate	2020-12-08	2021-01-21 01:04:18.217226
+eWMzxi0GTouBEyhRpFXu	C-230	Debate at Second Reading in the House of Commons	2020-12-08	2021-01-21 01:04:18.217226
+x4TNa1srMSAxq2ADSBaW	S-207	Debate at Second Reading in the Senate	2020-11-03	2021-01-21 01:04:18.217226
+XmTGTj9MMbgcqcHaYKWl	S-203	Debate at Second Reading in the Senate	2020-11-03	2021-01-21 01:04:18.217226
+Aq0ny8wrSu50ablyvf0i	S-213	Debate at Second Reading in the Senate	2020-11-03	2021-01-21 01:04:18.217226
+nQtlTkV8rxZprMdlCIv8	S-212	Debate at Second Reading in the Senate	2020-11-03	2021-01-21 01:04:18.217226
+QHWo6VBP9RksGPDby0nP	S-208	Debate at Second Reading in the Senate	2020-11-03	2021-01-21 01:04:18.217226
+EuMCXkwpbYPH8DRhVylp	C-10	Introduction and First Reading in the House of Commons	2020-11-03	2021-01-21 01:04:18.217226
+CAbAfc8TTGEPZKFHYLo5	C-218	Debate at Second Reading in the House of Commons	2020-11-03	2021-01-21 01:04:18.217226
+jYFJl7cXOnVEkMTENy7v	C-3	First Reading in the Senate	2020-12-01	2021-01-21 01:04:18.217226
+xUdjDrRoQCcQozZQkQ83	S-219	Introduction and First Reading in the Senate	2020-12-01	2021-01-21 01:04:18.217226
+0yPp8ozvQB7zMrECT68A	S-3	Introduction and First Reading in the Senate	2020-12-01	2021-01-21 01:04:18.217226
+92acHFdBgQY8Q41tYjBE	C-210	Debate at Second Reading in the House of Commons	2020-12-01	2021-01-21 01:04:18.217226
+kTUlCNn0yY7pCt1hbou5	C-210	Second Reading and Referral to Committee in the House of Commons	2020-12-01	2021-01-21 01:04:18.217226
+Y4P6TY8a8w3x0b7WZsyh	S-1001	Introduction and First Reading in the Senate	2020-10-29	2021-01-21 01:04:18.217226
+ARz2Eygbpc2GRIl2FdQ4	S-216	Introduction and First Reading in the Senate	2020-10-29	2021-01-21 01:04:18.217226
+J3Iopo3c7vS1TjbuLWzf	S-214	Debate at Second Reading in the Senate	2020-10-29	2021-01-21 01:04:18.217226
+lQR038rptRhJVQ0dJcqR	S-212	Debate at Second Reading in the Senate	2020-10-29	2021-01-21 01:04:18.217226
+Ph13G5tFxPIbMkqOUDyz	S-210	Debate at Second Reading in the Senate	2020-10-29	2021-01-21 01:04:18.217226
+XGhnrA70Opst7Y1ZvdVv	C-7	Second Reading and Referral to Committee in the House of Commons	2020-10-29	2021-01-21 01:04:18.217226
+DyHmtJaydu3tbzaQCp3F	C-214	Bill Not Proceeded With in the House of Commons	2020-11-26	2021-01-21 01:04:18.217226
+FTenJeeYNB5xq39scKLF	C-13	Introduction and First Reading in the House of Commons	2020-11-26	2021-01-21 01:04:18.217226
+wwqvCZyL0y5FrB5GNyGw	C-256	Introduction and First Reading in the House of Commons	2020-11-26	2021-01-21 01:04:18.217226
+9EKZoM2VxQpB5Hk0nzRT	C-12	Debate at Second Reading in the House of Commons	2020-11-26	2021-01-21 01:04:18.217226
+SCeUdoINpxX6TCa7QaLX	C-12	Debate at Second Reading in the House of Commons	2020-11-26	2021-01-21 01:04:18.217226
+r51uSdKQCf00BZsakepQ	C-205	Debate at Second Reading in the House of Commons	2020-11-26	2021-01-21 01:04:18.217226
+F6oQBulDwGJ4UgUketxa	C-2	Introduction and First Reading in the House of Commons	2020-09-24	2021-01-21 01:04:18.217226
+pSDHOUTXis9CeI8dnqV0	C-8	Introduction and First Reading in the House of Commons	2020-10-22	2021-01-21 01:04:18.217226
+QvHpM9MAUU1qDSLePoel	S-210	Debate at Second Reading in the Senate	2020-11-19	2021-01-21 01:04:18.217226
+YV9ntSJ8h5BpmhVITmT2	S-213	Debate at Second Reading in the Senate	2020-11-19	2021-01-21 01:04:18.217226
+ZhDV0C8hHGGgQbWJlx5Z	S-218	Debate at Second Reading in the Senate	2020-11-19	2021-01-21 01:04:18.217226
+Goi7u6UXjnM0HKbeIqHw	S-204	Debate at Second Reading in the Senate	2020-11-19	2021-01-21 01:04:18.217226
+D7ogCd5Lxm9E8ToskOFg	S-207	Debate at Second Reading in the Senate	2020-11-19	2021-01-21 01:04:18.217226
+eDlTgfS0oJIwpLaqwjtY	C-9	Committee Report Adopted in the Senate	2020-11-19	2021-01-21 01:04:18.217226
+ZiH6egpW3HzcjX0bnNvg	C-9	Debate at 3rd Reading in the Senate	2020-11-19	2021-01-21 01:04:18.217226
+WyOrq6B5mC7LjCFKGAqD	C-9	Third Reading in the Senate	2020-11-19	2021-01-21 01:04:18.217226
+9EbtWdIrvi6GviY2MwUD	C-12	Introduction and First Reading in the House of Commons	2020-11-19	2021-01-21 01:04:18.217226
+0pq6aGD7BZqJpHaM9pUs	C-10	Debate at Second Reading in the House of Commons	2020-11-19	2021-01-21 01:04:18.217226
+OkbU19VwgKqKWXwDDr0a	C-10	Debate at Second Reading in the House of Commons	2020-11-19	2021-01-21 01:04:18.217226
+bmFq1pNtIq0P9LuoJoYU	C-223	Debate at Second Reading in the House of Commons	2020-11-19	2021-01-21 01:04:18.217226
+xx3dJbrpqwb5lUe8sEK8	C-9	Royal Assent in the Senate	2020-11-19	2021-01-21 01:04:18.217226
+Sn2MB3toAlqOiynpSvub	S-2	Third Reading in the Senate	2020-12-17	2021-01-21 01:04:18.217226
+3LD0InaLPTBAyU3CBWPB	C-7	Second Reading in the Senate	2020-12-17	2021-01-21 01:04:18.217226
+xOHeSjOT8yUZgzl9Up4h	C-7	Referral to Committee in the Senate	2020-12-17	2021-01-21 01:04:18.217226
+ZiuHrKnyzkE4g2F1I91E	C-7	Committee Report on Subject-Matter of Bill Tabled in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+CoIaBIB2ZNb6XBLTTgTs	C-19	Introduction and First Reading in the House of Commons	2020-12-10	2021-01-21 01:04:18.217226
+PojcrCl0l0ETLlBqCIES	C-7	Debate at 3rd Reading in the House of Commons	2020-12-10	2021-01-21 01:04:18.217226
+6pP6SDfO1m23X5nCLQLd	C-8	Debate at Second Reading in the House of Commons	2020-12-10	2021-01-21 01:04:18.217226
+5QCSVwRjA8ryG7WU6s1F	C-10	Debate at Second Reading in the House of Commons	2020-12-10	2021-01-21 01:04:18.217226
+yEHtnuNCegW17WEUbcag	C-7	Third Reading in the House of Commons	2020-12-10	2021-01-21 01:04:18.217226
+hMkQbhA8JJ7GOTTqI3vS	C-17	Debate at Second Reading in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+SnWeDYG1HuDp2gHpNYqU	C-8	Second Reading and Referral to Committee in the House of Commons	2020-12-10	2021-01-21 01:04:18.217226
+unFfED6gu7iFZSC3nhDl	C-10	Debate at Second Reading in the House of Commons	2020-12-10	2021-01-21 01:04:18.217226
+RyHUVCDILxH2T16Jm0Xh	C-7	First Reading in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+WNKwVLhHj8x5huNARRqJ	C-228	Debate at Second Reading in the House of Commons	2020-12-10	2021-01-21 01:04:18.217226
+xwynaQ6qAh0O6vFyDaNA	C-17	Second Reading in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+Dv2eeKCbYYB9MuzCm3FC	C-17	Debate at 3rd Reading in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+vpLOar8rBqTjIrh7x8C9	C-228	Second Reading and Referral to Committee in the House of Commons	2020-12-10	2021-01-21 01:04:18.217226
+eset7OKlqrwAp6ScozSD	C-17	Third Reading in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+HmQQJqJeG1T1B2NuJG15	C-16	Debate at 3rd Reading in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+9GZ6dwZvUDgdj5RbXa4R	C-16	Third Reading in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+mEM3IHeux7mTSPXmJBlb	C-17	Royal Assent in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+RcwsIhP202SBFLJHHKwt	C-16	Royal Assent in the Senate	2020-12-10	2021-01-21 01:04:18.217226
+jSLC2UR1ppRrxxCPgSEP	C-248	Introduction and First Reading in the House of Commons	2020-10-08	2021-01-21 01:04:18.217226
+GcZhAQvWQtdMj8d7wRdF	C-3	Debate at Second Reading in the House of Commons	2020-10-08	2021-01-21 01:04:18.217226
+zZbM3vuzrTuziuEEKrq2	C-3	Debate at Second Reading in the House of Commons	2020-10-08	2021-01-21 01:04:18.217226
+pt35l6CpOFZAnDjtEEwp	S-209	Debate at Second Reading in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+jdqcN6wAxAxSzVcMAcGp	S-207	Debate at Second Reading in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+19Z0z3dSNVV3crqAtftm	S-216	Debate at Second Reading in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+TDLXV4hTzmp82udNTTAM	S-213	Debate at Second Reading in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+XO3zpyHaqFAJ5pCKkcbB	S-2	Debate at Second Reading in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+X4SIfkFdX6u7Nt4oYBGl	S-210	Debate at Second Reading in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+AJHaMIxuueZbnFlbWHRy	C-7	Pre-Study of Commons Bill in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+K2oAFD9ecU0BAm5WcDY8	C-9	Pre-Study of Commons Bill in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+aTM2pUFF32qj5tCddKB3	S-217	Introduction and First Reading in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+SXtOIAbyoxhX7C6ZPS9U	C-251	Introduction and First Reading in the House of Commons	2020-11-05	2021-01-21 01:04:18.217226
+vSidzid04U62gt6i0T2P	C-228	Debate at Second Reading in the House of Commons	2020-11-05	2021-01-21 01:04:18.217226
+1hYXjJT39f03MKIzf24V	C-9	Second Reading and Referral to Committee in the House of Commons	2020-11-05	2021-01-21 01:04:18.217226
+9LcHhaA5OaXx5wLTIGWF	S-1001	Debate at Second Reading in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+talpzzanMNRvDwpAAvc5	S-1001	Second Reading in the Senate	2020-11-05	2021-01-21 01:04:18.217226
+IF6EmUD46mfG5ETLF7Ey	C-9	Committee Reporting the Bill without Amendment in the House of Commons	2020-11-05	2021-01-21 01:04:18.217226
+FnCimwqbZY7M8lZoLO10	S-3	Debate at Second Reading in the Senate	2020-12-03	2021-01-21 01:04:18.217226
+sOeOm3Hdmw07ItJlmGpH	S-219	Debate at Second Reading in the Senate	2020-12-03	2021-01-21 01:04:18.217226
+wlsPto31BlrhmiNE3BgZ	S-213	Debate at Second Reading in the Senate	2020-12-03	2021-01-21 01:04:18.217226
+U5IQcJMRDprPQpifi9aj	S-212	Debate at Second Reading in the Senate	2020-12-03	2021-01-21 01:04:18.217226
+3R3cardoRyVk94WHvod7	S-210	Debate at Second Reading in the Senate	2020-12-03	2021-01-21 01:04:18.217226
+dmka1s4bMUFqPzXRmQ1I	S-209	Debate at Second Reading in the Senate	2020-12-03	2021-01-21 01:04:18.217226
+akb3yrO07LgWKLqailaD	C-3	Debate at Second Reading in the Senate	2020-12-03	2021-01-21 01:04:18.217226
+o6d1mqqGgrMnKZ3Sbq1T	C-15	Introduction and First Reading in the House of Commons	2020-12-03	2021-01-21 01:04:18.217226
+2DY32Hlp6NxCH4pMjQcf	C-258	Introduction and First Reading in the House of Commons	2020-12-03	2021-01-21 01:04:18.217226
+PJZIpN3mXqhmdT3lZa3P	C-259	Introduction and First Reading in the House of Commons	2020-12-03	2021-01-21 01:04:18.217226
+yOX5AQWJ5NsBuD77yXFv	C-7	Debate at Report Stage in the House of Commons	2020-12-03	2021-01-21 01:04:18.217226
+RK6tVwmXRQ4vBA6IRRpt	C-7	Concurrence at Report Stage in the House of Commons	2020-12-03	2021-01-21 01:04:18.217226
+PE7LLxUC2ElT6kZPnXMt	C-6	Introduction and First Reading in the House of Commons	2020-10-01	2021-01-21 01:04:18.217226
+nomObM6Fg0I7BYSR1TYu	C-4	Debate at Second Reading in the Senate	2020-10-01	2021-01-21 01:04:18.217226
+pMIwNFtAa1Z3P0IoMvv9	C-4	Second Reading in the Senate	2020-10-01	2021-01-21 01:04:18.217226
+TLQ8ioJdr5TlI9gcBXD5	C-225	Debate at Second Reading in the House of Commons	2020-11-30	2021-01-21 01:04:18.217226
+8EddcN2rAi7OwsdtB8ow	C-7	Debate at Report Stage in the House of Commons	2020-11-30	2021-01-21 01:04:18.217226
+YWuA8tLkI1ulyVWkWeKg	C-214	Bill Not Proceeded With in the House of Commons	2020-11-30	2021-01-21 01:04:18.217226
+e6DxhFz1QPQqtRTowUvY	C-4	Introduction and First Reading in the House of Commons	2020-09-28	2021-01-21 01:04:18.217226
+hSD4OFlNtpqqWB6slhuN	C-210	Debate at Second Reading in the House of Commons	2020-10-26	2021-01-21 01:04:18.217226
+lMULoQO3XkXr3ZYRDFXA	C-6	Debate at Second Reading in the House of Commons	2020-10-26	2021-01-21 01:04:18.217226
+uxBeBIUSG8EY3JUQ5mFp	C-6	Debate at Second Reading in the House of Commons	2020-10-26	2021-01-21 01:04:18.217226
+IHaSXAmrYHlwHxVUzL7R	C-250	Introduction and First Reading in the House of Commons	2020-10-26	2021-01-21 01:04:18.217226
+NCzm5iS3SLKpVEBTYfcL	C-206	Debate at Second Reading in the House of Commons	2020-11-23	2021-01-21 01:04:18.217226
+LiPE6aIp0QE922lLaQWv	C-8	Debate at Second Reading in the House of Commons	2020-11-23	2021-01-21 01:04:18.217226
+c1DuzRfXLMJWND1SEk40	C-8	Debate at Second Reading in the House of Commons	2020-11-23	2021-01-21 01:04:18.217226
+bVsdBtPUAFpxBcPCF08I	C-3	Third Reading in the House of Commons	2020-11-23	2021-01-21 01:04:18.217226
+SGxB6Go1Hhtma9asntvP	C-253	Introduction and First Reading in the House of Commons	2020-11-23	2021-01-21 01:04:18.217226
+5vEiMQcDCTh3Jb3G912n	C-7	Debate at Second Reading in the House of Commons	2020-10-19	2021-01-21 01:04:18.217226
+0nYmAhTCpRX3moocoJzM	C-3	Second Reading and Referral to Committee in the House of Commons	2020-10-19	2021-01-21 01:04:18.217226
+heAIXlzFxzklowFAZTZM	C-7	Debate at Second Reading in the House of Commons	2020-10-19	2021-01-21 01:04:18.217226
+RuPr0HoqNFi2VC7dZIiS	C-7	Debate at Second Reading in the House of Commons	2020-10-19	2021-01-21 01:04:18.217226
+6TlE2F0gjxqNQL871Y37	C-221	Debate at Second Reading in the House of Commons	2020-11-16	2021-01-21 01:04:18.217226
+NROTjYpBx1yRnhhAqhSu	C-3	Debate at Report Stage in the House of Commons	2020-11-16	2021-01-21 01:04:18.217226
+C1mzki3vBWg8thfTGnmG	C-3	Concurrence at Report Stage in the House of Commons	2020-11-16	2021-01-21 01:04:18.217226
+jYIAYiLPBHtorCGldQQi	C-3	Debate at 3rd Reading in the House of Commons	2020-11-16	2021-01-21 01:04:18.217226
+gUK2cCQg5Nec9ojjp97f	C-3	Debate at 3rd Reading in the House of Commons	2020-11-16	2021-01-21 01:04:18.217226
+2tpVe9dZH2UbGPHvW0IF	C-7	Debate at Second Reading in the Senate	2020-12-14	2021-01-21 01:04:18.217226
+NufHpbHXoVPvNS9ngcaU	C-231	Debate at Second Reading in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+RBvZ6Q2CU3kQMMDC7hG1	C-16	First Reading in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+8JW61bcMcWzzlqMft5H6	C-17	First Reading in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+ppuGFCoKPrumDA7LF6MH	C-16	Debate at Second Reading in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+s14BWqwP79pPtLLCiP02	C-16	Committee Reporting the Bill without Amendment in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+ypDnXJy5UHK6SOpoTDO5	C-16	Second Reading and Referral to Committee in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+Uiw2wnae7kng2TxSTlzF	C-16	Debate at Report Stage in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+Y0fk85RGKqTXBESlibFt	C-16	Concurrence at Report Stage in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+dzwCOjjKzSBctEDOerxU	C-16	Debate at 3rd Reading in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+CzHtFHqCtI2g1plCbIZP	C-16	Third Reading in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+WBGwR4EoBY44v9I1lXvV	C-17	Debate at Second Reading in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+b4ag4EYfMxMWRjjJoUpB	C-17	Second Reading and Referral to Committee in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+5jZqI1CEddovsrnuBOJ3	C-17	Committee Reporting the Bill without Amendment in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+aGh7zgRdj7KsxBSSRnW9	C-17	Debate at Report Stage in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+KCtCF2wwFhfFfJa1SbI3	C-17	Concurrence at Report Stage in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+6XGVICTgA1mgNXEmlwoj	C-17	Debate at 3rd Reading in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+6W4h36l1jASHLmKCgTTj	C-17	Third Reading in the House of Commons	2020-12-07	2021-01-21 01:04:18.217226
+bBXElL1tf0mTJUcjQP2l	C-7	Introduction and First Reading in the House of Commons	2020-10-05	2021-01-21 01:04:18.217226
+eQOz0eBiPQz4zFZ9tHV8	C-247	Introduction and First Reading in the House of Commons	2020-10-05	2021-01-21 01:04:18.217226
+W8vRUBDAyOIV4poQNeUy	C-229	Debate at Second Reading in the House of Commons	2020-11-02	2021-01-21 01:04:18.217226
+RjobkGQYBAfHPnl8BQdJ	C-8	Debate at Second Reading in the House of Commons	2020-11-02	2021-01-21 01:04:18.217226
+vyCPzcHY3AegjIYeGqNT	C-9	Introduction and First Reading in the House of Commons	2020-11-02	2021-01-21 01:04:18.217226
+wTRIfwvgyYUaNV6Xfb9p	C-8	Debate at Second Reading in the House of Commons	2020-11-02	2021-01-21 01:04:18.217226
+PZV3YSIVsdFrKgpiVrvc	C-5	Second Reading and Referral to Committee in the House of Commons	2020-11-02	2021-01-21 01:04:18.217226
+gtCalkGIpo4iQcV7xpTs	C-5	Debate at Second Reading in the House of Commons	2020-10-30	2021-01-21 01:04:18.217226
+D0BNyo8dtCcqhyuFgTvG	C-5	Debate at Second Reading in the House of Commons	2020-10-30	2021-01-21 01:04:18.217226
+RUPg45U8LFP3H6Wu00aI	C-204	Debate at Second Reading in the House of Commons	2020-10-30	2021-01-21 01:04:18.217226
+FQtnEAYg7GmhsZa6HhXj	C-3	Committee Reporting the Bill with Amendments in the House of Commons	2020-10-30	2021-01-21 01:04:18.217226
+D36sEtCCroc40YsGZbCO	C-237	Debate at Second Reading in the House of Commons	2020-11-27	2021-01-21 01:04:18.217226
+9IbR6ZjF5oZBKUo1aIBU	C-257	Introduction and First Reading in the House of Commons	2020-11-27	2021-01-21 01:04:18.217226
+ZlO4IgLSBjAFUi4dmAmt	C-7	Debate at Report Stage in the House of Commons	2020-11-27	2021-01-21 01:04:18.217226
+bN3UBEZIGO2e3z6QK0LP	C-3	Introduction and First Reading in the House of Commons	2020-09-25	2021-01-21 01:04:18.217226
+UbVnZIJAGBxBALdkFwd2	C-5	Debate at Second Reading in the House of Commons	2020-10-23	2021-01-21 01:04:18.217226
+YjYx8CgMeA4khhRSwXGN	C-249	Introduction and First Reading in the House of Commons	2020-10-23	2021-01-21 01:04:18.217226
+1CXdIrxz0aCeA8CZ0xT6	C-5	Debate at Second Reading in the House of Commons	2020-10-23	2021-01-21 01:04:18.217226
+8B3syNb4vD0eAGCcsOX0	C-3	Debate at 3rd Reading in the House of Commons	2020-11-20	2021-01-21 01:04:18.217226
+AOC7ftjsqt9vR24VMr1j	C-3	Debate at 3rd Reading in the House of Commons	2020-11-20	2021-01-21 01:04:18.217226
+BFLUt5JvmqBBDPruYw3N	C-10	Debate at Second Reading in the House of Commons	2020-12-11	2021-01-21 01:04:18.217226
+BNE1E6rYpjMBzweCXowK	C-262	Introduction and First Reading in the House of Commons	2020-12-11	2021-01-21 01:04:18.217226
+aslANyzJALYhjEiPlBbc	C-262	Placed in the Order of Precedence in the House of Commons	2020-12-11	2021-01-21 01:04:18.217226
+F9GdOnxKqKjY3MehAHf6	C-6	Committee Reporting the Bill with Amendments in the House of Commons	2020-12-11	2021-01-21 01:04:18.217226
+ppCfVw6t8IQLfeiJLAMS	C-7	Debate at Second Reading in the House of Commons	2020-10-09	2021-01-21 01:04:18.217226
+4mzsE2QDhcJsFkQDdVDu	C-7	Debate at Second Reading in the House of Commons	2020-10-09	2021-01-21 01:04:18.217226
+zuCUHNRBbdnmYSUB9gda	C-7	Debate at Second Reading in the House of Commons	2020-10-09	2021-01-21 01:04:18.217226
+2gs2eZb28giSVjJ7D5D3	C-220	Debate at Second Reading in the House of Commons	2020-11-06	2021-01-21 01:04:18.217226
+prxyEpPzcXHaL9FljVcd	C-9	Debate at Report Stage in the House of Commons	2020-11-06	2021-01-21 01:04:18.217226
+Ea0JT6QrNEbCo7alRmbp	C-9	Concurrence at Report Stage in the House of Commons	2020-11-06	2021-01-21 01:04:18.217226
+kN9QsoR40IpzPbh68GYQ	C-9	Debate at 3rd Reading in the House of Commons	2020-11-06	2021-01-21 01:04:18.217226
+ZZ458csTvQlb57gdTafE	C-9	Third Reading in the House of Commons	2020-11-06	2021-01-21 01:04:18.217226
+IndJF7ZyKLPgchNehsSI	C-7	Debate at 3rd Reading in the House of Commons	2020-12-04	2021-01-21 01:04:18.217226
+ODdjkHVmmEjcOaOdY013	C-7	Debate at 3rd Reading in the House of Commons	2020-12-04	2021-01-21 01:04:18.217226
+AnGKPH8aiBJF1Ikbj7gV	C-7	Debate at 3rd Reading in the House of Commons	2020-12-04	2021-01-21 01:04:18.217226
+TEz7axlJ4V23U6cEADBq	C-232	Debate at Second Reading in the House of Commons	2020-12-04	2021-01-21 01:04:18.217226
+gmTc0bGpUXKtLJJiLmsx	C-4	Debate at 3rd Reading in the Senate	2020-10-02	2021-01-21 01:04:18.217226
+WiM3HvH72yUj96eR4UYT	C-4	Third Reading in the Senate	2020-10-02	2021-01-21 01:04:18.217226
+Q6jNKzLsJRp635425SZT	C-4	Royal Assent in the Senate	2020-10-02	2021-01-21 01:04:18.217226
+KDsxZflb6JMGfGBQB7hN	C-3	Debate at Second Reading in the House of Commons	2020-10-02	2021-01-21 01:04:18.217226
+86oLwD1KHxn8ek2i7AR7	C-3	Debate at Second Reading in the House of Commons	2020-10-02	2021-01-21 01:04:18.217226
+tPGUlM18miYsmlSizlfv	C-3	Debate at Second Reading in the House of Commons	2020-10-02	2021-01-21 01:04:18.217226
+\.
+
+
+--
+-- Data for Name: parliamentary_sessions; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.parliamentary_sessions (id, parliament, number, start_date, end_date, created_at) FROM stdin;
+QCiRdvLxwhYaAt5OHPG7	43	1	2019-12-05	2019-08-18	2021-01-21 00:58:17.928907
+OczHlwsiFYQCTMspcTvc	43	2	2020-09-23	\N	2021-01-21 00:58:17.928907
+\.
+
+
+--
+-- Data for Name: parliaments; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.parliaments (id, number, start_date, end_date, created_at) FROM stdin;
+Dq5GnWtH4At3lxzuwshR	43	2019-12-05	\N	2021-01-21 00:58:17.925384
+\.
+
+
+--
+-- Data for Name: user_bills; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.user_bills (user_id, bill_id, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: user_categories; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.user_categories (user_id, category_id, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: user_credentials; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.user_credentials (id, user_id, type, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: commons_admin
+--
+
+COPY public.users (id, first_name, last_name, email, email_notification, sms_notification, active, phone_number, address, street, city, province, postal_code, mp, party, riding_name, created_at) FROM stdin;
+\.
+
+
+--
+-- Name: bill_categories bill_categories_bill_id_category_id_key; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.bill_categories
+    ADD CONSTRAINT bill_categories_bill_id_category_id_key UNIQUE (bill_id, category_id);
+
+
+--
+-- Name: bills bills_code_key; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.bills
+    ADD CONSTRAINT bills_code_key UNIQUE (code);
+
+
+--
+-- Name: bills bills_pkey; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.bills
+    ADD CONSTRAINT bills_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.categories
+    ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: events events_pkey; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.events
+    ADD CONSTRAINT events_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: parliamentary_sessions parliamentary_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.parliamentary_sessions
+    ADD CONSTRAINT parliamentary_sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: parliaments parliaments_number_key; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.parliaments
+    ADD CONSTRAINT parliaments_number_key UNIQUE (number);
+
+
+--
+-- Name: parliaments parliaments_pkey; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.parliaments
+    ADD CONSTRAINT parliaments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_bills user_bills_user_id_bill_id_key; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.user_bills
+    ADD CONSTRAINT user_bills_user_id_bill_id_key UNIQUE (user_id, bill_id);
+
+
+--
+-- Name: user_categories user_categories_user_id_category_id_key; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.user_categories
+    ADD CONSTRAINT user_categories_user_id_category_id_key UNIQUE (user_id, category_id);
+
+
+--
+-- Name: user_credentials user_credentials_pkey; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.user_credentials
+    ADD CONSTRAINT user_credentials_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_credentials user_credentials_user_id_type_key; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.user_credentials
+    ADD CONSTRAINT user_credentials_user_id_type_key UNIQUE (user_id, type);
+
+
+--
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: bill_categories bill_categories_bill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.bill_categories
+    ADD CONSTRAINT bill_categories_bill_id_fkey FOREIGN KEY (bill_id) REFERENCES public.bills(id) ON DELETE CASCADE;
+
+
+--
+-- Name: bill_categories bill_categories_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.bill_categories
+    ADD CONSTRAINT bill_categories_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id) ON DELETE CASCADE;
+
+
+--
+-- Name: bills bills_parliamentary_session_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.bills
+    ADD CONSTRAINT bills_parliamentary_session_id_fkey FOREIGN KEY (parliamentary_session_id) REFERENCES public.parliamentary_sessions(id);
+
+
+--
+-- Name: events events_bill_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.events
+    ADD CONSTRAINT events_bill_code_fkey FOREIGN KEY (bill_code) REFERENCES public.bills(code);
+
+
+--
+-- Name: parliamentary_sessions parliamentary_sessions_parliament_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.parliamentary_sessions
+    ADD CONSTRAINT parliamentary_sessions_parliament_fkey FOREIGN KEY (parliament) REFERENCES public.parliaments(number);
+
+
+--
+-- Name: user_bills user_bills_bill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.user_bills
+    ADD CONSTRAINT user_bills_bill_id_fkey FOREIGN KEY (bill_id) REFERENCES public.bills(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_bills user_bills_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.user_bills
+    ADD CONSTRAINT user_bills_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_categories user_categories_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.user_categories
+    ADD CONSTRAINT user_categories_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_categories user_categories_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.user_categories
+    ADD CONSTRAINT user_categories_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_credentials user_credentials_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: commons_admin
+--
+
+ALTER TABLE ONLY public.user_credentials
+    ADD CONSTRAINT user_credentials_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+

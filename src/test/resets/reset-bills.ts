@@ -33,7 +33,7 @@ CREATE TABLE bills (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-GRANT ALL PRIVILEGES ON TABLE bills TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE bills TO commons_admin;
 
 INSERT INTO bills 
   (parliamentary_session_id, code, title, description, introduced_date, summary_url, page_url, full_text_url, passed)
@@ -51,7 +51,7 @@ CREATE TABLE bill_categories (
   UNIQUE (bill_id, category_id)
 );
 
-GRANT ALL PRIVILEGES ON TABLE bill_categories TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE bill_categories TO commons_admin;
 `;
 
 export const resetBills = async (): Promise<void> => {

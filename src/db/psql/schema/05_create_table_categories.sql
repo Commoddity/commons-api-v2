@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS parliaments CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
 
 CREATE OR REPLACE FUNCTION generate_uid(size INT) RETURNS TEXT AS $$
 DECLARE
@@ -16,13 +16,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
-CREATE TABLE parliaments (
+CREATE TABLE categories (
   id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
-  number INT,
-  start_date DATE,
-  end_date DATE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (number)
+  name VARCHAR (555) NOT NULL,
+  class_code VARCHAR (555) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-GRANT ALL PRIVILEGES ON TABLE parliaments TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE categories TO commons_admin;

@@ -27,7 +27,7 @@ CREATE TABLE events (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-GRANT ALL PRIVILEGES ON TABLE events TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE events TO commons_admin;
 
 INSERT INTO events 
   (bill_code, title, publication_date)

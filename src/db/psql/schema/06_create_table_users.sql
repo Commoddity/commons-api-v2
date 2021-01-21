@@ -20,7 +20,7 @@ CREATE TABLE users (
   id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
   first_name VARCHAR (255) NOT NULL,
   last_name VARCHAR (255) NOT NULL,
-  email VARCHAR (255) NOT NULL UNIQUE,
+  email VARCHAR (255) NOT NULL,
   email_notification INT,
   sms_notification INT,
   active BOOLEAN,
@@ -29,11 +29,12 @@ CREATE TABLE users (
   street VARCHAR (255),
   city VARCHAR (255),
   province VARCHAR (255),
-  postal_code VARCHAR (255),
+  postal_code VARCHAR (7),
   mp VARCHAR (255),
   party VARCHAR (255),
   riding_name VARCHAR (255),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (email)
 );
 
-GRANT ALL PRIVILEGES ON TABLE users TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE users TO commons_admin;

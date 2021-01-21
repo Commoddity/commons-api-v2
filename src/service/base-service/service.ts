@@ -103,14 +103,14 @@ export class BaseService<T> {
     }
   }
 
-  async findLatestId({ table }: TableParams): Promise<number> {
+  async findLatestId({ table }: TableParams): Promise<string> {
     const query = pgp.as.format(
       "SELECT id FROM $1:raw ORDER BY id DESC LIMIT 1",
       [table],
     );
 
     try {
-      return Number((await this.one<{ id: number }>(query)).id);
+      return String((await this.one<{ id: number }>(query)).id);
     } catch (error) {
       throw new Error(`[FIND LATEST ID ERROR]: ${error}`);
     }

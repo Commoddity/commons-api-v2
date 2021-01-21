@@ -1,4 +1,7 @@
-DROP TABLE IF EXISTS events CASCADE;
+DROP TABLE IF EXISTS parliaments CASCADE;
+
+DROP EXTENSION IF EXISTS pgcrypto;
+CREATE EXTENSION pgcrypto;
 
 CREATE OR REPLACE FUNCTION generate_uid(size INT) RETURNS TEXT AS $$
 DECLARE
@@ -16,12 +19,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
-CREATE TABLE events (
+CREATE TABLE parliaments (
   id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
-  bill_code VARCHAR (7) NOT NULL REFERENCES bills (code),
-  title VARCHAR (555) NOT NULL,
-  publication_date DATE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  number INT,
+  start_date DATE,
+  end_date DATE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (number)
 );
 
-GRANT ALL PRIVILEGES ON TABLE events TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE parliaments TO commons_admin;

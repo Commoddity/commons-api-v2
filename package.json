@@ -12,7 +12,8 @@
     "lint": "eslint . --ext .ts",
     "test": "NODE_ENV=test jest --silent",
     "test:log": "NODE_ENV=test jest",
-    "db:reset": "ts-node ./src/bin/resetDb.ts",
+    "db:init": "NODE_ENV=dev ts-node -r tsconfig-paths/register ./src/bin/schemaReset.ts && NODE_ENV=dev ts-node -r tsconfig-paths/register --files ./src/bin/updateDb.ts",
+    "db:reset": "NODE_ENV=dev ts-node -r tsconfig-paths/register ./src/bin/resetDb.ts",
     "db:test_reset": "NODE_ENV=test ts-node -r tsconfig-paths/register ./src/bin/testResetDb.ts",
     "push:dev": "yarn lint && yarn build && yarn test && git push origin dev",
     "db:update_database": "NODE_ENV=dev ts-node -r tsconfig-paths/register --files ./src/bin/updateDb.ts"
@@ -69,6 +70,7 @@
     "graphql-iso-date": "^3.6.1",
     "join-monster": "^3.0.1",
     "pg-promise": "^10.9.1",
+    "serverless-http": "^2.6.1",
     "xml2js": "^0.4.23"
   }
 }

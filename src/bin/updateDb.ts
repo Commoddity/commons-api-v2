@@ -1,7 +1,3 @@
-// Load .env data into process.env
-import dotenv from "dotenv-flow";
-dotenv.config({ node_env: "dev" });
-
 import { WebService } from "../service/web";
 import { BillsService } from "../service/bills";
 import { EventsService } from "../service/events";

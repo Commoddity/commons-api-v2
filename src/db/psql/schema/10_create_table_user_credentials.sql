@@ -19,9 +19,9 @@ $$ LANGUAGE plpgsql VOLATILE;
 CREATE TABLE user_credentials (
   id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
   user_id TEXT NOT NULL REFERENCES users (id),
-  type VARCHAR(55),
+  type VARCHAR(20) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (user_id, type)
 );
 
-GRANT ALL PRIVILEGES ON TABLE user_credentials TO commoddity;
+GRANT ALL PRIVILEGES ON TABLE user_credentials TO commons_admin;
