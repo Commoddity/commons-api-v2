@@ -1,57 +1,38 @@
-service:
-  name: commons-app
+service: canada-commons-app
 
 provider:
   name: aws
   runtime: nodejs12.x
-  stage: dev
   region: ca-central-1
-  role: LambdaRole
-  environment:
-    POSTGRES_HOST: ${env.{NODE_ENV}:POSTGRES_HOST}
-    POSTGRES_PORT: ${env.{NODE_ENV}:POSTGRES_PORT}
-    DB_NAME: ${env.{NODE_ENV}:DB_NAME}
-    POSTGRES_USER: ${env.{NODE_ENV}:POSTGRES_USER}
-    POSTGRES_PASSWORD: ${env.{NODE_ENV}:POSTGRES_PASSWORD}
+  stage: dev
 
 plugins:
   - serverless-plugin-typescript
+  - serverless-tscpaths
+  - serverless-dotenv-plugin
   - serverless-offline
-
-package:
-  exclude:
-    - .env.test
-    - .env.production
-  include:
-    - .env.{NODE_ENV}
 
 functions:
   graphql:
-    handler: src/server.handler
+    handler: src/index.graphqlHandler
     events:
       - http:
-          path: api
+          path: graphql
           method: post
           cors: true
+      - http:
+          path: graphql
+          method: get
+          cors: true
 
-resources:
-  Resources:
-    PostgreSqlRDSInstance:
-      Type: AWS::RDS::DBInstance
-      Properties:
-        MasterUsername: ${env.{NODE_ENV}:POSTGRES_USER}
-        MasterUserPassword: ${env.{NODE_ENV}:POSTGRES_PASSWORD}
-        AllocatedStorage: 20
-        DBName: ${.env.{NODE_ENV}.POSTGRES_DB}
-        DBInstanceClass: db.t2.micro
-        DBSubnetGroupName:
-          Ref: ServerlessSubnetGroup
-        Engine: postgres
-        PubliclyAccessible: true
-    ServerlessVPCGA:
-      Type: AWS::EC2::VPCGatewayAttachment
-      Properties:
-        VpcId:
-          Ref: ServerlessVPC
-        InternetGatewayId:
-          Ref: ServerlessInternetGateway
+custom:
+  tscpaths:
+    buildPath: .build
+  dotenv:
+    include:
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - AWS_REGION
