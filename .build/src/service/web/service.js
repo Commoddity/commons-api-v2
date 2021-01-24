@@ -23,10 +23,10 @@ exports.WebService = void 0;
 const axios_1 = __importDefault(require("axios"));
 const cheerio_1 = __importDefault(require("cheerio"));
 const xml2js_1 = require("xml2js");
-const _services_1 = require("..");
+const _services_1 = require("@services");
 const bills_1 = require("../bills");
 const events_1 = require("../events");
-const _utils_1 = require("../../utils");
+const _utils_1 = require("@utils");
 class WebService extends _services_1.BaseService {
     constructor() {
         super(...arguments);

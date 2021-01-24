@@ -18,7 +18,7 @@ export const Parliament: GraphQLObjectType = new GraphQLObjectType({
     },
   },
   fields: () => ({
-    id: { type: GraphQLNonNull(GraphQLInt) },
+    id: { type: GraphQLNonNull(GraphQLString) },
     number: { type: GraphQLNonNull(GraphQLInt) },
     start_date: { type: DateScalar },
     end_date: { type: DateScalar },

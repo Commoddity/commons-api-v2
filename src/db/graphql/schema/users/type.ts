@@ -3,7 +3,6 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLString,
-  GraphQLInt,
   GraphQLBoolean,
 } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
@@ -20,7 +19,7 @@ const User: GraphQLObjectType = new GraphQLObjectType({
     },
   },
   fields: () => ({
-    id: { type: GraphQLNonNull(GraphQLInt) },
+    id: { type: GraphQLNonNull(GraphQLString) },
     first_name: { type: GraphQLNonNull(GraphQLString) },
     last_name: { type: GraphQLNonNull(GraphQLString) },
     email: { type: GraphQLNonNull(GraphQLString) },

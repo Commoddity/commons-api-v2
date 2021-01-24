@@ -14,7 +14,7 @@ exports.Category = new graphql_1.GraphQLObjectType({
         },
     },
     fields: () => ({
-        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLInt) },
+        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         name: { type: graphql_1.GraphQLString },
         class_code: { type: graphql_1.GraphQLString },
         created_at: { type: graphql_iso_date_1.GraphQLDateTime },

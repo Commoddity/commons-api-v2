@@ -14,7 +14,7 @@ exports.Parliament = new graphql_1.GraphQLObjectType({
         },
     },
     fields: () => ({
-        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLInt) },
+        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         number: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLInt) },
         start_date: { type: scalars_1.DateScalar },
         end_date: { type: scalars_1.DateScalar },

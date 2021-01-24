@@ -1,9 +1,4 @@
-import {
-  GraphQLObjectType,
-  GraphQLNonNull,
-  GraphQLString,
-  GraphQLInt,
-} from "graphql";
+import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
 import { DateScalar } from "../../scalars";
 
@@ -16,7 +11,7 @@ export const Event: GraphQLObjectType = new GraphQLObjectType({
     },
   },
   fields: () => ({
-    id: { type: GraphQLNonNull(GraphQLInt) },
+    id: { type: GraphQLNonNull(GraphQLString) },
     bill_code: { type: GraphQLNonNull(GraphQLString) },
     title: { type: GraphQLNonNull(GraphQLString) },
     publication_date: { type: DateScalar },

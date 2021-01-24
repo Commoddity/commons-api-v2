@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BaseService = void 0;
-const _db_1 = require("../../db");
+const _db_1 = require("@db");
 const _1 = require(".");
 class BaseService {
     createOne({ table, tableValues }) {

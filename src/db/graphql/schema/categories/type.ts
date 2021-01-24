@@ -3,7 +3,6 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLString,
-  GraphQLInt,
 } from "graphql";
 import { GraphQLDateTime } from "graphql-iso-date";
 import { Bill } from "../bills";
@@ -18,7 +17,7 @@ export const Category: GraphQLObjectType = new GraphQLObjectType({
     },
   },
   fields: () => ({
-    id: { type: GraphQLNonNull(GraphQLInt) },
+    id: { type: GraphQLNonNull(GraphQLString) },
     name: { type: GraphQLString },
     class_code: { type: GraphQLString },
     created_at: { type: GraphQLDateTime },

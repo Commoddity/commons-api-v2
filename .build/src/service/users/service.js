@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const aws_sdk_1 = require("aws-sdk");
-const _services_1 = require("..");
+const _services_1 = require("@services");
 const models_1 = require("./models");
 class UsersService extends _services_1.BaseService {
     constructor() {

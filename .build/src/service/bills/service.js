@@ -17,7 +17,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BillsService = void 0;
-const _services_1 = require("..");
+const _services_1 = require("@services");
 class BillsService extends _services_1.BaseService {
     constructor() {
         super(...arguments);

@@ -13,7 +13,7 @@ exports.Event = new graphql_1.GraphQLObjectType({
         },
     },
     fields: () => ({
-        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLInt) },
+        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         bill_code: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         title: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         publication_date: { type: scalars_1.DateScalar },

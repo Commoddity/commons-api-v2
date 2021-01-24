@@ -13,7 +13,7 @@ exports.userBillMutations = void 0;
 const graphql_1 = require("graphql");
 const graphql_iso_date_1 = require("graphql-iso-date");
 const type_1 = require("./type");
-const _services_1 = require("../../../../service");
+const _services_1 = require("@services");
 exports.userBillMutations = {
     addUserBill: {
         type: type_1.UserBill,

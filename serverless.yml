@@ -14,14 +14,14 @@ plugins:
 
 functions:
   graphql:
-    handler: src/index.graphqlHandler
+    handler: src/lambda.handler
     events:
       - http:
-          path: graphql
+          path: api
           method: post
           cors: true
       - http:
-          path: graphql
+          path: api
           method: get
           cors: true
 

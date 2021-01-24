@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParliamentsService = void 0;
-const _services_1 = require("..");
+const _services_1 = require("@services");
 class ParliamentsService extends _services_1.BaseService {
     queryLatestParliamentarySession() {
         const _super = Object.create(null, {

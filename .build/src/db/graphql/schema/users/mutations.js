@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userMutations = void 0;
 const graphql_1 = require("graphql");
 const type_1 = require("./type");
-const _services_1 = require("../../../../service");
+const _services_1 = require("@services");
 exports.userMutations = {
     addUser: {
         type: type_1.User,

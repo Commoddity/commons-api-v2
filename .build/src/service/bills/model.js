@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createBill = exports.Bill = void 0;
 const axios_1 = __importDefault(require("axios"));
 const cheerio_1 = __importDefault(require("cheerio"));
-const _utils_1 = require("../../utils");
+const _utils_1 = require("@utils");
 const parliaments_1 = require("../parliaments");
 class Bill {
     constructor({ link, description }) {

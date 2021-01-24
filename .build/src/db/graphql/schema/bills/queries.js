@@ -8,7 +8,7 @@ const graphql_1 = require("graphql");
 const join_monster_1 = __importDefault(require("join-monster"));
 const scalars_1 = require("../../scalars");
 const type_1 = require("./type");
-const _services_1 = require("../../../../service");
+const _services_1 = require("@services");
 const billQueries = {
     bills: {
         type: new graphql_1.GraphQLList(type_1.Bill),

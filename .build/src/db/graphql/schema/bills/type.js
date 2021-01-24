@@ -16,7 +16,7 @@ exports.Bill = new graphql_1.GraphQLObjectType({
         },
     },
     fields: () => ({
-        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLInt) },
+        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         parliamentary_session_id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLInt) },
         code: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         title: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },

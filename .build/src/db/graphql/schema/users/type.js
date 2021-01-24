@@ -15,7 +15,7 @@ const User = new graphql_1.GraphQLObjectType({
         },
     },
     fields: () => ({
-        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLInt) },
+        id: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         first_name: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         last_name: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },
         email: { type: graphql_1.GraphQLNonNull(graphql_1.GraphQLString) },

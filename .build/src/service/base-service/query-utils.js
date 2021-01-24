@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QueryUtils = void 0;
-const _db_1 = require("../../db");
+const _db_1 = require("@db");
 class QueryUtils {
     static createDeleteQuery(table, where, operator) {
         const whereClause = this.createWhereClause(where, operator);

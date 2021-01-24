@@ -21,7 +21,7 @@ export const Bill = new GraphQLObjectType({
     },
   },
   fields: () => ({
-    id: { type: GraphQLNonNull(GraphQLInt) },
+    id: { type: GraphQLNonNull(GraphQLString) },
     parliamentary_session_id: { type: GraphQLNonNull(GraphQLInt) },
     code: { type: GraphQLNonNull(GraphQLString) },
     title: { type: GraphQLNonNull(GraphQLString) },
