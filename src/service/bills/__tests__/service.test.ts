@@ -1,4 +1,4 @@
-import { BillsService } from "@services";
+import { BillsService, ParliamentsService } from "@services";
 import { resetBills, testBills } from "@test";
 import { BillInterface } from "../model";
 
@@ -10,11 +10,14 @@ describe(`BillsService methods`, () => {
   describe(`Create Bill`, () => {
     it(`Creates a new bill in the DB `, async () => {
       const testBillInput = testBills[1];
+      const parliamentary_session_id = await new ParliamentsService().queryLatestParliamentarySession();
+      testBillInput.parliamentary_session_id = parliamentary_session_id;
+
       const testBillResult = await new BillsService().createBill(testBillInput);
 
       // Test bill minus the fields id and created_at (which will differ between creations)
       const testBill = {
-        parliamentary_session_id: 2,
+        parliamentary_session_id,
         code: "C-231",
         title: "A Bill for the Provision of Momentary Sanity",
         description: "Why god why",
@@ -34,6 +37,11 @@ describe(`BillsService methods`, () => {
   describe(`Create Many Bills`, () => {
     it(`Creates many bills in the DB `, async () => {
       const testBillsInput: BillInterface[] = testBills;
+      const parliamentary_session_id = await new ParliamentsService().queryLatestParliamentarySession();
+      testBillsInput.forEach((bill) => {
+        bill.parliamentary_session_id = parliamentary_session_id;
+      });
+
       const testBillsResult = await new BillsService().createManyBills(
         testBillsInput,
       );

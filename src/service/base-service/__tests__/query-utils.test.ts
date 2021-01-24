@@ -43,7 +43,7 @@ describe(`Base Service Methods`, () => {
       it(`Creates the query string for an SQL insert query from a single object`, () => {
         const testObject = testBills[0];
         const testQuery = QueryUtils.createInsertQuery(testObject, testTable);
-        const correctQueryForBills = `INSERT INTO "bills"("parliamentary_session_id","code","title","description","introduced_date","summary_url","page_url","full_text_url","passed") VALUES(1,'C-205','A Bill to Touch Butts','Literally just touching butts.','2020/09/23','http://billsbillsbills.com','http://billsandbills.com','http://billsplusbills.com',null) RETURNING *`;
+        const correctQueryForBills = `INSERT INTO "bills"("parliamentary_session_id","code","title","description","introduced_date","summary_url","page_url","full_text_url","passed") VALUES('SJs9RCpn8Rvl0qmRtQ1e','C-205','A Bill to Touch Butts','Literally just touching butts.','2020/09/23','http://billsbillsbills.com','http://billsandbills.com','http://billsplusbills.com',null) RETURNING *`;
 
         expect(testQuery).toEqual(correctQueryForBills);
       });
@@ -54,7 +54,7 @@ describe(`Base Service Methods`, () => {
           testObjectsArray,
           testTable,
         );
-        const correctQueryForBillsArray = `INSERT INTO "bills"("parliamentary_session_id","code","title","description","introduced_date","summary_url","page_url","full_text_url","passed") VALUES(1,'C-205','A Bill to Touch Butts','Literally just touching butts.','2020/09/23','http://billsbillsbills.com','http://billsandbills.com','http://billsplusbills.com',null),(2,'C-231','A Bill for the Provision of Momentary Sanity','Why god why','2020/08/26','http://billsarebills.com','http://billsbillsbills.com','http://whybillstho.com',true),(2,'C-242','A Bill for Sea Otters','Cute little guys','2019/03/10','http://billsarebills.com','http://billsbillsbills.com','http://whybillstho.com',true) RETURNING *`;
+        const correctQueryForBillsArray = `INSERT INTO "bills"("parliamentary_session_id","code","title","description","introduced_date","summary_url","page_url","full_text_url","passed") VALUES('SJs9RCpn8Rvl0qmRtQ1e','C-205','A Bill to Touch Butts','Literally just touching butts.','2020/09/23','http://billsbillsbills.com','http://billsandbills.com','http://billsplusbills.com',null),('QRq6LhKG2EBoFOvNo1qv','C-231','A Bill for the Provision of Momentary Sanity','Why god why','2020/08/26','http://billsarebills.com','http://billsbillsbills.com','http://whybillstho.com',true),('QRq6LhKG2EBoFOvNo1qv','C-242','A Bill for Sea Otters','Cute little guys','2019/03/10','http://billsarebills.com','http://billsbillsbills.com','http://whybillstho.com',true) RETURNING *`;
 
         expect(testQueryForArrays).toEqual(correctQueryForBillsArray);
       });

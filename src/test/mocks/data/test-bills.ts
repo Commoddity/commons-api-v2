@@ -2,7 +2,7 @@ import { FormatUtils } from "@utils";
 
 export const testBills = [
   {
-    parliamentary_session_id: 1,
+    parliamentary_session_id: "SJs9RCpn8Rvl0qmRtQ1e",
     code: "C-205",
     title: "A Bill to Touch Butts",
     description: "Literally just touching butts.",
@@ -13,7 +13,7 @@ export const testBills = [
     passed: undefined,
   },
   {
-    parliamentary_session_id: 2,
+    parliamentary_session_id: "QRq6LhKG2EBoFOvNo1qv",
     code: "C-231",
     title: "A Bill for the Provision of Momentary Sanity",
     description: "Why god why",
@@ -24,7 +24,7 @@ export const testBills = [
     passed: true,
   },
   {
-    parliamentary_session_id: 2,
+    parliamentary_session_id: "QRq6LhKG2EBoFOvNo1qv",
     code: "C-242",
     title: "A Bill for Sea Otters",
     description: "Cute little guys",

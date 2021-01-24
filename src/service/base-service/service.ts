@@ -6,6 +6,8 @@ export class BaseService<T> {
   async createOne<T>({ table, tableValues }: CreateParams<T>): Promise<T> {
     const query: string = QueryUtils.createInsertQuery(tableValues, table);
 
+    console.log("QUERY IS HERE", query);
+
     try {
       return this.one<T>(query);
     } catch (error) {
@@ -143,10 +145,7 @@ export class BaseService<T> {
       : pgp.as.format("SELECT $1:raw FROM $2:raw", [column, table]);
 
     try {
-      const returnedValues = (await this.many<any>(query)).map(
-        (row) => row[column],
-      );
-      return sort ? returnedValues.sort() : returnedValues;
+      return (await this.many<any>(query)).map((row) => row[column]);
     } catch (error) {
       throw new Error(`[FIND LATEST ID ERROR]: ${error}`);
     }

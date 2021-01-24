@@ -9,12 +9,9 @@ describe(`Base Service Methods`, () => {
       const testReturnedIds = await new BaseService().findAllValues({
         table: testTable,
         column: testColumn,
-        sort: true,
       });
 
-      const testDbBillIds = [1, 2, 3];
-
-      expect(testReturnedIds).toEqual(testDbBillIds);
+      expect(testReturnedIds).toHaveLength(3);
     });
 
     it(`Returns all codes in the bills table, unsorted`, async () => {

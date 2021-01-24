@@ -2,7 +2,10 @@ import { UsersService, User, UserCredentials } from "@services";
 import { resetUsers } from "@test";
 
 describe(`UsersService methods`, () => {
-  afterAll(async () => {
+  beforeEach(async () => {
+    await resetUsers();
+  });
+  afterEach(async () => {
     await resetUsers();
   });
 

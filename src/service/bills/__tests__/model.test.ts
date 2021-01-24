@@ -1,6 +1,7 @@
+import { ParliamentsService } from "@services";
 import { Bill, createBill } from "..";
 
-describe(`Bill model`, () => {
+describe(`Bill model`, async () => {
   const testBillEvents: BillEvent[] = [
     {
       title: "C-8, Introduction and First Reading in the House of Commons",
@@ -23,9 +24,10 @@ describe(`Bill model`, () => {
   describe(`Create Bill from BillEvent using createBill factory method`, () => {
     it(`Creates a new instance of the Bill class from a Legisinfo BillEvent object`, async () => {
       const newBill = await createBill(testBillEvents[0]);
+      const parliamentary_session_id = await new ParliamentsService().queryLatestParliamentarySession();
 
       const testBill = {
-        parliamentary_session_id: 2,
+        parliamentary_session_id,
         code: "C-8",
         title: "An Act to amend the Criminal Code (conversion therapy)",
         description:
@@ -43,9 +45,10 @@ describe(`Bill model`, () => {
 
     it(`Creates a new instance of the Bill class from a Legisinfo BillEvent object`, async () => {
       const newBill = await createBill(testBillEvents[1]);
+      const parliamentary_session_id = await new ParliamentsService().queryLatestParliamentarySession();
 
       const testBill = {
-        parliamentary_session_id: 2,
+        parliamentary_session_id,
         code: "C-237",
         title: "An Act to establish a national framework for diabetes",
         description:

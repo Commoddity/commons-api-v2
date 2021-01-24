@@ -1,13 +1,10 @@
-import dotenv from "dotenv";
-import path from "path";
-const dotenvPath = path.join(__dirname, "../", `.env.${process.env.NODE_ENV}`);
-
-dotenv.config({
-  path: dotenvPath,
-});
-
+import dotenv from "dotenv-flow";
 import pgPromise, { QueryFile } from "pg-promise";
 import { join } from "path";
+
+if (process.env.NODE_ENV === "test") {
+  dotenv.config({ node_env: "test" });
+}
 
 const pgp = pgPromise({
   capSQL: true,

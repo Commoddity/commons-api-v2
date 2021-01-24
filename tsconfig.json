@@ -12,7 +12,6 @@
       "@test": ["src/test"],
       "@utils": ["src/utils"]
     },
-    "plugins": [{ "transform": "@zerollup/ts-transform-paths" }],
     "outDir": "dist",
     "rootDir": "src",
     "removeComments": true,
