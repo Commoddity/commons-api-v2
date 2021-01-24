@@ -1,6 +1,9 @@
-// Load .env data into process.env
-import dotenv from "dotenv-flow";
-dotenv.config({ node_env: "test" });
+import dotenv from "dotenv";
+import path from "path";
+const dotenvPath = path.join(__dirname, "../", `.env.${process.env.NODE_ENV}`);
+dotenv.config({
+  path: dotenvPath,
+});
 
 // Other dependencies
 import fs from "fs";

@@ -47,7 +47,6 @@
     "@zerollup/ts-transform-paths": "^1.7.18",
     "apollo-server-types": "^0.6.3",
     "eslint": "^7.18.0",
-    "graphql-import-node": "0.0.4",
     "jest": "^26.6.3",
     "nodemon": "^2.0.7",
     "prettier": "^2.2.1",
@@ -63,14 +62,17 @@
     "cheerio": "^1.0.0-rc.5",
     "cors": "^2.8.5",
     "dayjs": "^1.10.3",
-    "dotenv-flow": "^3.2.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "graphql": "^15.4.0",
     "graphql-iso-date": "^3.6.1",
     "join-monster": "^3.0.1",
+    "path": "^0.12.7",
     "pg-promise": "^10.9.1",
     "serverless-http": "^2.6.1",
+    "serverless-offline": "^6.8.0",
+    "serverless-plugin-typescript": "^1.1.9",
     "xml2js": "^0.4.23"
   }
 }
