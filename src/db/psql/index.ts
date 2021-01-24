@@ -1,1 +1,1 @@
-export { db, pgp, sql } from "./postgres.config";
+export { db, pgp, sql, getConnection } from "./postgres.config";

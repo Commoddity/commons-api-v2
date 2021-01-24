@@ -13,6 +13,9 @@ exports.BaseService = void 0;
 const _db_1 = require("@db");
 const _1 = require(".");
 class BaseService {
+    constructor() {
+        this.db = _db_1.db;
+    }
     createOne({ table, tableValues }) {
         return __awaiter(this, void 0, void 0, function* () {
             const query = _1.QueryUtils.createInsertQuery(tableValues, table);
@@ -140,8 +143,7 @@ class BaseService {
                 ])
                 : _db_1.pgp.as.format("SELECT $1:raw FROM $2:raw", [column, table]);
             try {
-                const returnedValues = (yield this.many(query)).map((row) => row[column]);
-                return sort ? returnedValues.sort() : returnedValues;
+                return (yield this.many(query)).map((row) => row[column]);
             }
             catch (error) {
                 throw new Error(`[FIND LATEST ID ERROR]: ${error}`);
@@ -216,17 +218,17 @@ class BaseService {
     }
     one(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield _db_1.db.one(query);
+            return yield this.db.one(query);
         });
     }
     many(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield _db_1.db.any(query);
+            return yield this.db.any(query);
         });
     }
     none(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield _db_1.db.none(query);
+            return yield this.db.none(query);
         });
     }
 }

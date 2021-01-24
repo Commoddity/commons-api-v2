@@ -7,12 +7,6 @@ exports.app = void 0;
 const express_1 = __importDefault(require("express"));
 const express_graphql_1 = require("express-graphql");
 const body_parser_1 = __importDefault(require("body-parser"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const path_1 = __importDefault(require("path"));
-const dotenvPath = path_1.default.join(__dirname, "../", `.env.${process.env.NODE_ENV}`);
-dotenv_1.default.config({
-    path: dotenvPath,
-});
 const cors_1 = __importDefault(require("cors"));
 const _db_1 = require("@db");
 const corsOptions = {

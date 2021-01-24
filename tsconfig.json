@@ -12,7 +12,7 @@
       "@test": ["src/test"],
       "@utils": ["src/utils"]
     },
-    "outDir": "dist",
+    "outDir": ".build",
     "rootDir": "src",
     "removeComments": true,
     "strict": true,

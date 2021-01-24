@@ -3,6 +3,12 @@ import { GraphQLFieldConfig, GraphQLObjectType } from "graphql";
 import { Where } from "join-monster";
 
 declare global {
+  type PostgresDBConnection = pgPromise.IDatabase<
+    Record<string, unknown>,
+    pg.IClient
+  >;
+  type PostgresPGP = pgPromise.IMain<Record<string, unknown>, pg.IClient>;
+
   // GraphQL Types
   type GraphQLFields = {
     [key: string]: JoinMonsterQuery;

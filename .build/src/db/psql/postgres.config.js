@@ -4,14 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sql = exports.pgp = exports.db = void 0;
-const dotenv_1 = __importDefault(require("dotenv"));
-const path_1 = __importDefault(require("path"));
-const dotenvPath = path_1.default.join(__dirname, "../", `.env.${process.env.NODE_ENV}`);
-dotenv_1.default.config({
-    path: dotenvPath,
-});
+const dotenv_flow_1 = __importDefault(require("dotenv-flow"));
 const pg_promise_1 = __importDefault(require("pg-promise"));
-const path_2 = require("path");
+const path_1 = require("path");
+if (process.env.NODE_ENV === "test") {
+    dotenv_flow_1.default.config({ node_env: "test" });
+}
 const pgp = pg_promise_1.default({
     capSQL: true,
 });
@@ -26,7 +24,7 @@ const devConfig = {
 const db = pgp(devConfig);
 exports.db = db;
 const sql = (file) => {
-    const fullPath = path_2.join(__dirname, file);
+    const fullPath = path_1.join(__dirname, file);
     return new pgp.QueryFile(fullPath, { minify: true });
 };
 exports.sql = sql;

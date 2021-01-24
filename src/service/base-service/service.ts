@@ -2,11 +2,15 @@ import { db, pgp } from "@db";
 import { QueryUtils } from ".";
 
 export class BaseService<T> {
+  private db: PostgresDBConnection;
+
+  constructor() {
+    this.db = db;
+  }
+
   /* Create methods */
   async createOne<T>({ table, tableValues }: CreateParams<T>): Promise<T> {
     const query: string = QueryUtils.createInsertQuery(tableValues, table);
-
-    console.log("QUERY IS HERE", query);
 
     try {
       return this.one<T>(query);
@@ -224,15 +228,16 @@ export class BaseService<T> {
     }
   }
 
+  /* DB connection methods */
   async one<T>(query: string): Promise<T> {
-    return await db.one<T>(query);
+    return await this.db.one<T>(query);
   }
 
   async many<T>(query: string): Promise<T[]> {
-    return await db.any<T>(query);
+    return await this.db.any<T>(query);
   }
 
   async none(query: string): Promise<null> {
-    return await db.none(query);
+    return await this.db.none(query);
   }
 }
