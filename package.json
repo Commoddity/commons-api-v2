@@ -16,6 +16,7 @@
     "push:dev": "yarn lint && yarn build && yarn test && git push origin dev",
     "db:update_database": "NODE_ENV=dev ts-node -r tsconfig-paths/register --files ./src/bin/updateDb.ts",
     "dev": "AWS_PROFILE=commons && sls offline --env dev",
+    "deploy": "AWS_PROFILE=commons && sls deploy --env dev",
     "dev:full": "AWS_PROFILE=commons && yarn lint && yarn build && yarn test && sls offline --env dev",
     "aws:db": "psql -h commons-app-database-dev.chgjlhdzehsr.ca-central-1.rds.amazonaws.com -p 5432 --username commons_admin -d postgres --pset expanded=auto;"
   },

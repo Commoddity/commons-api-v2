@@ -5,7 +5,7 @@ import cors from "cors";
 import { schema as graphQLSchema } from "@db";
 
 const corsOptions = {
-  origin: process.env.COMMONS_FRONT_END,
+  origin: "*",
   credentials: true,
 };
 
