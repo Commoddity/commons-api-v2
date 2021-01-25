@@ -35,4 +35,3 @@ custom:
       - POSTGRES_DB
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-      - AWS_REGION
