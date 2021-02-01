@@ -33,11 +33,6 @@ functions:
           path: api
           method: get
           cors: true
-  update-bills:
-    description: Update bills for LEGISINFO website
-    handler: src/cron/update-bills.handler
-    events:
-      - schedule: rate(1 day)
 
 custom:
   tscpaths:

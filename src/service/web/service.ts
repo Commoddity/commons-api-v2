@@ -10,9 +10,21 @@ export class WebService extends BaseService<any> {
   // Returns the XML document from a given URL
   private async fetchXml(url: string): Promise<string> {
     try {
-      const { data: xml }: AxiosResponse<string> = await Axios.get(url);
+      const { data: xml }: AxiosResponse<string> = await Axios.get(url, {
+        timeout: 100000,
+      });
+      // DEBUG CONSOLE LOG
+      console.log(`AFTER FETCH -------->  ${JSON.stringify(xml)}`);
+      // DEBUG CONSOLE LOG
+
       return xml;
     } catch (error) {
+      // DEBUG CONSOLE LOG
+      console.log(
+        `DEBUG CONSOLE LOG -------->  FETCH ERROR ${JSON.stringify(error)}`,
+      );
+      // DEBUG CONSOLE LOG
+
       throw new Error(`[WEB SERVICE ERROR]: fetchXml: ${error}`);
     }
   }
@@ -118,8 +130,29 @@ export class WebService extends BaseService<any> {
     url: string,
   ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
     try {
+      // DEBUG CONSOLE LOG
+      console.log(
+        `DEBUG CONSOLE LOG --------> BEFORE FETCH ${JSON.stringify(url)}`,
+      );
+      // DEBUG CONSOLE LOG
+
       const xml = await this.fetchXml(url);
+
+      // DEBUG CONSOLE LOG
+      console.log(
+        `DEBUG CONSOLE LOG --------> AFTER FETCH ${JSON.stringify(xml)}`,
+      );
+      // DEBUG CONSOLE LOG
+
       const sourceArray = await FormatUtils.formatXml<BillEvent>(xml);
+
+      // DEBUG CONSOLE LOG
+      console.log(
+        `DEBUG CONSOLE LOG --------> AFTER SPLIT ${JSON.stringify(
+          sourceArray,
+        )}`,
+      );
+      // DEBUG CONSOLE LOG
 
       return await this.splitBillsAndEvents(sourceArray);
     } catch (error) {
@@ -148,6 +181,14 @@ export class WebService extends BaseService<any> {
 
       const legisInfoData = await this.getLegisInfoCaller(legisInfoUrl);
       const { billsArray, eventsArray } = legisInfoData;
+
+      // DEBUG CONSOLE LOG
+      console.log(
+        `DEBUG CONSOLE LOG --------> AFTER CALLER! BILLS: ${JSON.stringify(
+          billsArray,
+        )} EVENTS: ${JSON.stringify(eventsArray)}`,
+      );
+      // DEBUG CONSOLE LOG
 
       logs.fetchedBills(billsArray.length, eventsArray.length);
       if (billsArray.length || eventsArray.length) logs.adding();
