@@ -14,7 +14,6 @@
     "db:init": "NODE_ENV=dev ts-node -r tsconfig-paths/register ./src/bin/schemaReset.ts && NODE_ENV=dev ts-node -r tsconfig-paths/register --files ./src/bin/updateDb.ts",
     "db:test_reset": "NODE_ENV=test ts-node -r tsconfig-paths/register ./src/bin/testResetDb.ts",
     "push:dev": "yarn lint && yarn build && yarn test && git push origin dev",
-    "db:update_database": "NODE_ENV=dev ts-node -r tsconfig-paths/register --files ./src/bin/updateDb.ts",
     "dev": "AWS_PROFILE=commons && sls offline --env dev",
     "deploy": "AWS_PROFILE=commons && sls deploy --env dev",
     "dev:full": "AWS_PROFILE=commons && yarn lint && yarn build && yarn test && sls offline --env dev",
