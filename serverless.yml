@@ -39,6 +39,5 @@ custom:
       - POSTGRES_PASSWORD
       - LEGISINFO_URL
       - SUMMARY_URL
-      - AWS_REGION
       - AWS_IAM_ACCESS_KEY_ID
       - AWS_IAM_SECRET_ACCESS_KEY
