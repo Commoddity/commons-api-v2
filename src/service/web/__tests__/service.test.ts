@@ -1,7 +1,6 @@
 import { WebService } from "@services";
 import { Bill } from "../../bills";
 import { Event } from "../../events";
-import { testBillEvents } from "@test";
 
 describe(`WebService methods`, () => {
   const testWebService = new WebService();
