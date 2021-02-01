@@ -1,7 +1,7 @@
 export const logs = {
   started: () =>
     console.log(
-      `[UPDATE DB SCRIPT] Beginning new fetch of Bills from LEGISinfo website in [${process.env.NODE_ENV!.toUpperCase()}] ...`,
+      `[UPDATE DB SCRIPT] Beginning new fetch of Bills from LEGISinfo website ...`,
     ),
   fetchedBills: (billsLength: number, eventsLength: number) =>
     console.log(
