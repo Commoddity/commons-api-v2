@@ -20,19 +20,6 @@
     "dev:full": "AWS_PROFILE=commons && yarn lint && yarn build && yarn test && sls offline --env dev",
     "aws:db": "psql -h commons-app-database-dev.chgjlhdzehsr.ca-central-1.rds.amazonaws.com -p 5432 --username commons_admin -d postgres --pset expanded=auto;"
   },
-  "nodemonConfig": {
-    "ignore": [
-      "**/*.test.ts",
-      "**/*.spec.ts",
-      ".git",
-      "node_modules"
-    ],
-    "watch": [
-      "src"
-    ],
-    "exec": "node -r tsconfig-paths/register -r ts-node/register src/server.ts",
-    "ext": "ts, js"
-  },
   "devDependencies": {
     "@aws-sdk/types": "^3.1.0",
     "@types/body-parser": "^1.19.0",
