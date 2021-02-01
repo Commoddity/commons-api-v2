@@ -6,6 +6,13 @@ provider:
   region: ca-central-1
   stage: dev
   profile: commons
+  vpc:
+    securityGroupIds:
+      - sg-0a41933a78e15ee98
+    subnetIds:
+      - subnet-adc794c5
+      - subnet-33593649
+      - subnet-34ec046b
 
 plugins:
   - serverless-plugin-typescript
@@ -27,7 +34,7 @@ functions:
           method: get
           cors: true
   update-bills:
-    description: Example lambda function
+    description: Update bills for LEGISINFO website
     handler: src/cron/update-bills.handler
     events:
       - schedule: rate(1 day)
