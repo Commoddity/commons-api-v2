@@ -5,6 +5,7 @@ provider:
   runtime: nodejs12.x
   region: ca-central-1
   stage: dev
+  profile: commons
 
 plugins:
   - serverless-plugin-typescript
@@ -36,3 +37,8 @@ custom:
       - POSTGRES_DB
       - POSTGRES_USER
       - POSTGRES_PASSWORD
+      - LEGISINFO_URL
+      - SUMMARY_URL
+      - AWS_REGION
+      - AWS_IAM_ACCESS_KEY_ID
+      - AWS_IAM_SECRET_ACCESS_KEY

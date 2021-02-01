@@ -1,14 +1,14 @@
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
-import { parseString } from "xml2js";
-import { BaseService } from "@services";
+import { BaseService, BillsService, EventsService } from "@services";
 import { Bill, createBill } from "../bills";
 import { Event } from "../events";
+import { logs } from "./logs";
 import { FormatUtils } from "@utils";
 
 export class WebService extends BaseService<any> {
   // Returns the XML document from a given URL
-  async fetchXml(url: string): Promise<string> {
+  private async fetchXml(url: string): Promise<string> {
     try {
       const { data: xml }: AxiosResponse<string> = await Axios.get(url);
       return xml;
@@ -38,39 +38,9 @@ export class WebService extends BaseService<any> {
     }
   }
 
-  // Returns the array of legislative summaries of bills from the parliament website
-  async fetchSummaryUrls(summariesUrl: string): Promise<string[]> {
-    return new Promise((resolve, reject) => {
-      this.fetchXml(summariesUrl)
-        .then((xml) => {
-          if (xml) {
-            parseString(xml, (error: Error, response: string) => {
-              if (!error) {
-                const xmlObject: {
-                  rss: { channel: { item: string[] }[] };
-                } = JSON.parse(JSON.stringify(response));
-                const summariesArray = xmlObject.rss.channel[0].item;
-
-                summariesArray ? resolve(summariesArray) : resolve([]);
-              } else if (error) {
-                reject(`[WEB SERVICE ERROR - fetchSummaryUrls ] ${error}`);
-              }
-            });
-          } else {
-            reject(
-              `[WEB SERVICE ERROR - fetchSummaryUrls ] Unable to fetch XML for legislative summaries.`,
-            );
-          }
-        })
-        .catch((error) => {
-          reject(`[WEB SERVICE ERROR - fetchSummaryUrls ] ${error}`);
-        });
-    });
-  }
-
   // Splits out the code of the bill from each legislative summary in the array
   // Returns an array of summary objects containing only the bill code and summary url
-  splitSummaries(fetchedSummaryArray: BillSummary[]): BillSummaryMap[] {
+  private splitSummaries(fetchedSummaryArray: BillSummary[]): BillSummaryMap[] {
     const summariesArray: BillSummaryMap[] = [];
 
     fetchedSummaryArray.forEach((summary) => {
@@ -93,7 +63,7 @@ export class WebService extends BaseService<any> {
 
   // Splits two arrays of Bills and Events from the fetched LEGISinfo XML data array.
   // Handles all the async detches needed to assemble the Bills and also avoid duplicates.
-  async splitBillsAndEvents(
+  private async splitBillsAndEvents(
     billEventsArray: BillEvent[],
   ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
     const billsArray: Bill[] = [];
@@ -138,9 +108,15 @@ export class WebService extends BaseService<any> {
     return { billsArray, eventsArray };
   }
 
-  getLegisInfoCaller = async (
+  private sortBillEventsByDate(billEventsArray: BillEvent[]): BillEvent[] {
+    return billEventsArray.sort((a, b) =>
+      !!(!!a.pubDate && !!b.pubDate) && a.pubDate < b.pubDate ? 1 : -1,
+    );
+  }
+
+  private async getLegisInfoCaller(
     url: string,
-  ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> => {
+  ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
     try {
       const xml = await this.fetchXml(url);
       const sourceArray = await FormatUtils.formatXml<BillEvent>(xml);
@@ -149,11 +125,10 @@ export class WebService extends BaseService<any> {
     } catch (error) {
       throw new Error(`[LEGISINFO CALLER ERROR] ${error}`);
     }
-  };
+  }
 
-  getSummaries = async (): Promise<BillSummaryMap[]> => {
-    const summaryUrl =
-      "https://www.parl.ca/legisinfo/RSSFeed.aspx?download=rss&Language=E&source=LegislativeSummaryPublications";
+  private async getSummaries(): Promise<BillSummaryMap[]> {
+    const summaryUrl = process.env.SUMMARY_URL!;
 
     try {
       const xml = await this.fetchXml(summaryUrl);
@@ -163,11 +138,42 @@ export class WebService extends BaseService<any> {
     } catch (error) {
       throw new Error(`[SUMMARIES FETCH ERROR] ${error}`);
     }
-  };
+  }
 
-  private sortBillEventsByDate(billEventsArray: BillEvent[]): BillEvent[] {
-    return billEventsArray.sort((a, b) =>
-      !!(!!a.pubDate && !!b.pubDate) && a.pubDate < b.pubDate ? 1 : -1,
-    );
+  async updateBills(): Promise<boolean> {
+    const legisInfoUrl = process.env.LEGISINFO_URL!;
+
+    try {
+      logs.started();
+
+      const legisInfoData = await this.getLegisInfoCaller(legisInfoUrl);
+      const { billsArray, eventsArray } = legisInfoData;
+
+      logs.fetchedBills(billsArray.length, eventsArray.length);
+      if (billsArray.length || eventsArray.length) logs.adding();
+
+      if (billsArray.length) {
+        const bills = await new BillsService().createManyBills(billsArray);
+        logs.addedBills(bills.length);
+      }
+
+      if (eventsArray.length) {
+        const events = await new EventsService().createManyEvents(eventsArray);
+        logs.addedEvents(events.length);
+
+        await new EventsService().updateBillsPassedStatus(eventsArray);
+      }
+
+      logs.summaryUpdate();
+      const billSummaryMaps = await this.getSummaries();
+      const summaries = await new BillsService().updateSummaryUrls(
+        billSummaryMaps,
+      );
+
+      logs.success(billsArray.length, eventsArray.length, summaries);
+      return true;
+    } catch (error) {
+      throw new Error(`[UPDATE DB SCRIPT ERROR]: ${error}`);
+    }
   }
 }

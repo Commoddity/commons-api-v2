@@ -16,7 +16,7 @@ app.use(
   "/api",
   graphqlHTTP({
     schema: graphQLSchema,
-    graphiql: true,
+    graphiql: process.env.NODE_ENV === "production" ? false : true,
   }),
 );
 

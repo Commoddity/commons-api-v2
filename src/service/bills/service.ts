@@ -1,9 +1,4 @@
-import {
-  BaseService,
-  CategoriesService,
-  Category,
-  WebService,
-} from "@services";
+import { BaseService, CategoriesService, Category } from "@services";
 import { BillInterface as Bill } from "./model";
 
 export class BillsService extends BaseService<Bill> {
@@ -41,9 +36,9 @@ export class BillsService extends BaseService<Bill> {
     });
   }
 
-  async updateSummaryUrls(): Promise<number> {
+  async updateSummaryUrls(billSummaryMaps: BillSummaryMap[]): Promise<number> {
     let billsUpdated = 0;
-    const billSummaryMaps = await new WebService().getSummaries();
+
     const whereCondition = billSummaryMaps.map(({ code }) => {
       return { code };
     });

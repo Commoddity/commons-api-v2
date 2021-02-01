@@ -1,4 +1,4 @@
-import { BillsService, ParliamentsService } from "@services";
+import { BillsService, ParliamentsService, WebService } from "@services";
 import { resetBills, testBills } from "@test";
 import { BillInterface } from "../model";
 
@@ -108,7 +108,13 @@ describe(`BillsService methods`, () => {
 
   describe(`updateSummaryUrl`, () => {
     it(`Updates a bill's summary_url field`, async () => {
-      const billsUpdated = await new BillsService().updateSummaryUrls();
+      const testWebService = new WebService();
+      const ProtoWebService = Object.getPrototypeOf(testWebService);
+      const billSummaryMaps = await ProtoWebService.getSummaries();
+
+      const billsUpdated = await new BillsService().updateSummaryUrls(
+        billSummaryMaps,
+      );
 
       // No bills from the actual Summaries site are in the Test DB
       expect(billsUpdated).toEqual(0);
