@@ -1,2 +1,2 @@
-export { User, UserInterface, UserCredentials } from "./models";
+export { User } from "./model";
 export { UsersService } from "./service";

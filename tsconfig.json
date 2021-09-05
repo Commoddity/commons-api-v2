@@ -12,6 +12,7 @@
       "@test": ["src/test"],
       "@utils": ["src/utils"]
     },
+
     "outDir": "dist",
     "rootDir": "src",
     "removeComments": true,
@@ -20,7 +21,11 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
+    "noImplicitReturns": false,
     "strictPropertyInitialization": false,
+    "strictNullChecks": false,
     "typeRoots": ["./src/types", "./node_modules/@types"]
-  }
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["./src/**/__tests__/**/*"]
 }

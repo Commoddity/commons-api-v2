@@ -24,7 +24,7 @@ CREATE TABLE parliaments (
   number INT,
   start_date DATE,
   end_date DATE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (number)
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE parliamentary_sessions (
   number INT,
   start_date DATE,
   end_date DATE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 GRANT ALL PRIVILEGES ON TABLE parliamentary_sessions TO commons_admin;
@@ -56,7 +56,7 @@ CREATE TABLE bills (
   page_url VARCHAR(555),
   full_text_url VARCHAR(555),
   passed BOOLEAN,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 GRANT ALL PRIVILEGES ON TABLE bills TO commons_admin;
@@ -68,7 +68,7 @@ CREATE TABLE events (
   bill_code VARCHAR (7) NOT NULL REFERENCES bills (code),
   title VARCHAR (555) NOT NULL,
   publication_date DATE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 GRANT ALL PRIVILEGES ON TABLE events TO commons_admin;
@@ -78,8 +78,8 @@ DROP TABLE IF EXISTS categories CASCADE;
 CREATE TABLE categories (
   id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
   name VARCHAR (555) NOT NULL,
-  class_code VARCHAR (555) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  classCode VARCHAR (555) NOT NULL,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 GRANT ALL PRIVILEGES ON TABLE categories TO commons_admin;
@@ -103,7 +103,7 @@ CREATE TABLE users (
   mp VARCHAR (255),
   party VARCHAR (255),
   riding_name VARCHAR (255),
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (email)
 );
 
@@ -114,7 +114,7 @@ DROP TABLE IF EXISTS bill_categories CASCADE;
 CREATE TABLE bill_categories (
   bill_id TEXT NOT NULL REFERENCES bills (id) ON DELETE CASCADE,
   category_id TEXT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (bill_id, category_id)
 );
 
@@ -125,7 +125,7 @@ DROP TABLE IF EXISTS user_bills CASCADE;
 CREATE TABLE user_bills (
   user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   bill_id TEXT NOT NULL REFERENCES bills (id) ON DELETE CASCADE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (user_id, bill_id)
 );
 
@@ -136,7 +136,7 @@ DROP TABLE IF EXISTS user_categories CASCADE;
 CREATE TABLE user_categories (
   user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   category_id TEXT NOT NULL REFERENCES categories (id) ON DELETE CASCADE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (user_id, category_id)
 );
 
@@ -148,7 +148,7 @@ CREATE TABLE user_credentials (
   id TEXT PRIMARY KEY DEFAULT (generate_uid(20)),
   user_id TEXT NOT NULL REFERENCES users (id),
   type VARCHAR(20) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (user_id, type)
 );
 
@@ -166,7 +166,7 @@ VALUES
   (43, 2, '2020-09-23', null);
 
 INSERT INTO categories 
-  (name, class_code)
+  (name, classCode)
 VALUES 
   ('Agriculture, environment, fisheries and natural resources', 'agriculture_environment'), 
   ('Arts, culture and entertainment', 'arts_culture'), 

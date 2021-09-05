@@ -1,22 +1,24 @@
 import { BaseService, BillsService } from "@services";
-import { EventInterface as Event } from "./model";
 
-export class EventsService extends BaseService<Event> {
-  private table = "events";
+import { BillEvent } from "./model";
+import { Bill } from "../bills";
+import { Collection as BillEventCollection } from "./collection";
 
-  async createEvent(event: Event): Promise<Event> {
-    return await super.createOne({ table: this.table, tableValues: event });
+export class EventsService extends BaseService<BillEvent> {
+  constructor() {
+    super(BillEventCollection, BillEvent);
   }
 
-  async createManyEvents(events: Event[]): Promise<Event[]> {
-    return await super.createMany({
-      table: this.table,
-      tableValuesArray: events,
-    });
+  async createEvent(event: BillEvent): Promise<BillEvent> {
+    return super.createOne(event);
   }
 
-  async updateBillsPassedStatus(events: Event[]): Promise<boolean> {
-    let billsUpdated = false;
+  async createManyEvents(events: BillEvent[]): Promise<BillEvent[]> {
+    return super.createMany(events);
+  }
+
+  async updateBillsPassedStatus(events: BillEvent[]): Promise<Bill[]> {
+    const billsUpdated: Bill[] = [];
 
     for await (const event of events) {
       const billHasPassed = !!event.title.includes("Royal Assent");
@@ -26,7 +28,7 @@ export class EventsService extends BaseService<Event> {
       );
 
       if (billHasPassed) {
-        await new BillsService().updateBillPassed({
+        const updatedBill = await new BillsService().updateBillPassed({
           code: event.bill_code,
           passed: true,
         });
@@ -35,9 +37,9 @@ export class EventsService extends BaseService<Event> {
           `Bill ${event.bill_code} has passed and the DB has been updated ....`,
         );
 
-        billsUpdated = true;
+        billsUpdated.push(updatedBill);
       } else if (billHasFailed) {
-        await new BillsService().updateBillPassed({
+        const updatedBill = await new BillsService().updateBillPassed({
           code: event.bill_code,
           passed: false,
         });
@@ -46,23 +48,14 @@ export class EventsService extends BaseService<Event> {
           `Bill ${event.bill_code} has failed and the DB has been updated ....`,
         );
 
-        billsUpdated = true;
+        billsUpdated.push(updatedBill);
       }
     }
 
     return billsUpdated;
   }
 
-  async deleteEvent(bill_code: string): Promise<boolean> {
-    return await super.deleteOne({ table: this.table, where: { bill_code } });
-  }
-
-  // GraphQL methods
-  async gqlFindOneEvent(query: string): Promise<Event> {
-    return super.one<Event>(query);
-  }
-
-  async gqlFindManyEvents(query: string): Promise<Event[]> {
-    return super.many<Event>(query);
+  async deleteEvent(bill_code: string): Promise<void> {
+    return super.deleteOne({ bill_code });
   }
 }

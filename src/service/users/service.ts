@@ -1,11 +1,14 @@
 import { CognitoIdentityServiceProvider, AWSError } from "aws-sdk";
 
 import { BaseService } from "@services";
-import { UserCredentials, User } from "./models";
+
+import { User, UserInput } from "./model";
+import { Collection as UserCollection } from "./collection";
 
 export class UsersService extends BaseService<User> {
-  private table = "users";
-  private credentialsTable = "user_credentials";
+  constructor() {
+    super(UserCollection, User);
+  }
 
   private cognitoServiceObject: CognitoIdentityServiceProvider;
 
@@ -22,42 +25,26 @@ export class UsersService extends BaseService<User> {
 
   // CRUD methods
   async createUser(user: User): Promise<User> {
-    return super.createOne({ table: this.table, tableValues: user });
+    return super.createOne(user);
   }
 
-  async findOneUser(where: WhereCondition | WhereCondition[]): Promise<User> {
-    return super.findOne({ table: this.table, where });
+  async findOneUser(query: PQuery): Promise<User> {
+    return super.findOne(query);
   }
 
   async findUserId(email: string): Promise<string> {
-    return super.findOneId({ table: this.table, where: { email } });
+    return (await super.findOne({ email })).id!;
   }
 
-  async updateUser({ id, values }): Promise<User> {
-    return super.updateOne({ table: this.table, data: { id, ...values } });
+  async updateUser(query: PQuery, update: PQuery): Promise<User> {
+    return super.updateOne(query, update);
   }
 
-  async deleteUser(id: string): Promise<boolean> {
-    return super.deleteOne({ table: this.table, where: { id } });
+  async deleteUser(id: string): Promise<void> {
+    return super.deleteOne({ _id: id });
   }
 
-  async createUserCredentials(
-    credentials: UserCredentials,
-  ): Promise<UserCredentials> {
-    return super.createOne<UserCredentials>({
-      table: this.credentialsTable,
-      tableValues: credentials,
-    });
-  }
-
-  async findUserCredentials(userId: string): Promise<UserCredentials[]> {
-    return super.findMany<UserCredentials>({
-      table: this.credentialsTable,
-      where: { user_id: userId },
-    });
-  }
-
-  // Cognito methods
+  /* Cognito methods */
   async cognitoSignUp({ userAttributes }: UserAttributes): Promise<void> {
     if (userAttributes.identities) {
       await this.cognitoSignUpSocial({
@@ -101,35 +88,27 @@ export class UsersService extends BaseService<User> {
 
     let user: User;
 
-    const userExists = await super.findIfRowExists({
-      table: this.table,
-      where: { email: userAttributes.email },
+    const userExists = await super.doesOneExist({
+      email: userAttributes.email,
     });
 
     if (userExists) {
-      user = await this.findOneUser({ email: userAttributes.email });
-
-      const appleCredentials = new UserCredentials({
-        type: UserCredentials.CredentialTypes.Apple,
-        user_id: user.id,
-      });
-      await this.createUserCredentials(appleCredentials);
+      user = await this.updatePush(
+        { email: userAttributes.email },
+        { credentials: ECredentialTypes.Apple },
+      );
     } else {
       const firstName = userAttributes.name.split(" ")[0];
       const lastName = userAttributes.name.split(" ")[1];
 
-      const newUser = new User({
+      const newUser = new UserInput({
         email: userAttributes.email.trim().toLowerCase(),
         first_name: firstName,
         last_name: lastName,
+        credentials: [ECredentialTypes.Apple],
       });
-      user = await this.createUser(newUser);
 
-      const appleCredentials = new UserCredentials({
-        type: UserCredentials.CredentialTypes.Apple,
-        user_id: user.id,
-      });
-      await this.createUserCredentials(appleCredentials);
+      user = await this.createUser(new User(newUser));
     }
 
     this.initCognitoServiceObject();
@@ -160,34 +139,26 @@ export class UsersService extends BaseService<User> {
 
     let user: User;
 
-    const userExists = await super.findIfRowExists({
-      table: this.table,
-      where: { email: userAttributes.email },
+    const userExists = await super.doesOneExist({
+      email: userAttributes.email,
     });
 
     if (userExists) {
-      user = await this.findOneUser({ email: userAttributes.email });
-
-      const facebookCredentials = new UserCredentials({
-        type: UserCredentials.CredentialTypes.Facebook,
-        user_id: user.id,
-      });
-      await this.createUserCredentials(facebookCredentials);
+      user = await this.updatePush(
+        { email: userAttributes.email },
+        { credentials: ECredentialTypes.Facebook },
+      );
     } else {
       const { given_name, family_name } = userAttributes;
 
-      const newUser = new User({
+      const newUser = new UserInput({
         email: userAttributes.email.trim().toLowerCase(),
         first_name: given_name,
         last_name: family_name,
+        credentials: [ECredentialTypes.Facebook],
       });
-      user = await this.createUser(newUser);
 
-      const facebookCredentials = new UserCredentials({
-        type: UserCredentials.CredentialTypes.Facebook,
-        user_id: user.id,
-      });
-      await this.createUserCredentials(facebookCredentials);
+      user = await this.createUser(new User(newUser));
     }
 
     this.initCognitoServiceObject();
@@ -214,33 +185,22 @@ export class UsersService extends BaseService<User> {
   async cognitoSignUpWithEmail({
     userAttributes,
   }: EmailUserAttributes): Promise<User | undefined> {
-    const userExists = await super.findIfRowExists({
-      table: this.table,
-      where: { email: userAttributes.email },
+    const userExists = await super.doesOneExist({
+      email: userAttributes.email,
     });
 
-    const userWithEmailCredentialsExists = await super.findIfRowExists({
-      table: this.credentialsTable,
-      where: [
-        { user_id: userAttributes.email.toLowerCase() },
-        { type: UserCredentials.CredentialTypes.Username },
-      ],
+    const userWithEmailCredentialsExists = await super.doesOneExist({
+      email: userAttributes.email,
+      credentials: [ECredentialTypes.Username],
     });
 
     let user: User;
 
     if (userExists && !userWithEmailCredentialsExists) {
-      user = await this.findOneUser({
-        where: {
-          emailAddress: userAttributes.email.toLowerCase(),
-        },
-      });
-
-      const usernameCredentials = new UserCredentials({
-        type: UserCredentials.CredentialTypes.Username,
-        user_id: user.id,
-      });
-      await this.createUserCredentials(usernameCredentials);
+      user = await this.updatePush(
+        { email: userAttributes.email },
+        { credentials: ECredentialTypes.Username },
+      );
 
       this.initCognitoServiceObject();
 
@@ -252,20 +212,14 @@ export class UsersService extends BaseService<User> {
 
       return user;
     } else if (!userExists) {
-      const newUser = new User({
+      const newUser = new UserInput({
         email: userAttributes.email.trim().toLowerCase(),
         first_name: userAttributes.given_name,
         last_name: userAttributes.family_name,
+        credentials: [ECredentialTypes.Username],
       });
 
-      user = await this.createUser(newUser);
-
-      const usernameCredentials = new UserCredentials({
-        type: UserCredentials.CredentialTypes.Username,
-        user_id: user.id,
-      });
-
-      await this.createUserCredentials(usernameCredentials);
+      user = await this.createUser(new User(newUser));
 
       this.initCognitoServiceObject();
 
@@ -307,47 +261,6 @@ export class UsersService extends BaseService<User> {
           data: CognitoIdentityServiceProvider.Types.AdminUpdateUserAttributesResponse,
         ) => (error ? reject(error) : resolve(data)),
       );
-    });
-  }
-
-  // GraphQL methods
-  async gqlFindOneUser(query: string): Promise<User> {
-    return super.one<User>(query);
-  }
-
-  async gqlFindManyUsers(query: string): Promise<User[]> {
-    return super.many<User>(query);
-  }
-
-  async gqlCreateUserBill({ userId, billId }): Promise<boolean> {
-    return super.createJoinTable({
-      idOne: { user_id: userId },
-      idTwo: { bill_id: billId },
-      table: this.table,
-    });
-  }
-
-  async gqlDeleteUserBill({ userId, billId }): Promise<boolean> {
-    return super.deleteJoinTable({
-      idOne: { user_id: userId },
-      idTwo: { bill_id: billId },
-      table: this.table,
-    });
-  }
-
-  async gqlCreateUserCategory({ userId, categoryId }): Promise<boolean> {
-    return super.createJoinTable({
-      idOne: { user_id: userId },
-      idTwo: { category_id: categoryId },
-      table: "user_bills",
-    });
-  }
-
-  async gqlDeleteUserCategory({ userId, categoryId }): Promise<boolean> {
-    return super.deleteJoinTable({
-      idOne: { user_id: userId },
-      idTwo: { category_id: categoryId },
-      table: "user_categories",
     });
   }
 }

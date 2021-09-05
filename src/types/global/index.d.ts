@@ -69,10 +69,11 @@ declare global {
   interface TableParams {
     table: string;
   }
-  interface UpdateBillCategoriesParams {
+  interface PUpdateBillCategories {
     code: string;
-    categories: string[];
+    category: EBillCategories;
   }
+
   interface UpdateManyParams {
     table: string;
     data: { [key: string]: any }[];
@@ -113,12 +114,13 @@ declare global {
     title: string[];
     pubDate: string[];
   }
-  interface BillEvent {
+  interface PBillEvent {
     description: string;
     link: string;
     title: string;
     pubDate: string;
   }
+
   interface BillSummaryMap {
     code: string;
     url: string;
@@ -167,5 +169,57 @@ declare global {
       given_name: string;
       family_name: string;
     };
+  }
+
+  enum ERecordStatus {
+    Created = "created",
+    Deleted = "deleted",
+  }
+
+  type PQuery = { [key: string]: any };
+
+  interface PQueryOptions {
+    limit?: number;
+    sort?: { [string]: 1 | -1 };
+    hard?: boolean;
+    excludeDeleted?: boolean;
+  }
+
+  /* */
+  enum EBillCategories {
+    // Agriculture, environment, fisheries and natural resources
+    agriculture_environment = "agriculture_environment",
+    // Arts, culture and entertainment
+    arts_culture = "arts_culture",
+    // Business, industry and trade
+    business_industry = "business_industry",
+    // Economics and finance
+    economics_finance = "economics_finance",
+    // Education, language and training
+    education_language = "education_language",
+    // Employment and labour
+    employment_labour = "employment_labour",
+    // Government, Parliament and politics
+    government_politics = "government_politics",
+    // Health and safety
+    health_safety = "health_safety",
+    // Indigenous affairs
+    indigenous_affairs = "indigenous_affairs",
+    // Information and communications
+    information_communications = "information_communications",
+    // International affairs and defence
+    international_affairs = "international_affairs",
+    // Law, justice and rights
+    law_justice = "law_justice",
+    // Science and technology
+    science_technology = "science_technology",
+    // Social affairs and population
+    social_affairs = "social_affairs",
+  }
+
+  enum ECredentialTypes {
+    Apple = "apple",
+    Facebook = "facebook",
+    Username = "username",
   }
 }

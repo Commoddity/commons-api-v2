@@ -2,46 +2,96 @@ import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
 
 import { FormatUtils } from "@utils";
-import { ParliamentsService } from "../parliaments";
 
-export interface BillInterface {
+export interface IBill {
   code: string;
   title: string;
   page_url: string;
+  categories: EBillCategories[];
   id?: string;
   parliamentary_session_id?: string;
   description?: string;
   introduced_date?: string;
-  summary_url?: string;
-  full_text_url?: string;
-  passed?: boolean;
-  created_at?: Date;
+  summary_url?: string | null;
+  full_text_url?: string | null;
+  passed?: boolean | null;
+  createdAt?: Date;
 }
 
-export class Bill implements BillInterface {
+export class Bill implements IBill {
   code: string;
   title: string;
   page_url: string;
+  categories: EBillCategories[];
   id?: string;
   parliamentary_session_id?: string;
   description?: string;
   introduced_date?: string;
-  summary_url?: string;
-  full_text_url?: string;
-  passed?: boolean;
-  created_at?: Date;
+  summary_url?: string | null;
+  full_text_url?: string | null;
+  passed?: boolean | null;
+  createdAt?: Date;
 
-  constructor({ link, description }: BillEvent) {
+  constructor({
+    code,
+    title,
+    page_url,
+    categories,
+    id,
+    parliamentary_session_id,
+    description,
+    introduced_date,
+    summary_url,
+    full_text_url,
+    passed,
+    createdAt,
+  }: BillInput) {
+    this.id = id;
+    this.code = code;
+    this.title = title;
+    this.page_url = page_url;
+    this.categories = categories;
+    this.parliamentary_session_id = parliamentary_session_id;
+    this.description = description;
+    this.introduced_date = introduced_date;
+    this.summary_url = summary_url;
+    this.full_text_url = full_text_url;
+    this.passed = passed;
+    this.createdAt = createdAt;
+  }
+}
+
+export class BillInput implements IBill {
+  code: string;
+  title: string;
+  page_url: string;
+  categories: EBillCategories[];
+  id?: string;
+  parliamentary_session_id?: string;
+  description?: string;
+  introduced_date?: string;
+  summary_url?: string | null;
+  full_text_url?: string | null;
+  passed?: boolean | null;
+  createdAt?: Date;
+
+  constructor({ link, description }: PBillEvent) {
     this.code = FormatUtils.formatCode(description);
     this.title = FormatUtils.formatTitle(description);
     this.page_url = link;
-    this.summary_url = undefined;
-    this.passed = undefined;
+    this.summary_url = null;
+    this.full_text_url = null;
+    this.passed = null;
+    this.categories = [];
   }
 
   // Performs all sync operations needed to initialize a new Bill from the Legisinfo data
-  async insertFetchedValues(pageUrl: string, billCode: string) {
-    this.parliamentary_session_id = await new ParliamentsService().queryLatestParliamentarySession();
+  async insertFetchedValues(
+    pageUrl: string,
+    billCode: string,
+    pSessionId: string,
+  ) {
+    this.parliamentary_session_id = pSessionId;
     this.introduced_date = await this.fetchIntroducedDate({
       pageUrl,
       billCode,
@@ -179,8 +229,16 @@ export class Bill implements BillInterface {
   }
 }
 
-export async function createBill(billEvent: BillEvent): Promise<Bill> {
-  const NewBill = new Bill(billEvent);
-  await NewBill.insertFetchedValues(NewBill.page_url, NewBill.code);
-  return NewBill;
+export async function createBill(
+  billEvent: PBillEvent,
+  pSessionId: string,
+): Promise<Bill> {
+  const newBillInput = new BillInput(billEvent);
+  await newBillInput.insertFetchedValues(
+    newBillInput.page_url,
+    newBillInput.code,
+    pSessionId,
+  );
+
+  return new Bill(newBillInput);
 }

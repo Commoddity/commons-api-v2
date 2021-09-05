@@ -1,6 +1,6 @@
 import { BillsService, ParliamentsService, WebService } from "@services";
 import { resetBills, testBills } from "@test";
-import { BillInterface } from "../model";
+import { IBill } from "../model";
 
 describe(`BillsService methods`, () => {
   afterEach(async () => {
@@ -15,7 +15,7 @@ describe(`BillsService methods`, () => {
 
       const testBillResult = await new BillsService().createBill(testBillInput);
 
-      // Test bill minus the fields id and created_at (which will differ between creations)
+      // Test bill minus the fields id and createdAt (which will differ between creations)
       const testBill = {
         parliamentary_session_id,
         code: "C-231",
@@ -29,14 +29,14 @@ describe(`BillsService methods`, () => {
 
       delete testBillResult.id;
       delete testBillResult.introduced_date;
-      delete testBillResult.created_at;
+      delete testBillResult.createdAt;
       expect(testBillResult).toEqual(testBill);
     });
   });
 
   describe(`Create Many Bills`, () => {
     it(`Creates many bills in the DB `, async () => {
-      const testBillsInput: BillInterface[] = testBills;
+      const testBillsInput: IBill[] = testBills;
       const parliamentary_session_id = await new ParliamentsService().queryLatestParliamentarySession();
       testBillsInput.forEach((bill) => {
         bill.parliamentary_session_id = parliamentary_session_id;

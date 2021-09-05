@@ -1,12 +1,14 @@
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
-import { BaseService, BillsService, EventsService } from "@services";
-import { Bill, createBill } from "../bills";
-import { Event } from "../events";
-import { logs } from "./logs";
+
+import { BillsService, EventsService, ParliamentsService } from "@services";
 import { FormatUtils } from "@utils";
 
-export class WebService extends BaseService<any> {
+import { Bill, createBill } from "../bills";
+import { BillEvent, BillEventInput } from "../events";
+import { logs } from "./logs";
+
+export class WebService {
   // Returns the XML document from a given URL
   private async fetchXml(url: string): Promise<string> {
     try {
@@ -74,19 +76,19 @@ export class WebService extends BaseService<any> {
   }
 
   // Splits two arrays of Bills and Events from the fetched LEGISinfo XML data array.
-  // Handles all the async detches needed to assemble the Bills and also avoid duplicates.
+  // Handles all the async fetches needed to assemble the Bills and also avoid duplicates.
   private async splitBillsAndEvents(
-    billEventsArray: BillEvent[],
-  ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
+    billEventsArray: PBillEvent[],
+    pSessionId: string,
+  ): Promise<{ billsArray: Bill[]; eventsArray: BillEvent[] }> {
     const billsArray: Bill[] = [];
-    const eventsArray: Event[] = [];
+    const eventsArray: BillEvent[] = [];
 
     const sortedBillEventsArray = this.sortBillEventsByDate(billEventsArray);
-    const billCodes: string[] = await super.findAllValues({
-      table: "bills",
-      column: "code",
-    });
-    const events: Event[] = await super.findAll("events");
+    const billCodes: string[] = await new BillsService().findAllDistinct(
+      "code",
+    );
+    const events: BillEvent[] = await new EventsService().findAll();
 
     for await (const billEvent of sortedBillEventsArray) {
       const code = FormatUtils.formatCode(billEvent.description);
@@ -97,7 +99,7 @@ export class WebService extends BaseService<any> {
         !billCodes.includes(code)
       );
       if (newBill) {
-        const bill = await createBill(billEvent);
+        const bill = await createBill(billEvent, pSessionId);
         billsArray.push(bill);
         console.log(
           `[NEW BILL] Successfully fetched Bill ${bill.code} from LEGISinfo server ...`,
@@ -109,8 +111,8 @@ export class WebService extends BaseService<any> {
           savedEvent.bill_code === code && savedEvent.title === eventTitle,
       );
       if (newEvent) {
-        const event = new Event(billEvent);
-        eventsArray.push(event);
+        const event = new BillEventInput(billEvent);
+        eventsArray.push(new BillEvent(event));
         console.log(
           `[NEW EVENT] Successfully fetched ${event.title} for Bill ${event.bill_code} from LEGISinfo server ...`,
         );
@@ -120,7 +122,7 @@ export class WebService extends BaseService<any> {
     return { billsArray, eventsArray };
   }
 
-  private sortBillEventsByDate(billEventsArray: BillEvent[]): BillEvent[] {
+  private sortBillEventsByDate(billEventsArray: PBillEvent[]): PBillEvent[] {
     return billEventsArray.sort((a, b) =>
       !!(!!a.pubDate && !!b.pubDate) && a.pubDate < b.pubDate ? 1 : -1,
     );
@@ -128,7 +130,7 @@ export class WebService extends BaseService<any> {
 
   private async getLegisInfoCaller(
     url: string,
-  ): Promise<{ billsArray: Bill[]; eventsArray: Event[] }> {
+  ): Promise<{ billsArray: Bill[]; eventsArray: BillEvent[] }> {
     try {
       // DEBUG CONSOLE LOG
       console.log(
@@ -144,7 +146,7 @@ export class WebService extends BaseService<any> {
       );
       // DEBUG CONSOLE LOG
 
-      const sourceArray = await FormatUtils.formatXml<BillEvent>(xml);
+      const sourceArray = await FormatUtils.formatXml<PBillEvent>(xml);
 
       // DEBUG CONSOLE LOG
       console.log(
@@ -154,7 +156,8 @@ export class WebService extends BaseService<any> {
       );
       // DEBUG CONSOLE LOG
 
-      return await this.splitBillsAndEvents(sourceArray);
+      const pSessionId = await new ParliamentsService().queryLatestParliamentarySession();
+      return await this.splitBillsAndEvents(sourceArray, pSessionId);
     } catch (error) {
       throw new Error(`[LEGISINFO CALLER ERROR] ${error}`);
     }
@@ -179,8 +182,9 @@ export class WebService extends BaseService<any> {
     try {
       logs.started();
 
-      const legisInfoData = await this.getLegisInfoCaller(legisInfoUrl);
-      const { billsArray, eventsArray } = legisInfoData;
+      const { billsArray, eventsArray } = await this.getLegisInfoCaller(
+        legisInfoUrl,
+      );
 
       // DEBUG CONSOLE LOG
       console.log(

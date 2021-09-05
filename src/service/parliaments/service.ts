@@ -1,32 +1,40 @@
 import { BaseService } from "@services";
-import {
-  ParliamentInterface as Parliament,
-  ParliamentarySessionInterface as ParliamentarySession,
-} from "./model";
+
+import { Parliament, IParliamentarySession } from "./model";
+import { Collection as ParliamentCollection } from "./collection";
 
 export class ParliamentsService extends BaseService<Parliament> {
+  constructor() {
+    super(ParliamentCollection, Parliament);
+  }
+
+  async createParliament(parliament: Parliament): Promise<Parliament> {
+    return super.createOne(parliament);
+  }
+
+  async createParliamentarySession(
+    parliamentarySession: IParliamentarySession,
+  ): Promise<Parliament> {
+    const { id } = await super.findOne(
+      {},
+      { limit: 1, sort: { createdAt: -1 } },
+    );
+
+    return super.updatePush(
+      { _id: id },
+      { parliamentarySessions: parliamentarySession },
+    );
+  }
+
   async queryLatestParliamentarySession(): Promise<string> {
-    return await super.findLatestId({ table: `parliamentary_sessions` });
-  }
+    const { parliamentarySessions } = await super.findOne(
+      {},
+      { limit: 1, sort: { createdAt: -1 } },
+    );
 
-  // GraphQL methods
-  async gqlFindOneParliament(query: string): Promise<Parliament> {
-    return super.one<Parliament>(query);
-  }
-
-  async gqlFindManyParliaments(query: string): Promise<Parliament[]> {
-    return super.many<Parliament>(query);
-  }
-
-  async gqlFindOneParliamentarySession(
-    query: string,
-  ): Promise<ParliamentarySession> {
-    return super.one<ParliamentarySession>(query);
-  }
-
-  async gqlFindManyParliamentarySessions(
-    query: string,
-  ): Promise<ParliamentarySession[]> {
-    return super.many<ParliamentarySession>(query);
+    const { id: latestParliamentarySessionId } = parliamentarySessions[
+      parliamentarySessions.length - 1
+    ];
+    return latestParliamentarySessionId;
   }
 }

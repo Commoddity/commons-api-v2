@@ -7,7 +7,7 @@ describe(`FormatUtils methods`, () => {
       '<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel><title>Custom RSS Feed';
 
     it("Should return an array", async () => {
-      const formattedXml = await FormatUtils.formatXml<BillEvent>(testString);
+      const formattedXml = await FormatUtils.formatXml<PBillEvent>(testString);
 
       expect(formattedXml).toBeInstanceOf(Array);
       formattedXml.forEach((billEvent) => {
@@ -19,13 +19,13 @@ describe(`FormatUtils methods`, () => {
     });
 
     it("Should return an array with length equal to number of bills", async () => {
-      const formattedXml = await FormatUtils.formatXml<BillEvent>(testString);
+      const formattedXml = await FormatUtils.formatXml<PBillEvent>(testString);
       expect(formattedXml).toHaveLength(2);
     });
 
     it("Throws if given invalid xml", async () => {
       try {
-        await FormatUtils.formatXml<BillEvent>(invalidXml);
+        await FormatUtils.formatXml<PBillEvent>(invalidXml);
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
       }

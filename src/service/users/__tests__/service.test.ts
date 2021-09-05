@@ -22,7 +22,7 @@ describe(`UsersService methods`, () => {
       expect(createdNewUser).toMatchObject(testNewUser);
       expect(createdNewUser.id).toBeTruthy();
       expect(createdNewUser.id).toHaveLength(20);
-      expect(createdNewUser.created_at).toBeTruthy();
+      expect(createdNewUser.createdAt).toBeTruthy();
       expect(createdNewUser.email).toEqual("burgertime@yahoo.com");
 
       const testNewUserCredentials = new UserCredentials({
@@ -61,7 +61,7 @@ describe(`UsersService methods`, () => {
 
       expect(newDbUser.id).toBeTruthy();
       expect(newDbUser.id).toHaveLength(20);
-      expect(newDbUser.created_at).toBeTruthy();
+      expect(newDbUser.createdAt).toBeTruthy();
       expect(newDbUser.email).toEqual("pascalvanleeuwen604@gmail.com");
 
       const userCredsAfterEmail = await new UsersService().findUserCredentials(
@@ -96,7 +96,7 @@ describe(`UsersService methods`, () => {
 
       expect(newDbUser.id).toBeTruthy();
       expect(newDbUser.id).toHaveLength(20);
-      expect(newDbUser.created_at).toBeTruthy();
+      expect(newDbUser.createdAt).toBeTruthy();
       expect(newDbUser.email).toEqual("pascalvanleeuwen604@gmail.com");
 
       const userCredsAfterApple = await new UsersService().findUserCredentials(
@@ -132,7 +132,7 @@ describe(`UsersService methods`, () => {
 
       expect(newDbUser.id).toBeTruthy();
       expect(newDbUser.id).toHaveLength(20);
-      expect(newDbUser.created_at).toBeTruthy();
+      expect(newDbUser.createdAt).toBeTruthy();
       expect(newDbUser.email).toEqual("pascalvanleeuwen604@gmail.com");
 
       const userCredsAfterFacebook = await new UsersService().findUserCredentials(

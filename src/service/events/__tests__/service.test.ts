@@ -13,7 +13,7 @@ describe(`EventsService methods`, () => {
         testEventInput,
       );
 
-      // Test event minus the fields id and created_at (which will differ between creations)
+      // Test event minus the fields id and createdAt (which will differ between creations)
       const testEvent = {
         bill_code: "C-829",
         title: "Bill was Defeated",
@@ -21,7 +21,7 @@ describe(`EventsService methods`, () => {
       };
 
       delete testEventResult.id;
-      delete testEventResult.created_at;
+      delete testEventResult.createdAt;
       expect(testEventResult).toEqual(testEvent);
     });
 

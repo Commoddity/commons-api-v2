@@ -1,243 +1,241 @@
-import { db, pgp } from "@db";
-import { QueryUtils } from ".";
+import { Model as MongoModel } from "mongoose";
+import { MongooseClient } from "@db";
 
 export class BaseService<T> {
-  private db: PostgresDBConnection;
+  private commandsCollection: MongoModel<any>;
+  private modelName: string;
 
-  constructor() {
-    this.db = db;
+  constructor(
+    private queriesCollection: MongoModel<any>,
+    private klass: any = null,
+  ) {
+    this.modelName = this.queriesCollection.modelName;
+    this.commandsCollection = MongooseClient.getInstance().models[
+      this.modelName
+    ];
+  }
+
+  async closeDbConnection(): Promise<void> {
+    await MongooseClient.getInstance().disconnect();
   }
 
   /* Create methods */
-  async createOne<T>({ table, tableValues }: CreateParams<T>): Promise<T> {
-    const query: string = QueryUtils.createInsertQuery(tableValues, table);
-
+  async createOne(record: T): Promise<T> {
     try {
-      return this.one<T>(query);
+      const data = await this.commandsCollection.create(record);
+      return this.build(data);
     } catch (error) {
-      throw new Error(`[ROW CREATION ERROR]: ${error}`);
+      throw new Error(`[RECORD CREATION ERROR]: ${error}`);
     }
   }
 
-  async createMany({
-    table,
-    tableValuesArray,
-  }: CreateManyParams<T>): Promise<T[]> {
-    const query: string = QueryUtils.createInsertQuery(tableValuesArray, table);
-
+  async createMany(records: T[]): Promise<T[]> {
     try {
-      return this.many<T>(query);
+      const data = await this.commandsCollection.create(records);
+      return data.map((data) => this.build(data));
     } catch (error) {
-      throw new Error(`[MULTIPLE ROW CREATION ERROR]: ${error}`);
-    }
-  }
-
-  async createJoinTable({
-    idOne,
-    idTwo,
-    table,
-  }: CreateJoinParams): Promise<boolean> {
-    const query: string = QueryUtils.createJoinQuery(idOne, idTwo, table);
-
-    try {
-      this.one(query);
-      return true;
-    } catch (error) {
-      throw new Error(`[JOIN TABLE CREATION ERROR]: ${error}`);
-    }
-  }
-
-  async deleteJoinTable({
-    idOne,
-    idTwo,
-    table,
-  }: CreateJoinParams): Promise<boolean> {
-    const query: string = QueryUtils.createJoinDeleteQuery(idOne, idTwo, table);
-
-    try {
-      this.none(query);
-      return true;
-    } catch (error) {
-      throw new Error(`[JOIN TABLE DELETION ERROR]: ${error}`);
-    }
-  }
-
-  async createJoinTables<T>({
-    table,
-    tableValuesArray,
-  }: CreateManyParams<T>): Promise<T[]> {
-    const query: string = QueryUtils.createInsertQuery(tableValuesArray, table);
-
-    try {
-      return this.many<T>(query);
-    } catch (error) {
-      throw new Error(`[MULTIPLE JOIN TABLE CREATION ERROR]: ${error}`);
+      throw new Error(`[MULTIPLE RECORD CREATION ERROR]: ${error}`);
     }
   }
 
   /* Read methods */
-  async findOne<T>({ table, where }: ReadParams): Promise<T> {
-    const whereClause = QueryUtils.createWhereClause(where);
-    const query = QueryUtils.createSelectQuery(table, whereClause);
-
+  async findOne(
+    query: PQuery,
+    options: PQueryOptions = {},
+    includeDeleted = false,
+  ): Promise<T> {
     try {
-      return this.one<T>(query);
+      const data = await this.commandsCollection.findOne(
+        this.transformQuery(query, includeDeleted),
+        this.transformOptions(options),
+      );
+      return this.build(data);
     } catch (error) {
       throw new Error(`[FIND ONE ERROR]: ${error}`);
     }
   }
 
-  async findMany<T>({ table, where, operator }: WhereParams): Promise<T[]> {
-    const whereClause = QueryUtils.createWhereClause(where, operator);
-
-    const query = QueryUtils.createSelectQuery(table, whereClause, true);
-
+  async findMany(
+    query: PQuery,
+    options: PQueryOptions = {},
+    includeDeleted = false,
+  ): Promise<T[]> {
     try {
-      return this.many<T>(query);
-    } catch (error) {
-      throw new Error(`[FIND MANY ERROR]: ${error}`);
-    }
-  }
-
-  async findAll(table: string): Promise<T[]> {
-    const query = pgp.as.format("SELECT * FROM $1:raw", [table]);
-
-    try {
-      return await this.many<T>(query);
-    } catch (error) {
-      throw new Error(`[FIND MANY ERROR]: ${error}`);
-    }
-  }
-
-  async findLatestId({ table }: TableParams): Promise<string> {
-    const query = pgp.as.format(
-      "SELECT id FROM $1:raw ORDER BY id DESC LIMIT 1",
-      [table],
-    );
-
-    try {
-      return String((await this.one<{ id: number }>(query)).id);
-    } catch (error) {
-      throw new Error(`[FIND LATEST ID ERROR]: ${error}`);
-    }
-  }
-
-  async findOneId({ table, where }: ReadParams): Promise<string> {
-    const whereClause = QueryUtils.createWhereClause(where);
-    const query = pgp.as.format("SELECT id FROM $1:raw $2:raw", [
-      table,
-      whereClause,
-    ]);
-
-    try {
-      return this.one<string>(query);
-    } catch (error) {
-      throw new Error(`[FIND LATEST ID ERROR]: ${error}`);
-    }
-  }
-
-  async findAllValues({
-    table,
-    column,
-    sort = false,
-  }: FindAllValuesParams): Promise<any[]> {
-    const query = sort
-      ? pgp.as.format("SELECT $1:raw FROM $2:raw ORDER BY $1:raw", [
-          column,
-          table,
-        ])
-      : pgp.as.format("SELECT $1:raw FROM $2:raw", [column, table]);
-
-    try {
-      return (await this.many<any>(query)).map((row) => row[column]);
-    } catch (error) {
-      throw new Error(`[FIND LATEST ID ERROR]: ${error}`);
-    }
-  }
-
-  async findIfRowExists({ table, where }: ReadParams): Promise<boolean> {
-    const whereClause = QueryUtils.createWhereClause(where);
-    const query = pgp.as.format("SELECT EXISTS(SELECT 1 FROM $1:raw $2:raw)", [
-      table,
-      whereClause,
-    ]);
-
-    try {
-      return (await this.one<{ exists: boolean }>(query)).exists;
-    } catch (error) {
-      throw new Error(`[FIND ROW EXISTS ERROR]: ${error}`);
-    }
-  }
-
-  async findIfRowContains({
-    table,
-    column,
-    value,
-  }: QueryParams): Promise<boolean> {
-    try {
-      const query = pgp.as.format(
-        `SELECT EXISTS(SELECT 1 FROM $1:raw WHERE $2:raw LIKE '%$3:raw%')`,
-        [table, column, value],
+      const data = await this.commandsCollection.find(
+        this.transformQuery(query, includeDeleted),
+        this.transformOptions(options),
       );
-
-      return this.one<boolean>(query);
+      return this.buildMultiple(data);
     } catch (error) {
-      throw new Error(`[FIND ROW CONTAINS ERROR]: ${error}`);
+      throw new Error(`[FIND MANY ERROR]: ${error}`);
+    }
+  }
+
+  async findAll(
+    options: PQueryOptions = { limit: 0 },
+    includeDeleted = false,
+  ): Promise<T[]> {
+    try {
+      const data = await this.commandsCollection.find(
+        this.transformQuery({}, includeDeleted),
+        this.transformOptions(options),
+      );
+      return this.buildMultiple(data);
+    } catch (error) {
+      throw new Error(`[FIND All ERROR]: ${error}`);
+    }
+  }
+
+  async findAllDistinct(
+    field: string,
+    query: PQuery = {},
+    includeDeleted = false,
+  ) {
+    return this.commandsCollection.distinct(
+      field,
+      this.transformQuery(query, includeDeleted),
+    );
+  }
+
+  async doesOneExist(query: PQuery): Promise<boolean> {
+    try {
+      return this.commandsCollection.exists(this.transformQuery(query));
+    } catch (error) {
+      throw new Error(`[DOES ONE EXIST]: ${error}`);
     }
   }
 
   /* Update methods */
-  async updateOne({ table, data }: UpdateOneParams): Promise<T> {
+  async updateOne(query: PQuery, update: PQuery): Promise<T> {
     try {
-      const query = QueryUtils.createUpdateQuery({
-        table,
-        data,
-      });
+      await this.commandsCollection.updateOne(query, update);
 
-      return this.one<T>(query);
+      const data = await this.commandsCollection.findOne(query);
+      return this.build(data);
     } catch (error) {
-      throw new Error(`[UPDATE ONE ROW ERROR]: ${error}`);
+      throw new Error(`[UPDATE ONE ERROR]: ${error}`);
     }
   }
 
-  async updateMany({ table, data }: UpdateManyParams): Promise<T[]> {
+  async updateMany(query: PQuery, update: PQuery): Promise<T[]> {
     try {
-      const query = QueryUtils.createUpdateQuery({
-        table,
-        data,
-      });
+      await this.commandsCollection.updateMany(query, update);
 
-      return this.many<T>(query);
+      const data = await this.commandsCollection.find(query);
+      return this.buildMultiple(data);
     } catch (error) {
-      throw new Error(`[UPDATE MANY ROW ERROR]: ${error}`);
+      throw new Error(`[UPDATE MANY ERROR]: ${error}`);
+    }
+  }
+
+  async updatePush(query: PQuery, update: PQuery): Promise<T> {
+    try {
+      await this.commandsCollection.updateOne(
+        query,
+        { $addToSet: update },
+        { new: true },
+      );
+
+      const data = await this.commandsCollection.findOne(query);
+      return this.build(data);
+    } catch (error) {
+      throw new Error(`[UPDATE PUSH ERROR]: ${error}`);
+    }
+  }
+
+  async updatePull(query: PQuery, update: PQuery): Promise<T> {
+    try {
+      await this.queriesCollection.updateOne(
+        query,
+        { $pull: update },
+        { new: true },
+      );
+
+      const data = await this.commandsCollection.findOne(query);
+      return this.build(data);
+    } catch (error) {
+      throw new Error(`[UPDATE PUSH ERROR]: ${error}`);
     }
   }
 
   /* Delete methods */
-  async deleteOne({
-    table,
-    where,
-    operator = undefined,
-  }: DeleteParams): Promise<boolean> {
-    const query: string = QueryUtils.createDeleteQuery(table, where, operator);
+  async deleteOne(
+    query: PQuery,
+    options: PQueryOptions = { hard: false },
+  ): Promise<void> {
     try {
-      await this.none(query);
-      return true;
+      if (options.hard) {
+        await this.commandsCollection.deleteOne(query);
+      } else {
+        await this.commandsCollection.updateOne(query, {
+          recordStatus: ERecordStatus.Deleted,
+        });
+      }
     } catch (error) {
-      throw new Error(`[ROW DELETION ERROR]: ${error}`);
+      throw new Error(`[DELETE ONE ERROR]: ${error}`);
     }
   }
 
-  /* DB connection methods */
-  async one<T>(query: string): Promise<T> {
-    return await this.db.one<T>(query);
+  async deleteMany(
+    query: PQuery,
+    options: PQueryOptions = { hard: false },
+  ): Promise<void> {
+    try {
+      if (options.hard) {
+        await this.commandsCollection.deleteMany(query);
+      } else {
+        await this.commandsCollection.updateMany(query, {
+          recordStatus: ERecordStatus.Deleted,
+        });
+      }
+    } catch (error) {
+      throw new Error(`[DELETE MANY ERROR]: ${error}`);
+    }
   }
 
-  async many<T>(query: string): Promise<T[]> {
-    return await this.db.any<T>(query);
+  /* Query Utils */
+  private transformQuery(query: PQuery, includeDeleted = false): PQuery {
+    if (includeDeleted) {
+      return query;
+    } else {
+      return {
+        ...query,
+        recordStatus: { $ne: ERecordStatus.Deleted },
+      };
+    }
   }
 
-  async none(query: string): Promise<null> {
-    return await this.db.none(query);
+  private transformOptions = ({
+    limit,
+    sort,
+  }: PQueryOptions): PQueryOptions => ({
+    limit: limit ?? 3000,
+    sort: sort || { createdAt: -1 },
+  });
+
+  private build(data: any): T {
+    if (!data) {
+      return null as any;
+    }
+
+    const { _id, __v, ...others } = data._doc || data; //eslint-disable-line
+
+    return this.factory({ id: _id, ...others });
+  }
+
+  private buildMultiple(data: any[]): T[] {
+    if (!data || !data?.length) {
+      return null as any;
+    }
+
+    return data.map((data) => this.build(data));
+  }
+
+  private factory(data: any): T {
+    if (this.klass) {
+      return new this.klass(data);
+    } else {
+      return data;
+    }
   }
 }

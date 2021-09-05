@@ -2,7 +2,7 @@ import { ParliamentsService } from "@services";
 import { Bill, createBill } from "..";
 
 describe(`Bill model`, async () => {
-  const testBillEvents: BillEvent[] = [
+  const testBillEvents: PBillEvent[] = [
     {
       title: "C-8, Introduction and First Reading in the House of Commons",
       link:
@@ -21,8 +21,8 @@ describe(`Bill model`, async () => {
     },
   ];
 
-  describe(`Create Bill from BillEvent using createBill factory method`, () => {
-    it(`Creates a new instance of the Bill class from a Legisinfo BillEvent object`, async () => {
+  describe(`Create Bill from PBillEvent using createBill factory method`, () => {
+    it(`Creates a new instance of the Bill class from a Legisinfo PBillEvent object`, async () => {
       const newBill = await createBill(testBillEvents[0]);
       const parliamentary_session_id = await new ParliamentsService().queryLatestParliamentarySession();
 
@@ -43,7 +43,7 @@ describe(`Bill model`, async () => {
       expect(newBill).toEqual(testBill);
     });
 
-    it(`Creates a new instance of the Bill class from a Legisinfo BillEvent object`, async () => {
+    it(`Creates a new instance of the Bill class from a Legisinfo PBillEvent object`, async () => {
       const newBill = await createBill(testBillEvents[1]);
       const parliamentary_session_id = await new ParliamentsService().queryLatestParliamentarySession();
 
