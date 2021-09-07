@@ -8,7 +8,7 @@ export class MongooseClient {
   static async initInstance(): Promise<void> {
     try {
       const uri =
-        "mongodb+srv://pascal:4xYJvwYvVTp5oADuaU6EWKz2taerfu8y9siNZHQQ5527P6cYZchmHFJ@commons-app-db.6pnh0.mongodb.net/test?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=true";
+        "mongodb+srv://pascal:4xYJvwYvVTp5oADuaU6EWKz2taerfu8y9siNZHQQ5527P6cYZchmHFJ@commons-app-db.6pnh0.mongodb.net/commons-app-db";
 
       const sanitizedUri = MongooseClient.sanitizeUri(uri);
       const initConnectionLog = `Initializing connection to MongoDB using URI ${sanitizedUri} ...`;

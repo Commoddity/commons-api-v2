@@ -43,7 +43,7 @@ export class FormatUtils {
   // Formats the fetched dates to a consistent format
   static formatDate = (date: string): string | undefined => {
     if (dayjs(date).isValid()) {
-      return dayjs(date).utcOffset(-4).format(`YYYY/MM/DD`);
+      return dayjs(date).utcOffset(-4).format();
     } else {
       return undefined;
     }

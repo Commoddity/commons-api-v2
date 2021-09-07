@@ -1,4 +1,5 @@
-import { FormatUtils } from "@utils";
+import { PBillEvent } from "../../types";
+import { FormatUtils } from "../../utils";
 
 describe(`FormatUtils methods`, () => {
   describe("formatXml", () => {

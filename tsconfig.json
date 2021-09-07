@@ -6,13 +6,12 @@
     "baseUrl": "./",
     "paths": {
       "@db": ["src/db"],
-      "@graphql": ["src/db/graphql/schema"],
       "@scripts": ["src/scripts"],
-      "@services": ["src/service"],
+      "@services": ["src/services"],
       "@test": ["src/test"],
+      "@types": ["src/types"],
       "@utils": ["src/utils"]
     },
-
     "outDir": "dist",
     "rootDir": "src",
     "removeComments": true,
@@ -26,6 +25,5 @@
     "strictNullChecks": false,
     "typeRoots": ["./src/types", "./node_modules/@types"]
   },
-  "include": ["./src/**/*.ts"],
-  "exclude": ["./src/**/__tests__/**/*"]
+  "include": ["./src/**/*.ts"]
 }
