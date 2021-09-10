@@ -5,7 +5,6 @@ schema {
 
 type Query {
   getAllBills: [IBill]
-  getManyBills(query): [IBill]
   getOneBill(code: String!): IBill
   getAllParliaments: [IParliament]
 }
