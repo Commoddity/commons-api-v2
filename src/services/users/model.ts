@@ -1,6 +1,6 @@
-import { ECredentialTypes } from "@types";
+import { ECredentialTypes, ERecordStatus } from "../../types";
 
-interface IUser {
+export interface IUser {
   id?: string;
   firstName: string;
   lastName: string;
@@ -17,7 +17,9 @@ interface IUser {
   mp: string;
   party: string;
   ridingName: string;
-  createdAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+  recordStatus?: ERecordStatus;
 }
 
 export class User implements IUser {
@@ -38,7 +40,9 @@ export class User implements IUser {
   mp: string;
   party: string;
   ridingName: string;
-  createdAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+  recordStatus?: ERecordStatus;
 
   constructor({
     id,
@@ -57,8 +61,10 @@ export class User implements IUser {
     mp,
     party,
     ridingName,
-    createdAt,
     credentials,
+    createdAt,
+    updatedAt,
+    recordStatus,
   }: UserInput) {
     this.id = id;
     this.firstName = firstName;
@@ -76,8 +82,10 @@ export class User implements IUser {
     this.mp = mp;
     this.party = party;
     this.ridingName = ridingName;
-    this.createdAt = createdAt;
     this.credentials = credentials;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+    this.recordStatus = recordStatus;
   }
 
   get fullName(): string {
@@ -113,8 +121,10 @@ export class UserInput {
   mp: string;
   party: string;
   ridingName: string;
-  createdAt: Date;
   credentials: ECredentialTypes[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  recordStatus?: ERecordStatus;
 
   constructor({ firstName, lastName, email, credentials }: PCognitoUserInput) {
     this.firstName = firstName;

@@ -3,15 +3,6 @@
     "target": "ES6",
     "module": "commonjs",
     "lib": ["dom", "es6"],
-    "baseUrl": "./",
-    "paths": {
-      "@db": ["src/db"],
-      "@scripts": ["src/scripts"],
-      "@services": ["src/services"],
-      "@test": ["src/test"],
-      "@types": ["src/types"],
-      "@utils": ["src/utils"]
-    },
     "outDir": "dist",
     "rootDir": "src",
     "removeComments": true,

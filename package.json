@@ -8,10 +8,14 @@
   "private": true,
   "scripts": {
     "build": "tsc -p ./",
+    "build:clean": "tsc --build --clean",
+    "deploy": "serverless deploy",
     "lint": "eslint . --ext .ts",
-    "test": "NODE_ENV=test && yarn build && jest",
-    "test:silent": "NODE_ENV=test && yarn build && jest --silent",
-    "run-script": "NODE_ENV=dev && yarn build && ts-node -r tsconfig-paths/register"
+    "set:dev": "export NODE_ENV=dev && export branch=dev;",
+    "test": "yarn && yarn build && yarn set:dev && jest",
+    "test:silent": "yarn && yarn build && yarn set:dev && jest --silent",
+    "run:dev": "yarn && yarn build && yarn set:dev ts-node",
+    "deploy:dev": "yarn && yarn build && yarn set:dev && yarn deploy --stage dev"
   },
   "devDependencies": {
     "@aws-sdk/types": "^3.29.0",
@@ -21,22 +25,23 @@
     "@types/xml2js": "^0.4.9",
     "@typescript-eslint/eslint-plugin": "^4.30.0",
     "@typescript-eslint/parser": "^4.30.0",
+    "aws-sdk": "^2.983.0",
     "eslint": "^7.18.0",
     "jest": "^27.1.0",
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.5",
+    "ts-loader": "^9.2.5",
     "ts-node": "^10.2.1",
-    "tsconfig-paths": "^3.11.0",
-    "tsconfig-paths-jest": "^0.0.1",
     "typescript": "^4.4.2",
     "yarn-upgrade-all": "^0.5.4"
   },
   "dependencies": {
-    "aws-sdk": "^2.983.0",
     "axios": "^0.21.3",
     "cheerio": "^1.0.0-rc.10",
     "dayjs": "^1.10.6",
     "mongoose": "^6.0.4",
+    "serverless": "^2.57.0",
+    "serverless-appsync-plugin": "^1.12.0",
     "xml2js": "^0.4.23"
   }
 }

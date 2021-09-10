@@ -1,4 +1,4 @@
-import { FormatUtils } from "@utils";
+import { FormatUtils } from "../../../utils";
 
 export const testEvents = [
   {

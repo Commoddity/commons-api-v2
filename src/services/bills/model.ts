@@ -1,33 +1,46 @@
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
+import mongoose from "mongoose";
 
-import { ParliamentsService } from "@services";
-import { EBillCategories, PBillEvent, PFetchPage } from "@types";
-import { FormatUtils } from "@utils";
+import { ParliamentsService } from "../../services";
+import {
+  EBillCategories,
+  ERecordStatus,
+  PBillEvent,
+  PFetchPage,
+} from "../../types";
+import { FormatUtils } from "../../utils";
+
+export enum EBillType {
+  commons = "commons",
+  senate = "senate",
+}
 
 export interface IBillEvent {
-  id: string;
+  eventId?: string;
   title: string;
-  publicationDate: string | undefined;
+  publicationDate: Date | undefined;
 }
 
 export class BillEvent implements IBillEvent {
-  id: string;
+  eventId?: string;
   title: string;
-  publicationDate: string | undefined;
+  publicationDate: Date | undefined;
 
   constructor({ title, pubDate }: PBillEvent) {
     this.title = FormatUtils.formatTitle(title);
     this.publicationDate = FormatUtils.formatDate(pubDate);
+    this.eventId = new mongoose.Types.ObjectId().toString();
   }
 }
 
 export interface IBill {
+  id?: string;
   code: string;
   title: string;
   pageUrl: string;
   categories: EBillCategories[];
-  id?: string;
+  type: EBillType;
   parliamentarySessionId?: string;
   description?: string;
   introducedDate?: Date;
@@ -37,14 +50,17 @@ export interface IBill {
   passed?: boolean | null;
   events: BillEvent[];
   createdAt?: Date;
+  updatedAt?: Date;
+  recordStatus?: ERecordStatus;
 }
 
 export class Bill implements IBill {
+  id?: string;
   code: string;
   title: string;
   pageUrl: string;
   categories: EBillCategories[];
-  id?: string;
+  type: EBillType;
   parliamentarySessionId?: string;
   description?: string;
   introducedDate?: Date;
@@ -54,13 +70,16 @@ export class Bill implements IBill {
   passed?: boolean | null;
   events: BillEvent[];
   createdAt?: Date;
+  updatedAt?: Date;
+  recordStatus?: ERecordStatus;
 
   constructor({
+    id,
     code,
     title,
     pageUrl,
     categories,
-    id,
+    type,
     parliamentarySessionId,
     description,
     introducedDate,
@@ -70,12 +89,15 @@ export class Bill implements IBill {
     passed,
     events,
     createdAt,
+    updatedAt,
+    recordStatus,
   }: BillInput) {
     this.id = id;
     this.code = code;
     this.title = title;
     this.pageUrl = pageUrl;
     this.categories = categories;
+    this.type = type;
     this.parliamentarySessionId = parliamentarySessionId;
     this.description = description;
     this.introducedDate = introducedDate;
@@ -85,15 +107,18 @@ export class Bill implements IBill {
     this.passed = passed;
     this.events = events;
     this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+    this.recordStatus = recordStatus;
   }
 }
 
 export class BillInput implements IBill {
+  id?: string;
   code: string;
   title: string;
   pageUrl: string;
   categories: EBillCategories[];
-  id?: string;
+  type: EBillType;
   parliamentarySessionId?: string;
   description?: string;
   introducedDate?: Date;
@@ -103,16 +128,27 @@ export class BillInput implements IBill {
   passed?: boolean | null;
   events: IBillEvent[];
   createdAt?: Date;
+  updatedAt?: Date;
+  recordStatus?: ERecordStatus;
 
   constructor({ link, description }: PBillEvent) {
     this.code = FormatUtils.formatCode(description);
     this.title = FormatUtils.formatTitle(description);
+    this.type = this.getBillType(description);
     this.pageUrl = link;
     this.summaryUrl = null;
     this.fullTextUrl = null;
     this.passed = null;
     this.events = [];
     this.categories = [];
+  }
+
+  private getBillType(description: string): EBillType {
+    const prefix = description.slice(0, 1);
+    return {
+      C: EBillType.commons,
+      S: EBillType.senate,
+    }[prefix];
   }
 
   // Performs all sync operations needed to initialize a new Bill from the Legisinfo data
@@ -146,14 +182,14 @@ export class BillInput implements IBill {
     });
 
     return parliamentarySessions.find(({ number }) => number === sessionNumber)
-      .id;
+      .sessionId;
   }
 
   // Returns the date that a bill was introduced from a bill page
   private async fetchIntroducedDate({
     pageUrl,
     billCode,
-  }: PFetchPage): Promise<string | undefined> {
+  }: PFetchPage): Promise<Date | string | undefined> {
     let introducedDate: string | undefined;
 
     try {
@@ -165,10 +201,10 @@ export class BillInput implements IBill {
       )?.attr("href");
 
       if (billReinstated) {
-        introducedDate = await this.fetchIntroducedDate({
+        introducedDate = (await this.fetchIntroducedDate({
           pageUrl: `https://www.parl.ca/LegisInfo/${billReinstated}`,
           billCode,
-        });
+        })) as string;
       } else {
         const closestId = "#ctl00_PageContentSection_DetailsContainerPanel";
         introducedDate = billPage(closestId)
@@ -251,7 +287,7 @@ export class BillInput implements IBill {
     }
   }
 
-  static async getPassedDate(pageUrl: string): Promise<string> {
+  static async getPassedDate(pageUrl: string): Promise<Date | undefined> {
     try {
       const response: AxiosResponse<string> = await Axios.get(pageUrl);
       const billPage: cheerio.Root = Cheerio.load(response.data);

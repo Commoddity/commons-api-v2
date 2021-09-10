@@ -1,4 +1,4 @@
-import { BaseService } from "@services";
+import { BaseService } from "../../services";
 
 import { Parliament, IParliamentarySession } from "./model";
 import { Collection as ParliamentCollection } from "./collection";
@@ -13,41 +13,24 @@ export class ParliamentsService extends BaseService<Parliament> {
   }
 
   async createParliamentarySession(
+    parliamentId: string,
     parliamentarySession: IParliamentarySession,
   ): Promise<Parliament> {
-    const { id } = await super.findOne(
-      {},
-      { limit: 1, sort: { createdAt: -1 } },
-    );
-
     return super.updatePush(
-      { _id: id },
+      { _id: parliamentId },
       { parliamentarySessions: parliamentarySession },
     );
   }
 
-  async addBillsToParliamentarySession(
-    parliamentarySession: IParliamentarySession,
-  ): Promise<Parliament> {
-    const { id } = await super.findOne(
+  async queryLatestSession(): Promise<string> {
+    const { parliamentarySessions: sessions } = await super.findOne(
       {},
-      { limit: 1, sort: { createdAt: -1 } },
+      { limit: 1, sort: { number: -1 } },
     );
 
-    return super.updatePush(
-      { _id: id },
-      { parliamentarySessions: parliamentarySession },
+    const { sessionId } = sessions.reduce((a, b) =>
+      a.number > b.number ? a : b,
     );
-  }
-
-  async queryLatestParliamentarySession(): Promise<string> {
-    const { parliamentarySessions } = await super.findOne(
-      {},
-      { limit: 1, sort: { createdAt: -1 } },
-    );
-
-    const { id: latestParliamentarySessionId } =
-      parliamentarySessions[parliamentarySessions.length - 1];
-    return latestParliamentarySessionId;
+    return sessionId;
   }
 }

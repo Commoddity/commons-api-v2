@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 
+import { ESSMParams } from "../types";
+import { SSMUtil } from "../utils";
+
 export class MongooseClient {
   private static instance: MongooseClient;
 
@@ -7,17 +10,19 @@ export class MongooseClient {
 
   static async initInstance(): Promise<void> {
     try {
-      const uri =
-        "mongodb+srv://pascal:4xYJvwYvVTp5oADuaU6EWKz2taerfu8y9siNZHQQ5527P6cYZchmHFJ@commons-app-db.6pnh0.mongodb.net/commons-app-db";
+      const uri = await SSMUtil.getInstance().getVar(
+        ESSMParams.MongoConnectionString,
+      );
 
       const sanitizedUri = MongooseClient.sanitizeUri(uri);
       const initConnectionLog = `Initializing connection to MongoDB using URI ${sanitizedUri} ...`;
       console.log(initConnectionLog);
 
-      await mongoose.connect(uri);
+      const envURI = MongooseClient.injectEnv(uri);
+      await mongoose.connect(envURI);
       MongooseClient.instance = new MongooseClient(mongoose);
 
-      console.log(`Successfully connected to MongoDB`);
+      console.log(`Successfully connected to MongoDB.`);
     } catch (error) {
       console.error(error);
       throw error;
@@ -26,12 +31,14 @@ export class MongooseClient {
 
   static getInstance(): mongoose.Mongoose {
     if (!MongooseClient.instance) {
-      throw new Error("MongooseClient must be initialized first");
+      throw new Error("MongooseClient must be initialized first!");
     }
 
     return MongooseClient.instance.nativeClient;
   }
 
+  private static HIDE_CREDENTIALS_REGEX = /:\/\/(.*)@/g;
+  private static HIDDEN_CREDENTIALS_PLACEHOLDER = "<username>:<password>";
   private static sanitizeUri(uri: string): string {
     return uri?.match(this.HIDE_CREDENTIALS_REGEX)
       ? uri.replace(
@@ -41,6 +48,8 @@ export class MongooseClient {
       : uri;
   }
 
-  private static HIDE_CREDENTIALS_REGEX = /:\/\/(.*)@/g;
-  private static HIDDEN_CREDENTIALS_PLACEHOLDER = "<username>:<password>";
+  private static ENV_PLACEHOLDER = "{env}";
+  private static injectEnv(uri: string): string {
+    return uri.replace(this.ENV_PLACEHOLDER, process.env.NODE_ENV);
+  }
 }

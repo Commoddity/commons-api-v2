@@ -41,9 +41,9 @@ export class FormatUtils {
   }
 
   // Formats the fetched dates to a consistent format
-  static formatDate = (date: string): string | undefined => {
+  static formatDate = (date: string): Date | undefined => {
     if (dayjs(date).isValid()) {
-      return dayjs(date).utcOffset(-4).format();
+      return dayjs(date).utcOffset(-4).toDate();
     } else {
       return undefined;
     }

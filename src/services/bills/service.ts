@@ -1,13 +1,12 @@
-import { BaseService, ParliamentsService } from "@services";
+import { FilterQuery, UpdateQuery } from "mongoose";
+
+import { BaseService, ParliamentsService } from "../../services";
 import {
   IBillSummaryMap,
   PBillEvent,
-  PPassedUpdate,
-  PQuery,
   PUpdateBillCategories,
-  PUpdatePassed,
-} from "@types";
-import { FormatUtils } from "@utils";
+} from "../../types";
+import { FormatUtils } from "../../utils";
 
 import { Bill, BillEvent, BillInput, createBill } from "./model";
 import { Collection as BillCollection } from "./collection";
@@ -25,7 +24,7 @@ export class BillsService extends BaseService<Bill> {
     return super.createMany(bills);
   }
 
-  async deleteBill(query: PQuery): Promise<void> {
+  async deleteBill(query: FilterQuery<Bill>): Promise<void> {
     return super.deleteOne(query);
   }
 
@@ -33,17 +32,19 @@ export class BillsService extends BaseService<Bill> {
     code,
     pageUrl,
     passed,
-  }: PUpdatePassed): Promise<Bill> {
-    const update: PPassedUpdate = { passed };
+  }: UpdateQuery<Bill>): Promise<Bill> {
+    let update: UpdateQuery<Bill> = { passed };
     if (passed) {
-      update.passedDate = await BillInput.getPassedDate(pageUrl);
+      update = {
+        ...update,
+        passedDate: new Date(await BillInput.getPassedDate(pageUrl)),
+      };
     }
     return super.updateOne({ code }, update);
   }
 
   async updateBillsAndEvents(billEventsArray: PBillEvent[]): Promise<void> {
-    const parliamentarySessionId =
-      await new ParliamentsService().queryLatestParliamentarySession();
+    const sessionId = await new ParliamentsService().queryLatestSession();
 
     const sortedBillEventsArray = this.sortBillEventsByDate(billEventsArray);
     const createdBillIds: string[] = [];
@@ -85,10 +86,7 @@ export class BillsService extends BaseService<Bill> {
     }
 
     // Add all new bills to their respective parliamentary sessions
-    await this.addBillsToParliamentarySession(
-      createdBillIds,
-      parliamentarySessionId,
-    );
+    await this.addBillsToParliamentarySession(createdBillIds, sessionId);
   }
 
   billHasPassed = (eventTitle: string): boolean =>
@@ -102,13 +100,13 @@ export class BillsService extends BaseService<Bill> {
 
   private async addBillsToParliamentarySession(
     billIds: string[],
-    parliamentarySessionId: string,
+    sessionId: string,
   ): Promise<void> {
     const service = new ParliamentsService();
-    const query = { "parliamentarySessions.id": parliamentarySessionId };
+    const query = { "parliamentarySessions.id": sessionId };
 
-    const { parliamentarySessions } = await service.findOne(query);
-    const { bills } = parliamentarySessions[parliamentarySessions.length - 1];
+    const { parliamentarySessions: sessions } = await service.findOne(query);
+    const { bills } = sessions[sessions.length - 1];
 
     for await (const billId of billIds) {
       const billExists = bills.some((id) => id === billId);
@@ -116,7 +114,7 @@ export class BillsService extends BaseService<Bill> {
         await service.updatePushArray(
           query,
           "parliamentarySessions.$[element].bills",
-          { "element._id": parliamentarySessionId },
+          { "element.sessionId": sessionId },
           billId,
         );
       }

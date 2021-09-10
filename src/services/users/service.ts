@@ -1,6 +1,8 @@
+import { FilterQuery, UpdateQuery } from "mongoose";
+
 import { CognitoIdentityServiceProvider, AWSError } from "aws-sdk";
 
-import { BaseService } from "@services";
+import { BaseService } from "../../services";
 import {
   ECredentialTypes,
   IAppleUserAttributes,
@@ -9,8 +11,7 @@ import {
   IParsedUserIdentities,
   ISocialUserAttributes,
   IUserAttributes,
-  PQuery,
-} from "@types";
+} from "../../types";
 
 import { User, UserInput } from "./model";
 import { Collection as UserCollection } from "./collection";
@@ -26,8 +27,6 @@ export class UsersService extends BaseService<User> {
     if (!this.cognitoServiceObject) {
       this.cognitoServiceObject = new CognitoIdentityServiceProvider({
         region: "ca-central-1",
-        accessKeyId: process.env.AWS_IAM_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_IAM_SECRET_ACCESS_KEY,
       });
     }
     return this.cognitoServiceObject;
@@ -38,7 +37,7 @@ export class UsersService extends BaseService<User> {
     return super.createOne(user);
   }
 
-  async findOneUser(query: PQuery): Promise<User> {
+  async findOneUser(query: FilterQuery<User>): Promise<User> {
     return super.findOne(query);
   }
 
@@ -46,7 +45,10 @@ export class UsersService extends BaseService<User> {
     return (await super.findOne({ email })).id!;
   }
 
-  async updateUser(query: PQuery, update: PQuery): Promise<User> {
+  async updateUser(
+    query: FilterQuery<User>,
+    update: UpdateQuery<User>,
+  ): Promise<User> {
     return super.updateOne(query, update);
   }
 

@@ -1,3 +1,5 @@
+import { QueryOptions } from "mongoose";
+
 /* Parameters */
 export interface PBillEvent {
   description: string;
@@ -11,13 +13,8 @@ export interface PFetchPage {
   billCode: string;
 }
 
-export type PQuery = { [key: string]: any };
-
-export interface PQueryOptions {
-  limit?: number;
-  sort?: { [field: string]: 1 | -1 };
+export interface PQueryOptions extends QueryOptions {
   hard?: boolean;
-  excludeDeleted?: boolean;
 }
 
 export interface PUpdateBillCategories {
@@ -34,11 +31,6 @@ export interface PUpdatePassed {
 export interface PUpdateSummary {
   code: string;
   summaryUrl: string;
-}
-
-export interface PPassedUpdate {
-  passed: boolean;
-  passedDate?: string;
 }
 
 /* Interfaces */
@@ -140,4 +132,17 @@ export enum ECredentialTypes {
 export enum ERecordStatus {
   Created = "created",
   Deleted = "deleted",
+}
+
+export enum ESSMParams {
+  MongoConnectionString = "MongoConnectionString",
+}
+
+export interface IAppSyncResolverEvent<A = any, S = any> {
+  arguments: A;
+  field: string;
+  source?: S;
+  identity?: {
+    claims: { "custom:userid": string };
+  };
 }

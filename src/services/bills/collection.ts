@@ -1,16 +1,18 @@
 import mongoose from "mongoose";
 
-import { EBillCategories, ERecordStatus } from "@types";
+import { Bill, BillEvent, EBillType } from "./model";
+import { EBillCategories, ERecordStatus } from "../../types";
 
-const billEventSchema = new mongoose.Schema(
+const billEventSchema = new mongoose.Schema<BillEvent>(
   {
+    eventId: { type: String, required: true },
     title: { type: String, required: true },
     publicationDate: { type: Date, required: true },
   },
-  { timestamps: true },
+  { timestamps: true, _id: false },
 );
 
-const billSchema = new mongoose.Schema(
+const billSchema = new mongoose.Schema<Bill>(
   {
     code: { type: String, required: true },
     title: { type: String, required: true },
@@ -27,6 +29,10 @@ const billSchema = new mongoose.Schema(
       type: [String],
       enum: Object.values(EBillCategories),
     },
+    type: {
+      type: String,
+      enum: Object.values(EBillType),
+    },
     recordStatus: {
       type: String,
       required: true,
@@ -39,6 +45,6 @@ const billSchema = new mongoose.Schema(
 
 billSchema.index({ code: 1 }, { unique: true });
 
-const collection = mongoose.model("Bill", billSchema);
+const collection = mongoose.model<Bill>("Bill", billSchema);
 
 export { collection as Collection };

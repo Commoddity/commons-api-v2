@@ -1,14 +1,19 @@
-import { Model as MongoModel, QueryOptions } from "mongoose";
+import {
+  FilterQuery,
+  Model as MongoModel,
+  OnlyFieldsOfType,
+  UpdateQuery,
+} from "mongoose";
 
-import { MongooseClient } from "@db";
-import { ERecordStatus, PQuery, PQueryOptions } from "@types";
+import { MongooseClient } from "../../db";
+import { ERecordStatus, PQueryOptions } from "../../types";
 
 export class BaseService<T> {
-  private commandsCollection: MongoModel<any>;
+  private commandsCollection: MongoModel<T>;
   private modelName: string;
 
   constructor(
-    private queriesCollection: MongoModel<any>,
+    private queriesCollection: MongoModel<T>,
     private klass: any = null,
   ) {
     this.modelName = this.queriesCollection.modelName;
@@ -33,7 +38,7 @@ export class BaseService<T> {
   async createMany(records: T[]): Promise<T[]> {
     try {
       const data = await this.commandsCollection.create(records);
-      return data.map((data) => this.build(data));
+      return this.buildMultiple(data);
     } catch (error) {
       throw new Error(`[MULTIPLE RECORD CREATION ERROR]: ${error}`);
     }
@@ -41,8 +46,8 @@ export class BaseService<T> {
 
   /* Read methods */
   async findOne(
-    query: PQuery,
-    options: QueryOptions = {},
+    query: FilterQuery<T>,
+    options: PQueryOptions = {},
     includeDeleted = false,
   ): Promise<T> {
     try {
@@ -58,8 +63,8 @@ export class BaseService<T> {
   }
 
   async findMany(
-    query: PQuery,
-    options: QueryOptions = {},
+    query: FilterQuery<T>,
+    options: PQueryOptions = {},
     includeDeleted = false,
   ): Promise<T[]> {
     try {
@@ -75,12 +80,13 @@ export class BaseService<T> {
   }
 
   async findAll(
-    options: QueryOptions = { limit: 0 },
+    options: PQueryOptions = { limit: 0 },
     includeDeleted = false,
   ): Promise<T[]> {
     try {
       const data = await this.commandsCollection.find(
         this.transformQuery({}, includeDeleted),
+        this.transformProjection(options),
         this.transformOptions(options),
       );
       return this.buildMultiple(data);
@@ -89,18 +95,18 @@ export class BaseService<T> {
     }
   }
 
-  async findAllDistinct(
+  async findAllDistinct<F = any>(
     field: string,
-    query: PQuery = {},
+    query: FilterQuery<T> = {},
     includeDeleted = false,
-  ) {
+  ): Promise<F[]> {
     return this.commandsCollection.distinct(
       field,
       this.transformQuery(query, includeDeleted),
     );
   }
 
-  async doesOneExist(query: PQuery): Promise<boolean> {
+  async doesOneExist(query: FilterQuery<T>): Promise<boolean> {
     try {
       return this.commandsCollection.exists(this.transformQuery(query));
     } catch (error) {
@@ -109,7 +115,7 @@ export class BaseService<T> {
   }
 
   /* Update methods */
-  async updateOne(query: PQuery, update: PQuery): Promise<T> {
+  async updateOne(query: FilterQuery<T>, update: UpdateQuery<T>): Promise<T> {
     try {
       await this.commandsCollection.updateOne(query, update);
 
@@ -120,7 +126,10 @@ export class BaseService<T> {
     }
   }
 
-  async updateMany(query: PQuery, update: PQuery): Promise<T[]> {
+  async updateMany(
+    query: FilterQuery<T>,
+    update: UpdateQuery<T>,
+  ): Promise<T[]> {
     try {
       await this.commandsCollection.updateMany(query, update);
 
@@ -131,11 +140,14 @@ export class BaseService<T> {
     }
   }
 
-  async updatePush(query: PQuery, update: PQuery): Promise<T> {
+  async updatePush(
+    query: FilterQuery<T>,
+    update: OnlyFieldsOfType<T>,
+  ): Promise<T> {
     try {
       await this.commandsCollection.updateOne(
         query,
-        { $addToSet: update },
+        { $addToSet: update } as any,
         { new: true },
       );
 
@@ -146,13 +158,14 @@ export class BaseService<T> {
     }
   }
 
-  async updatePull(query: PQuery, update: PQuery): Promise<T> {
+  async updatePull(
+    query: FilterQuery<T>,
+    update: OnlyFieldsOfType<T>,
+  ): Promise<T> {
     try {
-      await this.queriesCollection.updateOne(
-        query,
-        { $pull: update },
-        { new: true },
-      );
+      await this.queriesCollection.updateOne(query, { $pull: update } as any, {
+        new: true,
+      });
 
       const data = await this.commandsCollection.findOne(query);
       return this.build(data);
@@ -162,15 +175,15 @@ export class BaseService<T> {
   }
 
   async updatePushArray(
-    query: PQuery,
+    query: FilterQuery<T>,
     array: string,
-    arrayFilter: PQuery,
+    arrayFilter: UpdateQuery<T>,
     update: any,
   ): Promise<T> {
     try {
       await this.queriesCollection.updateOne(
         query,
-        { $addToSet: { [array]: update } },
+        { $addToSet: { [array]: update } } as any,
         { arrayFilters: [arrayFilter] },
       );
 
@@ -182,15 +195,15 @@ export class BaseService<T> {
   }
 
   async updatePullArray(
-    query: PQuery,
+    query: FilterQuery<T>,
     array: string,
-    arrayFilter: PQuery,
+    arrayFilter: UpdateQuery<T>,
     update: any,
   ): Promise<T> {
     try {
       await this.queriesCollection.updateOne(
         query,
-        { $pull: { [array]: update } },
+        { $pull: { [array]: update } } as any,
         { arrayFilters: [arrayFilter] },
       );
 
@@ -203,7 +216,7 @@ export class BaseService<T> {
 
   /* Delete methods */
   async deleteOne(
-    query: PQuery,
+    query: FilterQuery<T>,
     options: PQueryOptions = { hard: false },
   ): Promise<void> {
     try {
@@ -212,7 +225,7 @@ export class BaseService<T> {
       } else {
         await this.commandsCollection.updateOne(query, {
           recordStatus: ERecordStatus.Deleted,
-        });
+        } as any);
       }
     } catch (error) {
       throw new Error(`[DELETE ONE ERROR]: ${error}`);
@@ -220,7 +233,7 @@ export class BaseService<T> {
   }
 
   async deleteMany(
-    query: PQuery,
+    query: FilterQuery<T>,
     options: PQueryOptions = { hard: false },
   ): Promise<void> {
     try {
@@ -229,7 +242,7 @@ export class BaseService<T> {
       } else {
         await this.commandsCollection.updateMany(query, {
           recordStatus: ERecordStatus.Deleted,
-        });
+        } as any);
       }
     } catch (error) {
       throw new Error(`[DELETE MANY ERROR]: ${error}`);
@@ -237,7 +250,10 @@ export class BaseService<T> {
   }
 
   /* Query Utils */
-  private transformQuery(query: PQuery, includeDeleted = false): PQuery {
+  private transformQuery(
+    query: FilterQuery<T>,
+    includeDeleted = false,
+  ): FilterQuery<T> {
     if (includeDeleted) {
       return query;
     } else {
@@ -248,11 +264,14 @@ export class BaseService<T> {
     }
   }
 
-  private transformProjection(options) {
+  private transformProjection(options: PQueryOptions) {
     return options.projection;
   }
 
-  private transformOptions = ({ limit, sort }: QueryOptions): QueryOptions => ({
+  private transformOptions = ({
+    limit,
+    sort,
+  }: PQueryOptions): PQueryOptions => ({
     limit: limit ?? 3000,
     sort: sort || { createdAt: -1 },
   });

@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 
-import { ECredentialTypes, ERecordStatus } from "@types";
+import { User } from "./model";
+import { ECredentialTypes, ERecordStatus } from "../../types";
 
-const billEventSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<User>(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -34,8 +35,8 @@ const billEventSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-billEventSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ email: 1 }, { unique: true });
 
-const collection = mongoose.model("User", billEventSchema);
+const collection = mongoose.model<User>("User", userSchema);
 
 export { collection as Collection };

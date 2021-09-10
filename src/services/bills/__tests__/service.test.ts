@@ -32,7 +32,7 @@ describe(`BillsService methods`, () => {
     it(`Creates a new bill in the DB `, async () => {
       const testBillInput = testBills[1];
       const parliamentarySessionId =
-        await new ParliamentsService().queryLatestParliamentarySession();
+        await new ParliamentsService().queryLatestSession();
       testBillInput.parliamentarySessionId = parliamentarySessionId;
 
       const testBillResult = await new BillsService().createBill(
@@ -64,7 +64,7 @@ describe(`BillsService methods`, () => {
     it(`Creates many bills in the DB `, async () => {
       const testBillsInput = testBills;
       const parliamentarySessionId =
-        await new ParliamentsService().queryLatestParliamentarySession();
+        await new ParliamentsService().queryLatestSession();
       testBillsInput.forEach((bill) => {
         bill.parliamentarySessionId = parliamentarySessionId;
       });
@@ -176,7 +176,7 @@ describe(`BillsService methods`, () => {
       const testBillsService = new BillsService();
       const ProtoBillsService = Object.getPrototypeOf(testBillsService);
       const parliamentarySessionId =
-        await new ParliamentsService().queryLatestParliamentarySession();
+        await new ParliamentsService().queryLatestSession();
 
       /* Test Execution */
       await ProtoBillsService.addBillsToParliamentarySession(
@@ -188,11 +188,9 @@ describe(`BillsService methods`, () => {
       const { parliamentarySessions } = await new ParliamentsService().findOne({
         "parliamentarySessions.id": parliamentarySessionId,
       });
-      const { id, bills } =
-        parliamentarySessions[parliamentarySessions.length - 1];
+      const { bills } = parliamentarySessions[parliamentarySessions.length - 1];
 
       expect(bills).toContain("C-829");
-      console.log("ID HERE", id);
     });
   });
 });

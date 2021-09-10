@@ -1,0 +1,5 @@
+- type: AWS_LAMBDA
+  name: ClientLambda
+  config:
+    lambdaFunctionArn: arn:aws:lambda:ca-central-1:430902637264:function:commons-client-lambda-${self:custom.stage}
+    serviceRoleArn: arn:aws:iam::430902637264:role/commons-api-${self:custom.stage}-ca-central-1-lambdaRole

@@ -1,14 +1,14 @@
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
 
-import { BillsService } from "@services";
+import { BillsService } from "../../services";
 import {
   EBillEndpoints,
   IBillSummary,
   IBillSummaryMap,
   PBillEvent,
-} from "@types";
-import { FormatUtils } from "@utils";
+} from "../../types";
+import { FormatUtils } from "../../utils";
 
 export class WebService {
   async updateBills(): Promise<void> {
