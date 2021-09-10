@@ -33,23 +33,6 @@ The server updates once every 24 hours from a variety of government data sources
 
 - [Jest 25.1.0](https://jestjs.io/)
 
-## Cloud Hosting
-
-- [Amazon EC2](https://aws.amazon.com/ec2/)
-
-## Classification
-
-The app uses the uClassify machine learning web service to classify bills.
-
-- [uClassify](https://www.uclassify.com/)
-
-## Notifications
-
-Notifications are sent out using the following web services:
-
-- [Twilio](https://www.twilio.com/)
-- [SendGrid](https://sendgrid.com/)
-
 ### API Server
 
 #### _The front end of the app is hosted on a separate repo._
@@ -70,3 +53,9 @@ Notifications are sent out using the following web services:
 
 During development it may be necessary to reset the database. If so, run:
 yarn run db:reset
+
+### AWS RDS Database CLI
+
+pg_restore -h commons-app-database-dev.chgjlhdzehsr.ca-central-1.rds.amazonaws.com -p 5432 --username commons_admin -d postgres commons_dump.dump
+
+psql -h commons-app-database-dev.chgjlhdzehsr.ca-central-1.rds.amazonaws.com -p 5432 --username commons_admin -d postgres

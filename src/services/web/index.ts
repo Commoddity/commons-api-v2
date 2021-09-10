@@ -1,0 +1,1 @@
+export { WebService } from "./service";

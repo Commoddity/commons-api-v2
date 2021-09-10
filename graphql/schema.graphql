@@ -1,0 +1,103 @@
+schema {
+  query: Query
+  # mutation: Mutation
+}
+
+type Query {
+  getAllBills: [IBill]
+  getManyBills(query): [IBill]
+  getOneBill(code: String!): IBill
+  getAllParliaments: [IParliament]
+}
+
+# type Mutation {}
+
+type IBill {
+  id: ID!
+  code: String!
+  title: String!
+  parliamentarySessionId: String!
+  pageUrl: String!
+  categories: [EBillCategories]
+  type: EBillType
+  description: String
+  introducedDate: String
+  passedDate: String
+  summaryUrl: String
+  fullTextUrl: String
+  passed: Boolean
+  events: [IBillEvent]
+  createdAt: String!
+  updatedAt: String
+}
+
+type IBillEvent {
+  eventId: ID!
+  title: String!
+  publicationDate: String!
+  createdAt: String!
+  updatedAt: String
+}
+
+enum EBillCategories {
+  agriculture_environment
+  arts_culture
+  business_industry
+  economics_finance
+  education_language
+  employment_labour
+  government_politics
+  health_safety
+  indigenous_affairs
+  information_communications
+  international_affairs
+  law_justice
+  science_technology
+  social_affairs
+}
+
+enum EBillType {
+  commons
+  senate
+}
+
+type IParliament {
+  id: ID!
+  number: Int!
+  startDate: String!
+  endDate: String
+  parliamentarySessions: [IParliamentarySession]
+  createdAt: String!
+  updatedAt: String
+}
+
+type IParliamentarySession {
+  sessionId: ID!
+  number: Int!
+  startDate: String!
+  endDate: String
+  createdAt: String!
+  updatedAt: String
+  bills: [IBill]
+}
+
+type IUser {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  emailNotification: Boolean
+  smsNotification: Boolean
+  active: Boolean
+  phoneNumber: String
+  address: String
+  street: String
+  city: String
+  province: String
+  postalCode: String
+  mp: String
+  party: String
+  ridingName: String
+  createdAt: String!
+  updatedAt: String
+}

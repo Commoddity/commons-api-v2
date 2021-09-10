@@ -1,0 +1,110 @@
+service: commons-api
+
+package:
+  exclude:
+    - ./**
+  include:
+    - dist/**
+    - node_modules/**
+
+plugins:
+  - serverless-appsync-plugin
+
+provider:
+  name: aws
+  profile: commons-app
+  runtime: nodejs14.x
+  vpc:
+    securityGroupIds:
+      - sg-032d9aa86d926a1d1
+    subnetIds:
+      - subnet-02f47c3bb960dc6e3
+      - subnet-0ce52114d1cfc7b8d
+  region: ca-central-1
+  memorySize: 512
+  timeout: 15
+  environment:
+    NODE_ENV: ${self:custom.stage}
+  deploymentBucket:
+    name: commons-app-deployment-${self:custom.stage}
+  lambdaHashingVersion: 20201221
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "logs:CreateLogGroup"
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+            - "ec2:CreateNetworkInterface"
+            - "ec2:DescribeNetworkInterfaces"
+            - "ec2:DeleteNetworkInterface"
+          Resource:
+            - "*"
+        - Effect: "Allow"
+          Action:
+            - "ssm:GetParameter"
+            - "ssm:GetParameters"
+            - "ssm:GetParametersByPath"
+            - "ssm:DescribeParameters"
+            - "ssm:PutParameter"
+          Resource:
+            - "Fn::Join":
+                - ":"
+                - - "arn:aws:ssm"
+                  - Ref: "AWS::Region"
+                  - Ref: "AWS::AccountId"
+                  - "*"
+        - Effect: "Allow"
+          Action:
+            - "lambda:InvokeFunction"
+          Resource:
+            - "Fn::Join":
+                - ":"
+                - - "arn:aws:lambda"
+                  - Ref: "AWS::Region"
+                  - Ref: "AWS::AccountId"
+                  - function:commons-client-lambda-${self:custom.stage}
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  appSync:
+    name: commons-client-api-${self:custom.stage}
+    authenticationType: API_KEY
+    schema: graphql/schema.graphql
+
+    apiKeys:
+      - name: commons-client-api-key-${self:custom.stage}
+        description: "Client API key"
+        expiresAfter: 365d
+
+    mappingTemplatesLocation: graphql/mapping-templates
+    mappingTemplates:
+      - ${file(graphql/resources/queries.yml)}
+      # - ${file(graphql/resources/mutations.yml)}
+
+    dataSources:
+      - ${file(graphql/resources/data-sources.yml)}
+
+resources:
+  Resources:
+    IamRoleLambdaExecution:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - appsync.amazonaws.com
+                AWS:
+                  - arn:aws:iam::022508254368:root
+              Action: sts:AssumeRole
+
+functions:
+  clientLambda:
+    handler: dist/lambdas/client.handler
+    name: commons-client-lambda-${self:custom.stage}
+    description: Provides data to the client apps

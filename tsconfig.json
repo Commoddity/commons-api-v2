@@ -3,20 +3,18 @@
     "target": "ES6",
     "module": "commonjs",
     "lib": ["dom", "es6"],
-    "baseUrl": "./",
-    "paths": {
-      "@config": ["src/config"],
-      "@db": ["src/db"],
-      "@graphql": ["src/db/graphql/schema"],
-      "@types": ["src/types"]
-    },
-    "plugins": [{ "transform": "@zerollup/ts-transform-paths" }],
     "outDir": "dist",
     "rootDir": "src",
     "removeComments": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  }
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "strictPropertyInitialization": false,
+    "strictNullChecks": false,
+    "typeRoots": ["./src/types", "./node_modules/@types"]
+  },
+  "include": ["./src/**/*.ts"]
 }

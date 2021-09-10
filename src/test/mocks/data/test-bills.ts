@@ -1,0 +1,43 @@
+import { FormatUtils } from "../../../utils";
+
+export const testBills = [
+  {
+    parliamentarySessionId: "SJs9RCpn8Rvl0qmRtQ1e",
+    code: "C-205",
+    title: "A Bill to Touch Butts",
+    description: "Literally just touching butts.",
+    introducedDate: FormatUtils.formatDate("2020-09-23"),
+    summaryUrl: "http://billsbillsbills.com",
+    pageUrl: "http://billsandbills.com",
+    fullTextUrl: "http://billsplusbills.com",
+    passed: undefined,
+    categories: [],
+    events: [],
+  },
+  {
+    parliamentarySessionId: "QRq6LhKG2EBoFOvNo1qv",
+    code: "C-231",
+    title: "A Bill for the Provision of Momentary Sanity",
+    description: "Why god why",
+    introducedDate: FormatUtils.formatDate("2020-08-26"),
+    summaryUrl: "http://billsarebills.com",
+    pageUrl: "http://billsbillsbills.com",
+    fullTextUrl: "http://whybillstho.com",
+    passed: true,
+    categories: [],
+    events: [],
+  },
+  {
+    parliamentarySessionId: "QRq6LhKG2EBoFOvNo1qv",
+    code: "C-242",
+    title: "A Bill for Sea Otters",
+    description: "Cute little guys",
+    introducedDate: FormatUtils.formatDate("2019-03-10"),
+    summaryUrl: "http://billsarebills.com",
+    pageUrl: "http://billsbillsbills.com",
+    fullTextUrl: "http://whybillstho.com",
+    passed: true,
+    categories: [],
+    events: [],
+  },
+];
