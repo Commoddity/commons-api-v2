@@ -1,3 +1,13 @@
+# TO DO
+
+- Set up Cognito and Cognito Handler lambda
+- Set up CRON job bill updater Lambda
+- Set up admin Lambda
+- Field level resolvers for User Bills & categories
+- Retool module for updating categories
+- Set up Email & SMS notification service
+- Set up notifications for when a new Bill or Event is created
+
 # Commons API - Rebuild
 
 ## CURRENTLY VERY MUCH NOT READY
@@ -5,8 +15,6 @@
 #### In the process of rebuilding the original Ruby on Rails backend using Node.js, GraphQL and PostgreSQL.
 
 #### Up-to-date information and notifications about bills in progress in Canada's parliament.
-
-![Commons App](./docs/commons-readme.png)
 
 ## API Server for the Commons App
 
