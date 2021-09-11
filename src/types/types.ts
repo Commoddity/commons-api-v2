@@ -1,5 +1,10 @@
 import { QueryOptions } from "mongoose";
 
+export enum Envs {
+  dev = "dev",
+  production = "production",
+}
+
 /* Parameters */
 export interface PBillEvent {
   description: string;
@@ -138,6 +143,7 @@ export enum ESSMParams {
   MongoConnectionString = "MongoConnectionString",
 }
 
+/* AWS Types */
 export interface IAppSyncResolverEvent<A = any, S = any> {
   arguments: A;
   field: string;
@@ -145,4 +151,20 @@ export interface IAppSyncResolverEvent<A = any, S = any> {
   identity?: {
     claims: { "custom:userid": string };
   };
+}
+
+export interface ICloudWatchEvent {
+  eventSource: "aws:cloudWatchEvent";
+  header: {
+    eventType: { entityType: EEntityTypes; type: EEventTypes };
+    environment: Envs;
+  };
+}
+
+export enum EEntityTypes {
+  Bills = "Bills",
+}
+
+export enum EEventTypes {
+  UpdateBills = "UpdateBills",
 }

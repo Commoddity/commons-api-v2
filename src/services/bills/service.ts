@@ -123,7 +123,7 @@ export class BillsService extends BaseService<Bill> {
 
   private sortBillEventsByDate(billEventsArray: PBillEvent[]): PBillEvent[] {
     return billEventsArray.sort((a, b) =>
-      !!(!!a.pubDate && !!b.pubDate) && a.pubDate < b.pubDate ? 1 : -1,
+      Boolean(a.pubDate && b.pubDate) && a.pubDate < b.pubDate ? 1 : -1,
     );
   }
 

@@ -12,12 +12,16 @@ import { FormatUtils } from "../../utils";
 
 export class WebService {
   async updateBills(): Promise<void> {
+    const service = new BillsService();
+
     try {
       const billEventsArray = await this.getLegisInfoCaller();
-      await new BillsService().updateBillsAndEvents(billEventsArray);
+      await service.updateBillsAndEvents(billEventsArray);
 
       const billSummaryMaps = await this.getSummaries();
-      await new BillsService().updateSummaryUrls(billSummaryMaps);
+      await service.updateSummaryUrls(billSummaryMaps);
+
+      await service.closeDbConnection();
     } catch (error) {
       throw new Error(`[UPDATE DB SCRIPT ERROR]: ${error}`);
     }

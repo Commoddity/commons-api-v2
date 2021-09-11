@@ -15,7 +15,7 @@
     "test": "yarn && yarn build && yarn set:dev && jest",
     "test:silent": "yarn && yarn build && yarn set:dev && jest --silent",
     "run:dev": "yarn && yarn build && yarn set:dev ts-node",
-    "deploy:dev": "yarn && yarn build && yarn set:dev && yarn deploy --stage dev"
+    "deploy:dev": "yarn && yarn build:clean && yarn build && yarn set:dev && yarn deploy --stage dev"
   },
   "devDependencies": {
     "@aws-sdk/types": "^3.29.0",
@@ -29,6 +29,8 @@
     "eslint": "^7.18.0",
     "jest": "^27.1.0",
     "prettier": "^2.3.2",
+    "serverless-plugin-common-excludes": "^4.0.0",
+    "serverless-plugin-include-dependencies": "^5.0.0",
     "ts-jest": "^27.0.5",
     "ts-loader": "^9.2.5",
     "ts-node": "^10.2.1",

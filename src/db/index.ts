@@ -1,2 +1,2 @@
-export * from "./init-client";
-export * from "./mongoose-client";
+export { initClient } from "./init-client";
+export { MongooseClient } from "./mongoose-client";
