@@ -22,11 +22,6 @@ export interface PQueryOptions extends QueryOptions {
   hard?: boolean;
 }
 
-export interface PUpdateBillCategories {
-  code: string;
-  category: EBillCategories;
-}
-
 export interface PUpdatePassed {
   code: string;
   passed: boolean;

@@ -1,12 +1,7 @@
 import { FilterQuery, UpdateQuery } from "mongoose";
 
 import { BaseService, ParliamentsService } from "../../services";
-import {
-  EBillCategories,
-  IBillSummaryMap,
-  PBillEvent,
-  PUpdateBillCategories,
-} from "../../types";
+import { EBillCategories, IBillSummaryMap, PBillEvent } from "../../types";
 import { FormatUtils } from "../../utils";
 
 import { Bill, BillEvent, BillInput, createBill } from "./model";
