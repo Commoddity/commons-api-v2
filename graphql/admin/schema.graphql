@@ -19,6 +19,7 @@ type IBill {
   code: String!
   title: String!
   parliamentarySessionId: String!
+  session: String
   pageUrl: String!
   categories: [EBillCategories]
   type: EBillType

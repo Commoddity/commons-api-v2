@@ -7,6 +7,7 @@
 - Retool module for updating categories
 - Set up Email & SMS notification service
 - Set up notifications for when a new Bill or Event is created
+- Document all Services, Utils and other logic
 
 # Commons API - Rebuild
 
@@ -26,7 +27,7 @@ The application also provides an easy way to look up Members of Parliament and r
 
 ## Behaviour
 
-The server updates once every 24 hours from a variety of government data sources and pulls the latest bill and event data from them, then updates the data via a web based machine learning classification service. It then send notifications on those bills to all subscribed users.
+The server updates once every 24 hours from a variety of government data sources and pulls the latest bill and event data from them. It then send notifications on those bills to all subscribed users.
 
 # Stack
 

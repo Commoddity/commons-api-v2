@@ -33,4 +33,18 @@ export class ParliamentsService extends BaseService<Parliament> {
     );
     return sessionId;
   }
+
+  async getSessionCode(sessionId: string): Promise<string> {
+    const parliament = await this.findOne({
+      "parliamentarySessions.sessionId": sessionId,
+    });
+    const { number: parliamentNumber } = parliament;
+
+    const session = parliament.parliamentarySessions.find(
+      ({ sessionId: id }) => id === sessionId,
+    );
+    const { number: sessionNumber } = session;
+
+    return `${parliamentNumber}-${sessionNumber}`;
+  }
 }

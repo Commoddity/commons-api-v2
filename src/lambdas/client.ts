@@ -16,6 +16,7 @@ exports.handler = async (
 
   if (!Array.isArray(event)) {
     const { arguments: params, field } = event;
+
     resolver = {
       /* Read */
       getAllBills: () => {
@@ -77,5 +78,5 @@ exports.handler = async (
     }[field];
   }
 
-  return resolver ? resolver() : null;
+  return resolver?.() || null;
 };

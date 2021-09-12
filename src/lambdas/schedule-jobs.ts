@@ -21,5 +21,5 @@ exports.handler = async ({
     }
   }
 
-  return consumer ? await consumer() : null;
+  return consumer?.() || null;
 };

@@ -1,5 +1,6 @@
 import { initClient } from "../db";
 import { BillsService, ParliamentsService } from "../services";
+import { IBill } from "../services/bills/model";
 import { IParliamentarySession } from "../services/parliaments/model";
 import { IUser } from "../services/users/model";
 import { IAppSyncResolverEvent } from "../types";
@@ -17,6 +18,7 @@ exports.handler = async (
 
   if (!Array.isArray(event)) {
     const { arguments: params, field } = event;
+
     resolver = {
       /* Read */
       getAllBills: () => {
@@ -65,8 +67,24 @@ exports.handler = async (
 
         return billsArray;
       },
+
+      getSessionCodeField: async () => {
+        const events = event as IAppSyncResolverEvent<any, IBill>[];
+        const sessionCodesArray = [];
+
+        for await (const { source: bill } of events) {
+          const { parliamentarySessionId: sessionId } = bill;
+          const sessionCode = await new ParliamentsService().getSessionCode(
+            sessionId,
+          );
+
+          sessionCodesArray.push(sessionCode || null);
+        }
+
+        return sessionCodesArray;
+      },
     }[field];
   }
 
-  return resolver ? resolver() : null;
+  return resolver?.() || null;
 };

@@ -63,7 +63,7 @@ provider:
                 - - "arn:aws:lambda"
                   - Ref: "AWS::Region"
                   - Ref: "AWS::AccountId"
-                  - function:commons-client-lambda-${self:custom.stage}
+                  - function:commons-*-lambda-${self:custom.stage}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -83,21 +83,21 @@ custom:
         - ${file(graphql/client/resources/mutations.yml)}
       dataSources:
         - ${file(graphql/client/resources/data-sources.yml)}
-#     - name: commons-admin-api-${self:custom.stage}
-#       authenticationType: API_KEY
-#       schema: graphql/admin/schema.graphql
+    - name: commons-admin-api-${self:custom.stage}
+      authenticationType: API_KEY
+      schema: graphql/admin/schema.graphql
 
-#       apiKeys:
-#         - name: commons-admin-api-key-${self:custom.stage}
-#           description: "Admin API key"
-#           expiresAfter: 365d
+      apiKeys:
+        - name: commons-admin-api-key-${self:custom.stage}
+          description: "Admin API key"
+          expiresAfter: 365d
 
-#       mappingTemplatesLocation: graphql/admin/mapping-templates
-#       mappingTemplates:
-#         - ${file(graphql/admin/resources/queries.yml)}
-#         - ${file(graphql/admin/resources/mutations.yml)}
-#       dataSources:
-#         - ${file(graphql/admin/resources/data-sources.yml)}
+      mappingTemplatesLocation: graphql/admin/mapping-templates
+      mappingTemplates:
+        - ${file(graphql/admin/resources/queries.yml)}
+        - ${file(graphql/admin/resources/mutations.yml)}
+      dataSources:
+        - ${file(graphql/admin/resources/data-sources.yml)}
 
 resources:
   Resources:
