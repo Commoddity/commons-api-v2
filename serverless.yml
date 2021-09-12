@@ -5,7 +5,7 @@ package:
   individually: true
 
 plugins:
-  - serverless-appsync-plugin
+  # - serverless-appsync-plugin
   - serverless-plugin-common-excludes
   - serverless-plugin-include-dependencies
 
@@ -67,39 +67,37 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  appSync:
-    - name: commons-client-api-${self:custom.stage}
-      authenticationType: API_KEY
-      schema: graphql/client/schema.graphql
+  # appSync:
+  #   - name: commons-client-api-${self:custom.stage}
+  #     authenticationType: API_KEY
+  #     schema: graphql/client/schema.graphql
 
-      apiKeys:
-        - name: commons-client-api-key-${self:custom.stage}
-          description: "Client API key"
-          expiresAfter: 365d
+  #     apiKeys:
+  #       - name: commons-client-api-key-${self:custom.stage}
+  #         description: "Client API key"
+  #         expiresAfter: 365d
 
-      mappingTemplatesLocation: graphql/client/mapping-templates
-      mappingTemplates:
-        - ${file(graphql/client/resources/queries.yml)}
-        - ${file(graphql/client/resources/mutations.yml)}
+  #     mappingTemplatesLocation: graphql/client/mapping-templates
+  #     mappingTemplates:
+  #       - ${file(graphql/client/resources/queries.yml)}
+  #       - ${file(graphql/client/resources/mutations.yml)}
+  #     dataSources:
+  #       - ${file(graphql/client/resources/data-sources.yml)}
+  #   - name: commons-admin-api-${self:custom.stage}
+  #     authenticationType: API_KEY
+  #     schema: graphql/admin/schema.graphql
 
-      dataSources:
-        - ${file(graphql/client/resources/data-sources.yml)}
-    - name: commons-admin-api-${self:custom.stage}
-      authenticationType: API_KEY
-      schema: graphql/admin/schema.graphql
+  #     apiKeys:
+  #       - name: commons-admin-api-key-${self:custom.stage}
+  #         description: "Admin API key"
+  #         expiresAfter: 365d
 
-      apiKeys:
-        - name: commons-admin-api-key-${self:custom.stage}
-          description: "Admin API key"
-          expiresAfter: 365d
-
-      mappingTemplatesLocation: graphql/admin/mapping-templates
-      mappingTemplates:
-        - ${file(graphql/admin/resources/queries.yml)}
-        - ${file(graphql/admin/resources/mutations.yml)}
-
-      dataSources:
-        - ${file(graphql/admin/resources/data-sources.yml)}
+  #     mappingTemplatesLocation: graphql/admin/mapping-templates
+  #     mappingTemplates:
+  #       - ${file(graphql/admin/resources/queries.yml)}
+  #       - ${file(graphql/admin/resources/mutations.yml)}
+  #     dataSources:
+  #       - ${file(graphql/admin/resources/data-sources.yml)}
 
 resources:
   Resources:
@@ -115,7 +113,11 @@ resources:
                   - lambda.amazonaws.com
                   - appsync.amazonaws.com
                 AWS:
-                  - arn:aws:iam::022508254368:root
+                  - "Fn::Join":
+                      - ":"
+                      - - "arn:aws:iam"
+                        - Ref: "AWS::AccountId"
+                        - "root"
               Action: sts:AssumeRole
 
 functions:
@@ -133,6 +135,7 @@ functions:
     handler: dist/lambdas/schedule-jobs.handler
     name: commons-scheduled-jobs-${self:custom.stage}
     description: Performs scheduled CRON jobs
+    timeout: 360
     events:
       - schedule:
           name: fetch-bills-cron-job-${self:custom.stage}

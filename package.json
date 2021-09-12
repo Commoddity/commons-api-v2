@@ -10,6 +10,7 @@
     "build:clean": "tsc --build --clean",
     "deploy": "serverless deploy",
     "validate": "serverless validate-schema",
+    "playground": "serverless graphql-playground",
     "lint": "eslint . --ext .ts",
     "set:dev": "export NODE_ENV=dev && export branch=dev;",
     "test": "yarn && yarn build && yarn set:dev && jest",
