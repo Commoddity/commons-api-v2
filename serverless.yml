@@ -70,7 +70,7 @@ custom:
   appSync:
     - name: commons-client-api-${self:custom.stage}
       authenticationType: API_KEY
-      schema: graphql/schema.graphql
+      schema: graphql/client/schema.graphql
 
       apiKeys:
         - name: commons-client-api-key-${self:custom.stage}
@@ -86,7 +86,7 @@ custom:
         - ${file(graphql/client/resources/data-sources.yml)}
     - name: commons-admin-api-${self:custom.stage}
       authenticationType: API_KEY
-      schema: graphql/schema.graphql
+      schema: graphql/admin/schema.graphql
 
       apiKeys:
         - name: commons-admin-api-key-${self:custom.stage}
