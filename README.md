@@ -31,11 +31,15 @@ The server updates once every 24 hours from a variety of government data sources
 
 # Stack
 
+UPDATE (OUT OF DATE)
+
 - [Node.js 12.16.1](https://nodejs.org/en/)
 - [Express 4.17.0](https://expressjs.com/)
 - [GraphQL 14.6.0](https://graphql.org/)
 - [PostgreSQL 12.2](https://www.postgresql.org/)
 
 ## Testing
+
+UPDATE (OUT OF DATE)
 
 - [Jest 25.1.0](https://jestjs.io/)
