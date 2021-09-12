@@ -1,3 +1,4 @@
+# Query Resolvers
 - dataSource: ClientLambda
   type: Query
   field: getAllBills
@@ -11,7 +12,12 @@
   field: getAllParliaments
   response: false
 
+# Field Level Resolvers
 - dataSource: ClientLambda
   type: IParliamentarySession
+  field: bills
+  response: false
+- dataSource: ClientLambda
+  type: IUser
   field: bills
   response: false

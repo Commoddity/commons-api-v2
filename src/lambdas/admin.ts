@@ -1,6 +1,7 @@
 import { initClient } from "../db";
-import { BillsService, ParliamentsService, UsersService } from "../services";
+import { BillsService, ParliamentsService } from "../services";
 import { IParliamentarySession } from "../services/parliaments/model";
+import { IUser } from "../services/users/model";
 import { IAppSyncResolverEvent } from "../types";
 
 let initialize = null;
@@ -32,24 +33,14 @@ exports.handler = async (
       },
 
       /* Update */
-      addUserBill: () => {
-        const { userId, billCode } = params;
-        return new UsersService().addUserBill(userId, billCode);
+      addBillCategory: () => {
+        const { code, category } = params;
+        return new BillsService().addBillCategory(code, category);
       },
 
-      removeUserBill: () => {
-        const { userId, billCode } = params;
-        return new UsersService().removeUserBill(userId, billCode);
-      },
-
-      addUserCategory: () => {
-        const { userId, category } = params;
-        return new UsersService().addUserCategory(userId, category);
-      },
-
-      removeUserCategory: () => {
-        const { userId, category } = params;
-        return new UsersService().removeUserCategory(userId, category);
+      removeBillCategory: () => {
+        const { code, category } = params;
+        return new BillsService().removeBillCategory(code, category);
       },
     }[field];
   } else {
@@ -60,7 +51,7 @@ exports.handler = async (
       getBillsField: async () => {
         const events = event as IAppSyncResolverEvent<
           any,
-          IParliamentarySession
+          IParliamentarySession | IUser
         >[];
         const billsArray = [];
 

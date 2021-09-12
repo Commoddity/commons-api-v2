@@ -1,0 +1,17 @@
+# Mutation Resolvers
+- dataSource: ClientLambda
+  type: Mutation
+  field: addUserBill
+  response: false
+- dataSource: ClientLambda
+  type: Mutation
+  field: removeUserBill
+  response: false
+- dataSource: ClientLambda
+  type: Mutation
+  field: addUserCategory
+  response: false
+- dataSource: ClientLambda
+  type: Mutation
+  field: removeUserCategory
+  response: false

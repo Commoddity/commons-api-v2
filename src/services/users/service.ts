@@ -4,6 +4,7 @@ import { CognitoIdentityServiceProvider, AWSError } from "aws-sdk";
 
 import { BaseService } from "../../services";
 import {
+  EBillCategories,
   ECredentialTypes,
   IAppleUserAttributes,
   IEmailUserAttributes,
@@ -274,5 +275,27 @@ export class UsersService extends BaseService<User> {
         ) => (error ? reject(error) : resolve(data)),
       );
     });
+  }
+
+  async addUserBill(userId: string, billCode: string): Promise<User> {
+    return this.updatePush({ _id: userId }, { bills: billCode });
+  }
+
+  async removeUserBill(userId: string, billCode: string): Promise<User> {
+    return this.updatePull({ _id: userId }, { bills: billCode });
+  }
+
+  async addUserCategory(
+    userId: string,
+    category: EBillCategories,
+  ): Promise<User> {
+    return this.updatePush({ _id: userId }, { categories: category });
+  }
+
+  async removeUserCategory(
+    userId: string,
+    category: EBillCategories,
+  ): Promise<User> {
+    return this.updatePull({ _id: userId }, { categories: category });
   }
 }

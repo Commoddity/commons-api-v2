@@ -2,6 +2,7 @@ import { FilterQuery, UpdateQuery } from "mongoose";
 
 import { BaseService, ParliamentsService } from "../../services";
 import {
+  EBillCategories,
   IBillSummaryMap,
   PBillEvent,
   PUpdateBillCategories,
@@ -44,7 +45,8 @@ export class BillsService extends BaseService<Bill> {
   }
 
   async updateBillsAndEvents(billEventsArray: PBillEvent[]): Promise<void> {
-    const sessionId = await new ParliamentsService().queryLatestSession();
+    const parlService = new ParliamentsService();
+    const sessionId = await parlService.queryLatestSession();
 
     const sortedBillEventsArray = this.sortBillEventsByDate(billEventsArray);
     const createdBillIds: string[] = [];
@@ -102,16 +104,18 @@ export class BillsService extends BaseService<Bill> {
     billIds: string[],
     sessionId: string,
   ): Promise<void> {
-    const service = new ParliamentsService();
+    const parlService = new ParliamentsService();
     const query = { "parliamentarySessions.id": sessionId };
 
-    const { parliamentarySessions: sessions } = await service.findOne(query);
+    const { parliamentarySessions: sessions } = await parlService.findOne(
+      query,
+    );
     const { bills } = sessions[sessions.length - 1];
 
     for await (const billId of billIds) {
       const billExists = bills.some((id) => id === billId);
       if (!billExists) {
-        await service.updatePushArray(
+        await parlService.updatePushArray(
           query,
           "parliamentarySessions.$[element].bills",
           { "element.sessionId": sessionId },
@@ -152,17 +156,17 @@ export class BillsService extends BaseService<Bill> {
     return this.updatePush({ code }, { events: event });
   }
 
-  async addBillCategory({
-    code,
-    category,
-  }: PUpdateBillCategories): Promise<Bill> {
+  async addBillCategory(
+    code: string,
+    category: EBillCategories,
+  ): Promise<Bill> {
     return this.updatePush({ code }, { categories: category });
   }
 
-  async removeBillCategory({
-    code,
-    category,
-  }: PUpdateBillCategories): Promise<Bill> {
+  async removeBillCategory(
+    code: string,
+    category: EBillCategories,
+  ): Promise<Bill> {
     return this.updatePull({ code }, { categories: category });
   }
 }

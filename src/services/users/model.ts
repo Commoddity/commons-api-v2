@@ -1,4 +1,4 @@
-import { ECredentialTypes, ERecordStatus } from "../../types";
+import { EBillCategories, ECredentialTypes, ERecordStatus } from "../../types";
 
 export interface IUser {
   id?: string;
@@ -17,6 +17,8 @@ export interface IUser {
   mp: string;
   party: string;
   ridingName: string;
+  bills: string[];
+  categories: EBillCategories[];
   createdAt?: Date;
   updatedAt?: Date;
   recordStatus?: ERecordStatus;
@@ -40,6 +42,8 @@ export class User implements IUser {
   mp: string;
   party: string;
   ridingName: string;
+  bills: string[];
+  categories: EBillCategories[];
   createdAt?: Date;
   updatedAt?: Date;
   recordStatus?: ERecordStatus;
@@ -62,6 +66,8 @@ export class User implements IUser {
     party,
     ridingName,
     credentials,
+    bills,
+    categories,
     createdAt,
     updatedAt,
     recordStatus,
@@ -83,6 +89,8 @@ export class User implements IUser {
     this.party = party;
     this.ridingName = ridingName;
     this.credentials = credentials;
+    this.bills = bills;
+    this.categories = categories;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.recordStatus = recordStatus;
@@ -122,6 +130,8 @@ export class UserInput {
   party: string;
   ridingName: string;
   credentials: ECredentialTypes[];
+  bills?: string[];
+  categories?: EBillCategories[];
   createdAt?: Date;
   updatedAt?: Date;
   recordStatus?: ERecordStatus;

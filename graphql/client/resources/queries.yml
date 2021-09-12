@@ -1,0 +1,19 @@
+# Query Resolvers
+- dataSource: ClientLambda
+  type: Query
+  field: getAllBills
+  response: false
+- dataSource: ClientLambda
+  type: Query
+  field: getOneBill
+  response: false
+- dataSource: ClientLambda
+  type: Query
+  field: getAllParliaments
+  response: false
+
+# Field Level Resolvers
+- dataSource: ClientLambda
+  type: IParliamentarySession
+  field: bills
+  response: false

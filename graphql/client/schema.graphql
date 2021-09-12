@@ -1,6 +1,6 @@
 schema {
   query: Query
-  # mutation: Mutation
+  mutation: Mutation
 }
 
 type Query {
@@ -9,7 +9,12 @@ type Query {
   getAllParliaments: [IParliament]
 }
 
-# type Mutation {}
+type Mutation {
+  addUserBill(userId: ID!, billCode: String!): IBill
+  removeUserBill(userId: ID!, billCode: String!): IBill
+  addUserCategory(userId: ID!, category: EBillCategories!): IBill
+  removeUserCategory(userId: ID!, category: EBillCategories!): IBill
+}
 
 type IBill {
   id: ID!
@@ -97,6 +102,8 @@ type IUser {
   mp: String
   party: String
   ridingName: String
+  bills: [String]
+  categories: [EBillCategories]
   createdAt: String!
   updatedAt: String
 }

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 import { User } from "./model";
-import { ECredentialTypes, ERecordStatus } from "../../types";
+import { EBillCategories, ECredentialTypes, ERecordStatus } from "../../types";
 
 const userSchema = new mongoose.Schema<User>(
   {
@@ -25,6 +25,8 @@ const userSchema = new mongoose.Schema<User>(
     mp: { type: String },
     party: { type: String },
     ridingName: { type: String },
+    bills: { type: [String] },
+    categories: { type: [String], enum: Object.values(EBillCategories) },
     recordStatus: {
       type: String,
       required: true,

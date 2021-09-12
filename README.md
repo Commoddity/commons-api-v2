@@ -1,7 +1,7 @@
 # TO DO
 
 - Set up Cognito and Cognito Handler lambda
-- Set up CRON job bill updater Lambda
+- ~~Set up CRON job bill updater Lambda~~
 - Set up admin Lambda
 - Field level resolvers for User Bills & categories
 - Retool module for updating categories
@@ -11,8 +11,6 @@
 # Commons API - Rebuild
 
 ## CURRENTLY VERY MUCH NOT READY
-
-#### In the process of rebuilding the original Ruby on Rails backend using Node.js, GraphQL and PostgreSQL.
 
 #### Up-to-date information and notifications about bills in progress in Canada's parliament.
 

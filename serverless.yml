@@ -68,22 +68,38 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   appSync:
-    name: commons-client-api-${self:custom.stage}
-    authenticationType: API_KEY
-    schema: graphql/schema.graphql
+    - name: commons-client-api-${self:custom.stage}
+      authenticationType: API_KEY
+      schema: graphql/schema.graphql
 
-    apiKeys:
-      - name: commons-client-api-key-${self:custom.stage}
-        description: "Client API key"
-        expiresAfter: 365d
+      apiKeys:
+        - name: commons-client-api-key-${self:custom.stage}
+          description: "Client API key"
+          expiresAfter: 365d
 
-    mappingTemplatesLocation: graphql/mapping-templates
-    mappingTemplates:
-      - ${file(graphql/resources/queries.yml)}
-      # - ${file(graphql/resources/mutations.yml)}
+      mappingTemplatesLocation: graphql/client/mapping-templates
+      mappingTemplates:
+        - ${file(graphql/client/resources/queries.yml)}
+        - ${file(graphql/client/resources/mutations.yml)}
 
-    dataSources:
-      - ${file(graphql/resources/data-sources.yml)}
+      dataSources:
+        - ${file(graphql/client/resources/data-sources.yml)}
+    - name: commons-admin-api-${self:custom.stage}
+      authenticationType: API_KEY
+      schema: graphql/schema.graphql
+
+      apiKeys:
+        - name: commons-admin-api-key-${self:custom.stage}
+          description: "Admin API key"
+          expiresAfter: 365d
+
+      mappingTemplatesLocation: graphql/admin/mapping-templates
+      mappingTemplates:
+        - ${file(graphql/admin/resources/queries.yml)}
+        - ${file(graphql/admin/resources/mutations.yml)}
+
+      dataSources:
+        - ${file(graphql/admin/resources/data-sources.yml)}
 
 resources:
   Resources:
@@ -107,6 +123,11 @@ functions:
     handler: dist/lambdas/client.handler
     name: commons-client-lambda-${self:custom.stage}
     description: Provides data to the client apps
+
+  admin-lambda:
+    handler: dist/lambdas/admin.handler
+    name: commons-admin-lambda-${self:custom.stage}
+    description: Provides data to the admin app
 
   schedule-jobs:
     handler: dist/lambdas/schedule-jobs.handler
