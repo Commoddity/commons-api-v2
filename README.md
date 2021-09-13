@@ -26,13 +26,13 @@ The server updates once every 24 hours from a variety of government data sources
 
 # Stack
 
+- [Node.js 14](https://nodejs.org/en/)
 - [Typescript](https://www.typescriptlang.org/)
 - [GraphQL](https://graphql.org/)
 - [MongoDB](https://www.mongodb.com/)
 
 Libs
 
-- [Node.js 14](https://nodejs.org/en/)
 - [Mongoose 6.0.5](https://mongoosejs.com/)
 - [Serverless 2.57.0](https://serverless.com/)
 
