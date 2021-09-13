@@ -161,9 +161,9 @@ describe(`BillsService methods`, () => {
       };
       await new BillsService().createBill(new Bill(testBill as any));
 
-      const afterUpdate = await new BillsService().addBillCategory(
+      const afterUpdate = await new BillsService().updateBillCategories(
         testBill.code,
-        EBillCategories.arts_culture,
+        [EBillCategories.arts_culture],
       );
 
       expect(afterUpdate.categories).toContain(EBillCategories.arts_culture);

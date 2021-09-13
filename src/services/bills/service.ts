@@ -151,17 +151,10 @@ export class BillsService extends BaseService<Bill> {
     return this.updatePush({ code }, { events: event });
   }
 
-  async addBillCategory(
+  async updateBillCategories(
     code: string,
-    category: EBillCategories,
+    categories: EBillCategories[],
   ): Promise<Bill> {
-    return this.updatePush({ code }, { categories: category });
-  }
-
-  async removeBillCategory(
-    code: string,
-    category: EBillCategories,
-  ): Promise<Bill> {
-    return this.updatePull({ code }, { categories: category });
+    return this.updateOne({ code }, { categories });
   }
 }

@@ -1,12 +1,11 @@
 type Query {
   getAllBills: [IBill]
-  getOneBill(code: String!): IBill
+  getOneBill(code: ID!): IBill
   getAllParliaments: [IParliament]
 }
 
 type Mutation {
-  addBillCategory(code: String!, category: EBillCategories!): IBill
-  removeBillCategory(code: String!, category: EBillCategories!): IBill
+  updateBillCategories(code: ID!, categories: [EBillCategories]!): IBill
 }
 
 schema {
