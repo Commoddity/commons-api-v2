@@ -1,8 +1,4 @@
 - dataSource: AdminLambda
   type: Mutation
-  field: addBillCategory
-  response: false
-- dataSource: AdminLambda
-  type: Mutation
-  field: removeBillCategory
+  field: updateBillCategories
   response: false

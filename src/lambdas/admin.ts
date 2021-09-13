@@ -35,14 +35,9 @@ exports.handler = async (
       },
 
       /* Update */
-      addBillCategory: () => {
-        const { code, category } = params;
-        return new BillsService().addBillCategory(code, category);
-      },
-
-      removeBillCategory: () => {
-        const { code, category } = params;
-        return new BillsService().removeBillCategory(code, category);
+      updateBillCategories: () => {
+        const { code, categories } = params;
+        return new BillsService().updateBillCategories(code, categories);
       },
     }[field];
   } else {

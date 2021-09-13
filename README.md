@@ -1,10 +1,11 @@
 # TO DO
 
-- Set up Cognito and Cognito Handler lambda
+- NEXT UP:Set up Cognito and Cognito Handler lambda
+
 - ~~Set up CRON job bill updater Lambda~~
-- Set up admin Lambda
-- Field level resolvers for User Bills & categories
-- Retool module for updating categories
+- ~~Set up admin Lambda~~
+- ~~Field level resolvers for User Bills & categories~~
+- ~~Retool module for updating categories~~
 - Set up Email & SMS notification service
 - Set up notifications for when a new Bill or Event is created
 - Document all Services, Utils and other logic
