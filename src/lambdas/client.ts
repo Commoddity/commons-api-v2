@@ -39,22 +39,26 @@ exports.handler = async (
 
       /* Update */
       addUserBill: () => {
-        const { userId, billCode } = params;
+        const userId = identity.claims["custom:userId"];
+        const { billCode } = params;
         return new UsersService().addUserBill(userId, billCode);
       },
 
       removeUserBill: () => {
-        const { userId, billCode } = params;
+        const userId = identity.claims["custom:userId"];
+        const { billCode } = params;
         return new UsersService().removeUserBill(userId, billCode);
       },
 
       addUserCategory: () => {
-        const { userId, category } = params;
+        const userId = identity.claims["custom:userId"];
+        const { category } = params;
         return new UsersService().addUserCategory(userId, category);
       },
 
       removeUserCategory: () => {
-        const { userId, category } = params;
+        const userId = identity.claims["custom:userId"];
+        const { category } = params;
         return new UsersService().removeUserCategory(userId, category);
       },
     }[field];
