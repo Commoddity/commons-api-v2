@@ -90,7 +90,6 @@ type IUser {
   email: String!
   emailNotification: Boolean
   smsNotification: Boolean
-  active: Boolean
   phoneNumber: String
   address: String
   street: String

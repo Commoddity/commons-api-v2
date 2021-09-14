@@ -15,7 +15,6 @@ const userSchema = new mongoose.Schema<User>(
     },
     emailNotification: { type: Boolean },
     smsNotification: { type: Boolean },
-    active: { type: Boolean },
     phoneNumber: { type: String },
     address: { type: String },
     street: { type: String },

@@ -15,7 +15,7 @@ exports.handler = async (
   let resolver: () => any;
 
   if (!Array.isArray(event)) {
-    const { arguments: params, field } = event;
+    const { arguments: params, field, identity } = event;
 
     resolver = {
       /* Read */
@@ -30,6 +30,11 @@ exports.handler = async (
 
       getAllParliaments: () => {
         return new ParliamentsService().findAll();
+      },
+
+      getOneUser: () => {
+        const userId = identity.claims["custom:userId"];
+        return new UsersService().getOneUser(userId);
       },
 
       /* Update */

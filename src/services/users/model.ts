@@ -7,7 +7,6 @@ export interface IUser {
   email: string;
   emailNotification: boolean;
   smsNotification: boolean;
-  active: boolean;
   phoneNumber: string;
   address: string;
   street: string;
@@ -32,7 +31,6 @@ export class User implements IUser {
   credentials: ECredentialTypes[];
   emailNotification: boolean;
   smsNotification: boolean;
-  active: boolean;
   phoneNumber: string;
   address: string;
   street: string;
@@ -55,7 +53,6 @@ export class User implements IUser {
     email,
     emailNotification,
     smsNotification,
-    active,
     phoneNumber,
     address,
     street,
@@ -78,7 +75,6 @@ export class User implements IUser {
     this.email = email;
     this.emailNotification = emailNotification;
     this.smsNotification = smsNotification;
-    this.active = active;
     this.phoneNumber = phoneNumber;
     this.address = address;
     this.street = street;
@@ -119,7 +115,6 @@ export class UserInput {
   email: string;
   emailNotification: boolean;
   smsNotification: boolean;
-  active: boolean;
   phoneNumber: string;
   address: string;
   street: string;

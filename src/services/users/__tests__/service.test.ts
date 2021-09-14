@@ -2,9 +2,9 @@ import { UsersService } from "../service";
 import { User, UserInput } from "../../users/model";
 import {
   ECredentialTypes,
-  IAppleUserAttributes,
-  IEmailUserAttributes,
-  IFacebookUserAttributes,
+  ICognitoAppleUserAttributes,
+  ICognitoEmailUserAttributes,
+  ICognitoFacebookUserAttributes,
 } from "../../../types";
 import { initClient } from "../../../db";
 
@@ -47,21 +47,17 @@ describe(`UsersService methods`, () => {
 
   describe(`Cognito sign up`, () => {
     it(`Email sign up - creates a new user in the DB and adds user credentials`, async () => {
-      const testNewUserAttributes: IEmailUserAttributes = {
-        userAttributes: {
-          given_name: "Turtle",
-          family_name: "Kid",
-          email: "burgertime@yahoo.com",
-        },
+      const testNewUserAttributes: ICognitoEmailUserAttributes = {
+        given_name: "Turtle",
+        family_name: "Kid",
+        email: "burgertime@yahoo.com",
       };
 
-      await new UsersService().cognitoSignUp({
-        userAttributes: testNewUserAttributes.userAttributes,
-      });
+      const service = new UsersService();
+      await service.cognitoSignUp(testNewUserAttributes);
 
-      const newDbUser = await new UsersService().findOneUser({
-        email: testNewUserAttributes.userAttributes.email,
-      });
+      const userId = await service.findUserId(testNewUserAttributes.email);
+      const newDbUser = await service.getOneUser(userId);
 
       expect(newDbUser.id).toBeTruthy();
       expect(newDbUser.id).toHaveLength(20);
@@ -71,22 +67,18 @@ describe(`UsersService methods`, () => {
     });
 
     it(`Apple sign up - creates a new user in the DB and adds user credentials`, async () => {
-      const testNewUserAttributesApple: IAppleUserAttributes = {
-        userAttributes: {
-          identities:
-            '[{"userId":"4065b67d-71dc-4e67-a4ac-d56a9fe2c5ba","providerName":"SignInWithApple","providerType":"SignInWithApple","issuer":null,"primary":true,"dateCreated":1600705285940}]',
-          name: "Turtle Kid",
-          email: "burgertime@yahoo.com",
-        },
+      const testNewUserAttributesApple: ICognitoAppleUserAttributes = {
+        identities:
+          '[{"userId":"4065b67d-71dc-4e67-a4ac-d56a9fe2c5ba","providerName":"SignInWithApple","providerType":"SignInWithApple","issuer":null,"primary":true,"dateCreated":1600705285940}]',
+        name: "Turtle Kid",
+        email: "burgertime@yahoo.com",
       };
 
-      await new UsersService().cognitoSignUp({
-        userAttributes: testNewUserAttributesApple.userAttributes,
-      });
+      const service = new UsersService();
+      await service.cognitoSignUp(testNewUserAttributesApple);
 
-      const newDbUser = await new UsersService().findOneUser({
-        email: testNewUserAttributesApple.userAttributes.email,
-      });
+      const userId = await service.findUserId(testNewUserAttributesApple.email);
+      const newDbUser = await service.getOneUser(userId);
 
       expect(newDbUser.id).toBeTruthy();
       expect(newDbUser.id).toHaveLength(20);
@@ -96,23 +88,21 @@ describe(`UsersService methods`, () => {
     });
 
     it(`Facebook sign up - creates a new user in the DB and adds user credentials`, async () => {
-      const testNewUserAttributesFacebook: IFacebookUserAttributes = {
-        userAttributes: {
-          identities:
-            '[{"userId":"4065b67d-71dc-4e67-a4ac-d56a9fe2c5ba","providerName":"Facebook","providerType":"Facebook","issuer":null,"primary":true,"dateCreated":1601588014283}]',
-          given_name: "Turtle",
-          family_name: "Kid",
-          email: "burgertime@yahoo.com",
-        },
+      const testNewUserAttributesFacebook: ICognitoFacebookUserAttributes = {
+        identities:
+          '[{"userId":"4065b67d-71dc-4e67-a4ac-d56a9fe2c5ba","providerName":"Facebook","providerType":"Facebook","issuer":null,"primary":true,"dateCreated":1601588014283}]',
+        given_name: "Turtle",
+        family_name: "Kid",
+        email: "burgertime@yahoo.com",
       };
 
-      await new UsersService().cognitoSignUp({
-        userAttributes: testNewUserAttributesFacebook.userAttributes,
-      });
+      const service = new UsersService();
+      await service.cognitoSignUp(testNewUserAttributesFacebook);
 
-      const newDbUser = await new UsersService().findOneUser({
-        email: testNewUserAttributesFacebook.userAttributes.email,
-      });
+      const userId = await service.findUserId(
+        testNewUserAttributesFacebook.email,
+      );
+      const newDbUser = await service.getOneUser(userId);
 
       expect(newDbUser.id).toBeTruthy();
       expect(newDbUser.id).toHaveLength(20);

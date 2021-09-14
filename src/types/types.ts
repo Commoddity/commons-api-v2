@@ -34,8 +34,37 @@ export interface PUpdateSummary {
 }
 
 /* Interfaces */
-export interface IAppleUserAttributes {
-  userAttributes: { identities: string; email: string; name: string };
+
+export type ICognitoUserAttributes =
+  | ICognitoEmailUserAttributes
+  | ICognitoSocialUserAttributes;
+export type ICognitoSocialUserAttributes =
+  | ICognitoAppleUserAttributes
+  | ICognitoFacebookUserAttributes;
+export interface ICognitoAppleUserAttributes {
+  identities: string;
+  email: string;
+  name: string;
+}
+export interface ICognitoEmailUserAttributes {
+  email: string;
+  given_name: string;
+  family_name: string;
+}
+export interface ICognitoFacebookUserAttributes {
+  identities: string;
+  email: string;
+  given_name: string;
+  family_name: string;
+}
+export interface ICognitoParsedUserIdentities {
+  providerName: ECognitoProviders;
+  userId: string;
+}
+export enum ECognitoProviders {
+  Facebook = "Facebook",
+  Google = "Google",
+  SignInWithApple = "SignInWithApple",
 }
 
 export interface IBillSummary {
@@ -49,42 +78,6 @@ export interface IBillSummaryMap {
   code: string;
   url: string;
 }
-
-export interface IEmailUserAttributes {
-  userAttributes: {
-    email: string;
-    given_name: string;
-    family_name: string;
-  };
-}
-
-export interface IFacebookUserAttributes {
-  userAttributes: {
-    identities: string;
-    email: string;
-    given_name: string;
-    family_name: string;
-  };
-}
-
-export interface IParsedUserIdentities {
-  providerName: "Facebook" | "Google" | "SignInWithApple";
-  userId: string;
-}
-
-export type ISocialUserAttributes =
-  | IAppleUserAttributes
-  | IFacebookUserAttributes;
-
-export type IUserAttributes = {
-  userAttributes: {
-    email: string;
-    identities?: string;
-    given_name?: string;
-    family_name?: string;
-    name?: string;
-  };
-};
 
 /* Enums */
 export enum EBillCategories {
@@ -145,7 +138,7 @@ export interface IAppSyncResolverEvent<A = any, S = any> {
   field: string;
   source?: S;
   identity?: {
-    claims: { "custom:userid": string };
+    claims: { "custom:userId": string };
   };
 }
 
@@ -163,4 +156,41 @@ export enum EEntityTypes {
 
 export enum EEventTypes {
   UpdateBills = "UpdateBills",
+}
+
+export interface ICognitoContext {
+  callbackWaitsForEmptyEventLoop: boolean;
+  functionVersion: string;
+  functionName: string;
+  memoryLimitInMB: string;
+  logGroupName: string;
+  logStreamName: string;
+  invokedFunctionArn: string;
+  awsRequestId: string;
+}
+
+export interface ICognitoEvent {
+  version: string;
+  region: string;
+  userPoolId: string;
+  userName: string;
+  callerContext: {
+    awsSdkVersion: string;
+    clientId: string;
+  };
+  triggerSource: ECognitoTriggerSource;
+  request: {
+    userAttributes: ICognitoUserAttributes;
+    validationData: any;
+  };
+  response: {
+    autoConfirmUser: boolean;
+    autoVerifyEmail: boolean;
+    autoVerifyPhone: boolean;
+  };
+}
+
+export enum ECognitoTriggerSource {
+  PreSignUp_SignUp = "PreSignUp_SignUp",
+  PostConfirmation_ConfirmSignUp = "PostConfirmation_ConfirmSignUp",
 }

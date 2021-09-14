@@ -11,6 +11,10 @@
   type: Query
   field: getAllParliaments
   response: false
+- dataSource: ClientLambda
+  type: Query
+  field: getOneUser
+  response: false
 
 # Field Level Resolvers
 - dataSource: ClientLambda

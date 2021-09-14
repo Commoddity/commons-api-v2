@@ -7,12 +7,12 @@ import {
   EBillCategories,
   ECredentialTypes,
   ESSMParams,
-  IAppleUserAttributes,
-  IEmailUserAttributes,
-  IFacebookUserAttributes,
-  IParsedUserIdentities,
-  ISocialUserAttributes,
-  IUserAttributes,
+  ICognitoAppleUserAttributes,
+  ICognitoEmailUserAttributes,
+  ICognitoFacebookUserAttributes,
+  ICognitoSocialUserAttributes,
+  ICognitoUserAttributes,
+  ICognitoParsedUserIdentities,
 } from "../../types";
 import { SSMUtil } from "../../utils";
 
@@ -35,69 +35,69 @@ export class UsersService extends BaseService<User> {
     return this.cognitoServiceObject;
   }
 
-  // CRUD methods
-  async createUser(user: User): Promise<User> {
-    return super.createOne(user);
-  }
+  /* Pre Sign Up Cognito Event */
+  async checkIfEmailExists(
+    userAttributes: ICognitoUserAttributes,
+  ): Promise<void> {
+    const emailAddress = userAttributes.email.toLowerCase().trim();
 
-  async findOneUser(query: FilterQuery<User>): Promise<User> {
-    return super.findOne(query);
-  }
+    const isApple = emailAddress.startsWith("signinwithapple_");
+    const isFacebook = emailAddress.startsWith("facebook_");
+    if (!isApple && !isFacebook) {
+      const emailUserExists = await super.doesOneExist({
+        $and: [{ emailAddress }, { credentials: ECredentialTypes.Username }],
+      });
 
-  async findUserId(email: string): Promise<string> {
-    return (await super.findOne({ email })).id!;
-  }
-
-  async updateUser(
-    query: FilterQuery<User>,
-    update: UpdateQuery<User>,
-  ): Promise<User> {
-    return super.updateOne(query, update);
-  }
-
-  async deleteUser(id: string): Promise<void> {
-    return super.deleteOne({ _id: id });
-  }
-
-  /* Cognito methods */
-  async cognitoSignUp({ userAttributes }: IUserAttributes): Promise<void> {
-    if (userAttributes.identities) {
-      await this.cognitoSignUpSocial({
-        userAttributes,
-      } as ISocialUserAttributes);
-    } else {
-      await this.cognitoSignUpWithEmail({
-        userAttributes,
-      } as IEmailUserAttributes);
+      if (emailUserExists) {
+        throw new Error("User with email already exists");
+      }
     }
+
+    return;
   }
 
-  async cognitoSignUpSocial({
-    userAttributes,
-  }: ISocialUserAttributes): Promise<void> {
-    const { providerName }: IParsedUserIdentities = JSON.parse(
+  /* Post Confirmation Cognito Event */
+  async cognitoSignUp(userAttributes: ICognitoUserAttributes): Promise<void> {
+    if ((userAttributes as ICognitoSocialUserAttributes).identities) {
+      await this.cognitoSignUpSocial(
+        userAttributes as ICognitoSocialUserAttributes,
+      );
+    } else {
+      await this.cognitoSignUpEmail(
+        userAttributes as ICognitoEmailUserAttributes,
+      );
+    }
+
+    return;
+  }
+
+  /* Cognito Sign Up Methods */
+  async cognitoSignUpSocial(
+    userAttributes: ICognitoSocialUserAttributes,
+  ): Promise<void> {
+    const { providerName }: ICognitoParsedUserIdentities = JSON.parse(
       userAttributes.identities,
     )[0];
 
     const createSocialUser: () => Promise<User> = {
       SignInWithApple: async () =>
-        await this.cognitoSignUpApple({
-          userAttributes,
-        } as IAppleUserAttributes),
+        await this.cognitoSignUpApple(
+          userAttributes as ICognitoAppleUserAttributes,
+        ),
 
       Facebook: async () =>
-        await this.cognitoSignUpFacebook({
-          userAttributes,
-        } as IFacebookUserAttributes),
+        await this.cognitoSignUpFacebook(
+          userAttributes as ICognitoFacebookUserAttributes,
+        ),
     }[providerName];
 
     await createSocialUser();
   }
 
-  async cognitoSignUpApple({
-    userAttributes,
-  }: IAppleUserAttributes): Promise<User> {
-    const { userId }: IParsedUserIdentities = JSON.parse(
+  async cognitoSignUpApple(
+    userAttributes: ICognitoAppleUserAttributes,
+  ): Promise<User> {
+    const { userId }: ICognitoParsedUserIdentities = JSON.parse(
       userAttributes.identities,
     )[0];
 
@@ -147,9 +147,9 @@ export class UsersService extends BaseService<User> {
     return user;
   }
 
-  async cognitoSignUpFacebook({
-    userAttributes,
-  }: IFacebookUserAttributes): Promise<User> {
+  async cognitoSignUpFacebook(
+    userAttributes: ICognitoFacebookUserAttributes,
+  ): Promise<User> {
     const { userId } = JSON.parse(userAttributes.identities)[0];
 
     let user: User;
@@ -197,9 +197,9 @@ export class UsersService extends BaseService<User> {
     return user;
   }
 
-  async cognitoSignUpWithEmail({
-    userAttributes,
-  }: IEmailUserAttributes): Promise<User | undefined> {
+  async cognitoSignUpEmail(
+    userAttributes: ICognitoEmailUserAttributes,
+  ): Promise<User | undefined> {
     const userExists = await super.doesOneExist({
       email: userAttributes.email,
     });
@@ -279,6 +279,30 @@ export class UsersService extends BaseService<User> {
         ) => (error ? reject(error) : resolve(data)),
       );
     });
+  }
+
+  /* CRUD methods */
+  async createUser(user: User): Promise<User> {
+    return super.createOne(user);
+  }
+
+  async getOneUser(userId: string): Promise<User> {
+    return super.findOne({ _id: userId });
+  }
+
+  async findUserId(email: string): Promise<string> {
+    return (await super.findOne({ email })).id;
+  }
+
+  async updateUser(
+    query: FilterQuery<User>,
+    update: UpdateQuery<User>,
+  ): Promise<User> {
+    return super.updateOne(query, update);
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    return super.deleteOne({ _id: id });
   }
 
   async addUserBill(userId: string, billCode: string): Promise<User> {

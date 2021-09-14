@@ -2,13 +2,14 @@ type Query {
   getAllBills: [IBill]
   getOneBill(code: String!): IBill
   getAllParliaments: [IParliament]
+  getOneUser: IUser @aws_cognito_user_pools
 }
 
 type Mutation {
-  addUserBill(userId: ID!, billCode: String!): IBill
-  removeUserBill(userId: ID!, billCode: String!): IBill
-  addUserCategory(userId: ID!, category: EBillCategories!): IBill
-  removeUserCategory(userId: ID!, category: EBillCategories!): IBill
+  addUserBill(userId: ID!, billCode: String!): IUser
+  removeUserBill(userId: ID!, billCode: String!): IUser
+  addUserCategory(userId: ID!, category: EBillCategories!): IUser
+  removeUserCategory(userId: ID!, category: EBillCategories!): IUser
 }
 
 schema {
@@ -85,14 +86,13 @@ type IParliamentarySession {
   bills: [IBill]
 }
 
-type IUser {
+type IUser @aws_cognito_user_pools {
   id: ID!
   firstName: String!
   lastName: String!
   email: String!
   emailNotification: Boolean
   smsNotification: Boolean
-  active: Boolean
   phoneNumber: String
   address: String
   street: String

@@ -1,48 +1,40 @@
 import { initClient } from "../db";
-// import { WebService } from "../services/web/service";
-// import { EEntityTypes, EEventTypes } from "../types";
+import { UsersService } from "../services/users/service";
+import {
+  ECognitoTriggerSource,
+  ICognitoContext,
+  ICognitoEvent,
+} from "../types";
 
 let initialize = null;
 
-const eventShape = {
-  version: "1",
-  region: "ca-central-1",
-  userPoolId: "ca-central-1_0cNBzg1g1",
-  userName: "c4ce68ba-7b60-47a3-80e4-8f1d2f2a5d3c",
-  callerContext: {
-    awsSdkVersion: "aws-sdk-unknown-unknown",
-    clientId: "2n3nrhs9rvcclfhdd6428i5hjr",
-  },
-  triggerSource: "PreSignUp_SignUp",
-  request: {
-    userAttributes: {
-      given_name: "Pascal",
-      family_name: "van Leeuwen",
-      email: "pascalvanleeuwen604@gmail.com",
-    },
-    validationData: null,
-  },
-  response: {
-    autoConfirmUser: false,
-    autoVerifyEmail: false,
-    autoVerifyPhone: false,
-  },
-};
-
-exports.handler = async (event) => {
+exports.handler = async (
+  event: ICognitoEvent,
+  _context: ICognitoContext,
+  callback: (_arg: any, event: ICognitoEvent) => unknown,
+) => {
   if (!initialize) {
     initialize = await initClient();
   }
 
-  console.log(event);
+  const {
+    request: { userAttributes },
+    triggerSource,
+  } = event;
 
-  // let consumer: () => Promise<void>;
+  const service = new UsersService();
+  const resolver = {
+    [ECognitoTriggerSource.PreSignUp_SignUp]: () => {
+      return service.checkIfEmailExists(userAttributes);
+    },
 
-  // if (entityType === EEntityTypes.Bills) {
-  //   if (type === EEventTypes.UpdateBills) {
-  //     consumer = async () => await new WebService().updateBills();
-  //   }
-  // }
+    [ECognitoTriggerSource.PostConfirmation_ConfirmSignUp]: () => {
+      return service.cognitoSignUp(userAttributes);
+    },
+  }[triggerSource];
 
-  // return consumer?.() || null;
+  await resolver?.();
+
+  await service.closeDbConnection();
+  callback(null, event);
 };
