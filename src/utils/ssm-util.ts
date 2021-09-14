@@ -1,5 +1,7 @@
 import AWS from "aws-sdk";
 
+import { ESSMParams } from "../types";
+
 const awsConfig: AWS.ConfigurationOptions = {
   region: "ca-central-1",
 };
@@ -38,13 +40,23 @@ export class SSMUtil {
     return SSMUtil.instance;
   }
 
-  getVar(key: string, required = true): Promise<string> {
+  public getVar(key: ESSMParams, required = true): Promise<string> {
     const fullKey = `/${this.environment}/${key}`;
 
     return this.get(fullKey, required);
   }
 
-  async get(key: string, required = true): Promise<string> {
+  public setVar(
+    key: ESSMParams,
+    value: string,
+    overwrite = true,
+  ): Promise<string> {
+    const fullKey = `/${this.environment}/${key}`;
+
+    return this.set(fullKey, value, overwrite);
+  }
+
+  private async get(key: string, required = true): Promise<string> {
     console.log(`[SSM]: Requesting SSM parameter ${key}`);
 
     const cachedValue: string = ProcessCaching.get(`SSMCache#${key}`);
@@ -83,7 +95,11 @@ export class SSMUtil {
     });
   }
 
-  async set(key: string, value: string, overwrite = true): Promise<string> {
+  private async set(
+    key: string,
+    value: string,
+    overwrite = true,
+  ): Promise<string> {
     console.log(`[SSM]: Setting SSM parameter ${key}`);
 
     return new Promise<string>((resolve, reject) => {

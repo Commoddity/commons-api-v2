@@ -6,6 +6,7 @@ import { BaseService } from "../../services";
 import {
   EBillCategories,
   ECredentialTypes,
+  ESSMParams,
   IAppleUserAttributes,
   IEmailUserAttributes,
   IFacebookUserAttributes,
@@ -13,6 +14,7 @@ import {
   ISocialUserAttributes,
   IUserAttributes,
 } from "../../types";
+import { SSMUtil } from "../../utils";
 
 import { User, UserInput } from "./model";
 import { Collection as UserCollection } from "./collection";
@@ -127,7 +129,7 @@ export class UsersService extends BaseService<User> {
     this.initCognitoServiceObject();
 
     await this.updateCognitoUserAttribute(
-      "custom:userid",
+      "custom:userId",
       String(user.id),
       userId,
     );
@@ -177,7 +179,7 @@ export class UsersService extends BaseService<User> {
     this.initCognitoServiceObject();
 
     await this.updateCognitoUserAttribute(
-      "custom:userid",
+      "custom:userId",
       String(user.id),
       userId,
     );
@@ -218,7 +220,7 @@ export class UsersService extends BaseService<User> {
       this.initCognitoServiceObject();
 
       await this.updateCognitoUserAttribute(
-        "custom:userid",
+        "custom:userId",
         String(user.id),
         userAttributes.email,
       );
@@ -237,7 +239,7 @@ export class UsersService extends BaseService<User> {
       this.initCognitoServiceObject();
 
       await this.updateCognitoUserAttribute(
-        "custom:userid",
+        "custom:userId",
         String(user.id),
         userAttributes.email,
       );
@@ -253,7 +255,9 @@ export class UsersService extends BaseService<User> {
     value: string,
     email: string,
   ): Promise<CognitoIdentityServiceProvider.Types.AdminUpdateUserAttributesResponse> {
-    const userPoolId = process.env.COGNITO_USER_POOL_ID;
+    const userPoolId = await SSMUtil.getInstance().getVar(
+      ESSMParams.UserPoolId,
+    );
 
     return new Promise((resolve, reject) => {
       const params = {
@@ -263,7 +267,7 @@ export class UsersService extends BaseService<User> {
             Value: value, // The new attribute value
           },
         ],
-        UserPoolId: userPoolId!,
+        UserPoolId: userPoolId,
         Username: email,
       };
 

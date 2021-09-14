@@ -136,6 +136,7 @@ export enum ERecordStatus {
 
 export enum ESSMParams {
   MongoConnectionString = "MongoConnectionString",
+  UserPoolId = "UserPoolId",
 }
 
 /* AWS Types */

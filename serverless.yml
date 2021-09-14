@@ -131,6 +131,11 @@ functions:
     name: commons-admin-lambda-${self:custom.stage}
     description: Provides data to the admin app
 
+  cognito-lambda:
+    handler: dist/lambdas/cognito.handler
+    name: commons-cognito-lambda-${self:custom.stage}
+    description: Handles user sign ups via Cognito
+
   schedule-jobs:
     handler: dist/lambdas/schedule-jobs.handler
     name: commons-scheduled-jobs-${self:custom.stage}
