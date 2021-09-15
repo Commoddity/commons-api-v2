@@ -245,6 +245,7 @@ export enum ECredentialTypes {
 
 export enum EDataEndpoints {
   MP_ENDPOINT = "https://represent.opennorth.ca",
+  BP_PRESS_AI = "https://api.thebipartisanpress.com/api/endpoints/beta/robert",
 }
 
 export enum EProvinceCodes {
@@ -269,6 +270,9 @@ export enum ERecordStatus {
 }
 
 export enum ESSMParams {
+  // To use, submit POST request to endpoint url with body of ”API=apikey&Text=text content”
+  // The endpoint return data with bias from -42 to 42
+  BPPressApiKey = "BPPressApiKey",
   MapBoxToken = "MapBoxToken",
   MongoConnectionString = "MongoConnectionString",
   UserPoolId = "UserPoolId",
