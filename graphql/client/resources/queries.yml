@@ -15,6 +15,10 @@
   type: Query
   field: getOneUser
   response: false
+- dataSource: ClientLambda
+  type: Query
+  field: fetchMpInfo
+  response: false
 
 # Field Level Resolvers
 - dataSource: ClientLambda

@@ -1,8 +1,6 @@
-const tsconfig = require("./tsconfig.json");
-const moduleNameMapper = require("tsconfig-paths-jest")(tsconfig);
+import type { Config } from "@jest/types";
 
-//eslint-ignore-next
-module.exports = {
+const config: Config.InitialOptions = {
   verbose: true,
   testEnvironment: "node",
   testPathIgnorePatterns: ["/node_modules/"],
@@ -17,5 +15,6 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
-  moduleNameMapper,
 };
+
+export default config;

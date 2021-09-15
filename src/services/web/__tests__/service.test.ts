@@ -1,4 +1,14 @@
+import { initClient, closeDbConnection } from "../../../db";
 import { WebService } from "../../web";
+import { EProvinceCodes } from "../../../types";
+
+beforeAll(async () => {
+  await initClient();
+});
+
+afterAll(async () => {
+  await closeDbConnection();
+});
 
 describe(`WebService methods`, () => {
   const testWebService = new WebService();
@@ -34,6 +44,20 @@ describe(`WebService methods`, () => {
       );
 
       expect(testFullTextResponse).toEqual(testfullTextRaw);
+    });
+  });
+
+  describe("fetchMpInfo", () => {
+    it("Fetches a users MP info by address", async () => {
+      const jennyKwan = await new WebService().fetchMpInfo({
+        street: "2752 E Hastings St",
+        city: "Vancouver",
+        province: EProvinceCodes.BC,
+      });
+
+      expect(jennyKwan.name).toEqual("Jenny Kwan");
+      expect(jennyKwan.party).toEqual("NDP");
+      expect(jennyKwan.riding).toEqual("Vancouver East");
     });
   });
 });

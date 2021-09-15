@@ -3,6 +3,10 @@ import mongoose from "mongoose";
 import { ESSMParams } from "../types";
 import { SSMUtil } from "../utils";
 
+export const closeDbConnection = async (): Promise<void> => {
+  await MongooseClient.getInstance().disconnect();
+};
+
 export class MongooseClient {
   private static instance: MongooseClient;
 

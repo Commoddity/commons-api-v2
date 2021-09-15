@@ -1,4 +1,5 @@
 import { QueryOptions } from "mongoose";
+import { MapiResponse } from "@mapbox/mapbox-sdk/lib/classes/mapi-response";
 
 export enum Envs {
   dev = "dev",
@@ -33,8 +34,13 @@ export interface PUpdateSummary {
   summaryUrl: string;
 }
 
-/* Interfaces */
+export interface PGeocodeQuery {
+  street: string;
+  city: string;
+  province: EProvinceCodes;
+}
 
+/* Interfaces */
 export type ICognitoUserAttributes =
   | ICognitoEmailUserAttributes
   | ICognitoSocialUserAttributes;
@@ -77,6 +83,121 @@ export interface IBillSummary {
 export interface IBillSummaryMap {
   code: string;
   url: string;
+}
+
+export interface IMapBoxResponse extends MapiResponse {
+  body: {
+    type: string;
+    query: string[];
+    features: IMapBoxFeature[];
+    attribution: "NOTICE: © 2021 Mapbox and its suppliers. All rights reserved. Use of this data is subject to the Mapbox Terms of Service (https://www.mapbox.com/about/maps/). This response and the information it contains may not be retained. POI(s) provided by Foursquare.";
+  };
+}
+
+interface IMapBoxFeature {
+  id: string;
+  type: string;
+  place_type: string[];
+  relevance: number;
+  properties: { accuracy: string };
+  text: string;
+  place_name: string;
+  center: number[];
+  geometry: IMapBoxGeometry;
+  address: string;
+  context: IMapBoxFeatureContext[];
+}
+
+interface IMapBoxGeometry {
+  type: string;
+  coordinates: number[];
+  interpolated?: boolean;
+}
+
+interface IMapBoxFeatureContext {
+  id: string;
+  text: string;
+  wikidata?: string;
+  short_code?: string;
+}
+
+export interface ILatLng {
+  latitude: number;
+  longitude: number;
+}
+
+export interface IRepresentMPResponse {
+  objects: IRepresentMP[];
+  meta: {
+    previous: number;
+    limit: number;
+    total_count: number;
+    offset: number;
+    next: number;
+  };
+}
+
+export interface IRepresentMP {
+  name: string;
+  first_name: string;
+  last_name: string;
+  party_name: string;
+  email: string;
+  district_name: string;
+  photo_url: string;
+  personal_url: string;
+  representative_set_name: string;
+  elected_office: string;
+  related: {
+    boundary_url: string;
+    representative_set_url: string;
+  };
+  source_url: string;
+  extra: {
+    preferred_languages: ["English  French"];
+  };
+  offices: IRepresentOffice[];
+  gender: string;
+  url: string;
+}
+
+export interface IRepresentOffice {
+  type: EMPOfficeType;
+  tel: string;
+  postal: string;
+  fax: string;
+}
+
+export enum EMPOfficeType {
+  constituency = "constituency",
+  legislature = "legislature",
+}
+
+export interface IMemberOfParliament {
+  name: string;
+  party: string;
+  riding: string;
+  email: string;
+  phoneNumber: string;
+  ourCommonsUrl: string;
+  photoUrl: string;
+  preferredLanguages: string[];
+  offices: IMPOffice[];
+}
+
+export interface IMPOffice {
+  type: EMPOfficeType;
+  phoneNumber: string;
+  faxNumber: string;
+  address: IMPAddress;
+}
+
+export interface IMPAddress {
+  name: string;
+  street: string;
+  city: string;
+  province: EProvinceCodes;
+  postalCode: string;
 }
 
 /* Enums */
@@ -122,12 +243,33 @@ export enum ECredentialTypes {
   Username = "username",
 }
 
+export enum EDataEndpoints {
+  MP_ENDPOINT = "https://represent.opennorth.ca",
+}
+
+export enum EProvinceCodes {
+  AB = "AB",
+  BC = "BC",
+  MB = "MB",
+  NB = "NB",
+  NL = "NL",
+  NS = "NS",
+  NT = "NT",
+  NU = "NU",
+  ON = "ON",
+  PE = "PE",
+  QC = "QC",
+  SK = "SK",
+  YT = "YT",
+}
+
 export enum ERecordStatus {
   Created = "created",
   Deleted = "deleted",
 }
 
 export enum ESSMParams {
+  MapBoxToken = "MapBoxToken",
   MongoConnectionString = "MongoConnectionString",
   UserPoolId = "UserPoolId",
 }
@@ -143,7 +285,7 @@ export interface IAppSyncResolverEvent<A = any, S = any> {
 }
 
 export interface ICloudWatchEvent {
-  eventSource: "aws:cloudWatchEvent";
+  eventSource: string;
   header: {
     eventType: { entityType: EEntityTypes; type: EEventTypes };
     environment: Envs;

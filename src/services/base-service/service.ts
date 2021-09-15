@@ -280,10 +280,8 @@ export class BaseService<T> {
     if (!data) {
       return null as any;
     }
-
     //eslint-disable-next-line
     const { _id, _v, ...others } = data._doc || data;
-
     return this.factory({ id: _id, ...others });
   }
 
@@ -291,7 +289,6 @@ export class BaseService<T> {
     if (!data || !data?.length) {
       return null as any;
     }
-
     return data.map((data) => this.build(data));
   }
 

@@ -1,2 +1,2 @@
 export { initClient } from "./init-client";
-export { MongooseClient } from "./mongoose-client";
+export { MongooseClient, closeDbConnection } from "./mongoose-client";

@@ -1,5 +1,10 @@
 import { initClient } from "../db";
-import { BillsService, ParliamentsService, UsersService } from "../services";
+import {
+  BillsService,
+  ParliamentsService,
+  UsersService,
+  WebService,
+} from "../services";
 import { IParliamentarySession } from "../services/parliaments/model";
 import { IAppSyncResolverEvent } from "../types";
 
@@ -35,6 +40,11 @@ exports.handler = async (
       getOneUser: () => {
         const userId = identity.claims["custom:userId"];
         return new UsersService().getOneUser(userId);
+      },
+
+      fetchMpInfo: () => {
+        const { query } = params;
+        return new WebService().fetchMpInfo(query);
       },
 
       /* Update */

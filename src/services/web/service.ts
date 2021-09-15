@@ -1,12 +1,22 @@
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
 
-import { BillsService } from "../../services";
+import { BillsService, MapBoxService } from "../../services";
 import {
   EBillEndpoints,
+  EDataEndpoints,
+  EProvinceCodes,
+  EMPOfficeType,
   IBillSummary,
   IBillSummaryMap,
+  IMemberOfParliament,
+  IMPAddress,
+  IMPOffice,
+  IRepresentMP,
+  IRepresentMPResponse,
+  IRepresentOffice,
   PBillEvent,
+  PGeocodeQuery,
 } from "../../types";
 import { FormatUtils } from "../../utils";
 
@@ -101,5 +111,83 @@ export class WebService {
     } catch (error) {
       console.error(`An error occurred while fetching raw full text: ${error}`);
     }
+  }
+
+  // Fetches a users MP info, based on postal code
+  async fetchMpInfo(query: PGeocodeQuery): Promise<IMemberOfParliament> {
+    const { latitude, longitude } = await new MapBoxService().getGeocode(query);
+
+    try {
+      const {
+        data: { objects },
+      } = await Axios.get<IRepresentMPResponse>(
+        `${EDataEndpoints.MP_ENDPOINT}/representatives/house-of-commons/?point=${latitude},${longitude}`,
+      );
+      const [mpData] = objects;
+
+      console.log(mpData);
+
+      return this.parseMpData(mpData);
+    } catch (error) {
+      throw new Error(`[FETCH MP INFO ERROR] ${error}`);
+    }
+  }
+
+  private parseMpData({
+    district_name,
+    email,
+    extra: { preferred_languages },
+    name,
+    offices,
+    party_name,
+    photo_url,
+    url,
+  }: IRepresentMP): IMemberOfParliament {
+    const { tel: phoneNumber } = offices.find(
+      ({ type }) => type === EMPOfficeType.constituency,
+    );
+    return {
+      name,
+      party: party_name,
+      riding: district_name,
+      email,
+      phoneNumber,
+      ourCommonsUrl: url,
+      photoUrl: photo_url,
+      preferredLanguages: preferred_languages,
+      offices: this.parseOfficeData(offices, name),
+    };
+  }
+
+  private parseOfficeData(
+    offices: IRepresentOffice[],
+    name: string,
+  ): IMPOffice[] {
+    return offices.map(({ fax, postal, tel, type }) => ({
+      type,
+      phoneNumber: tel,
+      faxNumber: fax,
+      address: this.splitPostal(postal, type, name),
+    }));
+  }
+
+  private splitPostal(
+    postal: string,
+    type: EMPOfficeType,
+    name: string,
+  ): IMPAddress {
+    const splitAddress = postal.split("\n");
+    if (type === EMPOfficeType.constituency) splitAddress.shift();
+    const [street] = splitAddress;
+    const [cityProvince, postalCode] = splitAddress[1].split("  ");
+    const [city, province] = cityProvince.split(" ");
+
+    return {
+      name,
+      street,
+      city,
+      province: EProvinceCodes[province],
+      postalCode,
+    };
   }
 }

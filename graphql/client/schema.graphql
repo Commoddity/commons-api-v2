@@ -1,8 +1,11 @@
+# Queries / Mutations
 type Query {
   getAllBills: [IBill]
   getOneBill(code: String!): IBill
   getAllParliaments: [IParliament]
   getOneUser: IUser @aws_cognito_user_pools
+  fetchMpInfo(query: PGeocodeQuery!): IMemberOfParliament
+    @aws_cognito_user_pools
 }
 
 type Mutation {
@@ -17,6 +20,14 @@ schema {
   mutation: Mutation
 }
 
+# Params
+input PGeocodeQuery {
+  street: String!
+  city: String!
+  province: EProvinceCodes!
+}
+
+# Unauthenticated Types - API Key
 type IBill {
   id: ID!
   code: String!
@@ -44,6 +55,76 @@ type IBillEvent {
   updatedAt: String
 }
 
+type IParliament {
+  id: ID!
+  number: Int!
+  startDate: String!
+  endDate: String
+  parliamentarySessions: [IParliamentarySession]
+  createdAt: String!
+  updatedAt: String
+}
+
+type IParliamentarySession {
+  sessionId: ID!
+  number: Int!
+  startDate: String!
+  endDate: String
+  createdAt: String!
+  updatedAt: String
+  bills: [IBill]
+}
+
+#  Authenticated types - User Pool
+type IUser @aws_cognito_user_pools {
+  firstName: String!
+  lastName: String!
+  email: String!
+  emailNotification: Boolean
+  smsNotification: Boolean
+  phoneNumber: String
+  address: String
+  street: String
+  city: String
+  province: String
+  postalCode: String
+  mp: String
+  party: String
+  ridingName: String
+  bills: [String]
+  categories: [EBillCategories]
+  createdAt: String!
+  updatedAt: String
+}
+
+type IMemberOfParliament @aws_cognito_user_pools {
+  name: String!
+  party: String!
+  riding: String!
+  email: String!
+  phoneNumber: String!
+  ourCommonsUrl: String!
+  photoUrl: String!
+  preferredLanguages: [String]!
+  offices: [IMPOffice]!
+}
+
+type IMPOffice @aws_cognito_user_pools {
+  type: EMPOfficeType!
+  phoneNumber: String!
+  faxNumber: String!
+  address: IMPAddress!
+}
+
+type IMPAddress @aws_cognito_user_pools {
+  name: String!
+  street: String!
+  city: String!
+  province: EProvinceCodes!
+  postalCode: String!
+}
+
+# Enums
 enum EBillCategories {
   agriculture_environment
   arts_culture
@@ -66,43 +147,23 @@ enum EBillType {
   senate
 }
 
-type IParliament {
-  id: ID!
-  number: Int!
-  startDate: String!
-  endDate: String
-  parliamentarySessions: [IParliamentarySession]
-  createdAt: String!
-  updatedAt: String
+enum EMPOfficeType {
+  constituency
+  legislature
 }
 
-type IParliamentarySession {
-  sessionId: ID!
-  number: Int!
-  startDate: String!
-  endDate: String
-  createdAt: String!
-  updatedAt: String
-  bills: [IBill]
-}
-
-type IUser @aws_cognito_user_pools {
-  firstName: String!
-  lastName: String!
-  email: String!
-  emailNotification: Boolean
-  smsNotification: Boolean
-  phoneNumber: String
-  address: String
-  street: String
-  city: String
-  province: String
-  postalCode: String
-  mp: String
-  party: String
-  ridingName: String
-  bills: [String]
-  categories: [EBillCategories]
-  createdAt: String!
-  updatedAt: String
+enum EProvinceCodes {
+  AB
+  BC
+  MB
+  NB
+  NL
+  NS
+  NT
+  NU
+  ON
+  PE
+  QC
+  SK
+  YT
 }
