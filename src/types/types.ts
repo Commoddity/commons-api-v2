@@ -1,3 +1,4 @@
+import { ArticleData } from "article-parser";
 import { QueryOptions } from "mongoose";
 import { MapiResponse } from "@mapbox/mapbox-sdk/lib/classes/mapi-response";
 
@@ -245,6 +246,7 @@ export enum ECredentialTypes {
 
 export enum EDataEndpoints {
   MP_ENDPOINT = "https://represent.opennorth.ca",
+  MBFC_HOMEPAGE = "https://mediabiasfactcheck.com/",
   BP_PRESS_AI = "https://api.thebipartisanpress.com/api/endpoints/beta/robert",
 }
 
@@ -341,4 +343,15 @@ export enum ECognitoTriggerSource {
   PostConfirmation_ConfirmSignUp = "PostConfirmation_ConfirmSignUp",
 }
 
-export interface PMediaSourceInputData {}
+export interface IArticleData extends ArticleData {
+  hostname: string;
+}
+
+export interface IMBFCResults {
+  biasRating?: string;
+  factualReporting?: string;
+  country?: string;
+  mediaType?: string;
+  trafficPopularity?: string;
+  mbfcCredibilityRating?: string;
+}

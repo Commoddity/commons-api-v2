@@ -56,4 +56,12 @@ export class FormatUtils {
   // Returns the title of a bill or event from the 'description' or 'title' field
   static formatTitle = (title: string): string =>
     title.toString().split(/, (.+)/)[1];
+
+  static toCamelCase = (string: string): string =>
+    string
+      .replace("/", " ")
+      .toLowerCase()
+      .trim()
+      .split(/[.\-_\s]/g)
+      .reduce((string, word) => string + word[0].toUpperCase() + word.slice(1));
 }

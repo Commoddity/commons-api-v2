@@ -1,16 +1,19 @@
+import { extract } from "article-parser";
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
+import striptags from "striptags";
 
-import { BillsService, MapBoxService, IBillMediaSource } from "../../services";
+import { BillsService, MapBoxService } from "../../services";
 import {
   EBillEndpoints,
   EDataEndpoints,
   EProvinceCodes,
   EMPOfficeType,
   ESSMParams,
+  IArticleData,
   IBillSummary,
   IBillSummaryMap,
-  PMediaSourceInputData,
+  IMBFCResults,
   IMemberOfParliament,
   IMPAddress,
   IMPOffice,
@@ -195,19 +198,14 @@ export class WebService {
   /* Media Sources methods */
   /** 
   @todo
-  1. Get domain of news article from URL
-  2. Enter domain into MBFC website and proceed to search results then media source page
-  3. Scrape mbfcData fields from MBFC page
+  1. Set up GraphQL and Retool to build Media Source input interface and resolvers.
   */
-  async addMediaSourceToBill(
-    billCode: string,
-    mediaSourceInputData: PMediaSourceInputData,
-  ) {
-    const mockData = await this.fetchMediaBiasFactCheckData(
-      mediaSourceInputData,
-    );
+  async addMediaSourceToBill(billCode: string, mediaSourceUrl: string) {
+    const { hostname } = await this.getArticleText(mediaSourceUrl);
+    const mbfcResults = await this.fetchMediaBiasFactCheckData(hostname);
+    console.log({ mbfcResults });
 
-    await new BillsService().addMediaSourceToBill(billCode, mockData);
+    // await new BillsService().addMediaSourceToBill(billCode, mockData);
   }
 
   /** 
@@ -216,52 +214,77 @@ export class WebService {
   2. Enter domain into MBFC website and proceed to search results then media source page
   3. Scrape mbfcData fields from MBFC page
   */
-  async fetchMediaBiasFactCheckData(
-    _mediaSourceInputData: PMediaSourceInputData,
-  ): Promise<IBillMediaSource> {
-    const mockMBFCData = "" as unknown as IBillMediaSource;
-    return mockMBFCData;
+  async fetchMediaBiasFactCheckData(hostname: string): Promise<IMBFCResults> {
+    const searchUrl = `${EDataEndpoints.MBFC_HOMEPAGE}/?s=${hostname}`;
+    const biasResults: IMBFCResults = {};
+
+    try {
+      const searchResults: cheerio.Root = Cheerio.load(
+        (await Axios.get<string>(searchUrl)).data,
+      );
+      const mediaSourceUrl: string = searchResults('span:contains("Read More")')
+        .parent()
+        .attr("href");
+
+      console.log({ mediaSourceUrl });
+      const mediaSourcePage: cheerio.Root = Cheerio.load(
+        (await Axios.get<string>(mediaSourceUrl)).data,
+      );
+
+      if (mediaSourcePage('span:contains("Detailed Record")')?.text()) {
+        const biasResultsData = mediaSourcePage(
+          'span:contains("Detailed Record")',
+        )
+          .parent("h3")
+          .next("p")
+          .text()
+          .split("\n");
+        biasResultsData.forEach((field) => {
+          const split = field.split(":");
+          biasResults[FormatUtils.toCamelCase(split[0])] = split[1].trim();
+        });
+
+        console.log({ biasResults });
+      } else if (mediaSourcePage('span:contains("Detailed Reports")')?.text()) {
+        // mediaSourcePage('span:contains("Detailed Reports")').text();
+        // .parent("h3")
+        // .siblings("p")
+      }
+    } catch (error) {
+      throw new Error(`[FETCH MBFC DATA ERROR]: ${error}`);
+    }
+
+    return biasResults;
   }
 
   /* Bipartisan Press Data */
-  async fetchBPPressInfo(url: string): Promise<any> {
+  async fetchBPPressInfo(articleText: string): Promise<number> {
     SSMUtil.initInstance();
+
     try {
       const apiKey = await SSMUtil.getInstance().getVar(
         ESSMParams.BPPressApiKey,
       );
 
-      const text = await this.getArticleText(url);
-
-      const response = await Axios.post(
-        `${EDataEndpoints.BP_PRESS_AI}?API=${apiKey}&Text=${text}`,
+      const { data } = await Axios.post<number>(
+        `${EDataEndpoints.BP_PRESS_AI}`,
+        new URLSearchParams({ API: apiKey, Text: articleText }),
+        { headers: { "content-type": "application/x-www-form-urlencoded" } },
       );
-
-      return response;
+      return data;
     } catch (error) {
-      console.error(error);
       throw new Error(`[FETCH BP PRESS INFO ERROR] ${error}`);
     }
   }
 
-  async getArticleText(url: string): Promise<string> {
-    const { data } = await Axios.get(url);
-
-    const articleTextArray: string[] = [];
-
-    const articlePage = Cheerio.load(data);
-
-    articlePage("article")
-      .find("p")
-      .each((_id, element) => {
-        articleTextArray.push(articlePage(element).text());
-      });
-
-    return articleTextArray
-      .join(" ")
-      .replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")
-      .replace(/[^\w\s\\.]/g, "")
-      .replace(/\//g, "")
-      .replace(/\\/g, "");
+  async getArticleText(url: string): Promise<IArticleData> {
+    try {
+      const articleData = await extract(url);
+      const rawText = striptags(articleData.content);
+      const { hostname } = new URL(articleData.url);
+      return { ...articleData, content: rawText, hostname };
+    } catch (error) {
+      throw new Error(`[GET ARTICLE TEXT]: ${error}`);
+    }
   }
 }

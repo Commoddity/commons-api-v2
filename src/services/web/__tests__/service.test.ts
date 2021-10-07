@@ -62,12 +62,21 @@ describe(`WebService methods`, () => {
   });
 
   describe("fetchBPPressInfo", () => {
-    it("Gets the text of a news article from a URL", async () => {
+    it("Analyzes the text of a new article", async () => {
+      // const testUrl =
+      //   "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/";
+      // const testUrl =
+      //   "https://www.foxnews.com/politics/joe-biden-hunter-biden-secure-business-license-china";
       const testUrl =
-        "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/";
+        "https://www.theguardian.com/world/2021/oct/07/britons-stranded-in-afghanistan-call-for-urgent-evacuation-help";
 
-      const test = await new WebService().fetchBPPressInfo(testUrl);
-      console.log(test);
+      const webService = new WebService();
+
+      const { content: articleText } = await webService.getArticleText(testUrl);
+
+      const test = await webService.fetchBPPressInfo(articleText);
+
+      console.log("RESULTS HERE", test);
     });
   });
 
@@ -76,9 +85,27 @@ describe(`WebService methods`, () => {
       const testUrl =
         "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/";
 
-      const text = await new WebService().getArticleText(testUrl);
+      const articleData = await new WebService().getArticleText(testUrl);
 
-      expect(typeof text).toEqual("string");
+      console.log(articleData);
+
+      expect(typeof articleData.content).toEqual("string");
+    });
+  });
+
+  describe("addMediaSourceToBill", () => {
+    it("Gets the text of a news article from a URL", async () => {
+      // const testUrl =
+      //   "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/";
+      const testUrl =
+        "https://www.rebelnews.com/trudeau_mandates_vaccines_for_planes_trains_disregards_natural_immunity";
+      // const testUrl =
+      //   "https://www.cbc.ca/news/business/covid-19-layoffs-1.6202871";
+
+      await new WebService().addMediaSourceToBill("T-123", testUrl);
+
+      // expect(typeof mbfcResults.biasRating).toEqual("string");
+      // expect(typeof mbfcResults.factualReporting).toEqual("string");
     });
   });
 });
