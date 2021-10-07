@@ -34,6 +34,20 @@ export class BillEvent implements IBillEvent {
   }
 }
 
+export interface IBillMediaSource {
+  articleTitle: string;
+  articleUrl: string;
+  mediaSource: string;
+  excerpt: string;
+  publicationDate: Date;
+  mbfcData: {
+    biasRating: string;
+    factualRating: string;
+    country: string;
+    credibilityRating?: string;
+  };
+}
+
 export interface IBill {
   id?: string;
   code: string;
@@ -49,6 +63,7 @@ export interface IBill {
   fullTextUrl?: string | null;
   passed?: boolean | null;
   events: BillEvent[];
+  mediaSources?: IBillMediaSource[];
   createdAt?: Date;
   updatedAt?: Date;
   recordStatus?: ERecordStatus;
@@ -69,6 +84,7 @@ export class Bill implements IBill {
   fullTextUrl?: string | null;
   passed?: boolean | null;
   events: BillEvent[];
+  mediaSources?: IBillMediaSource[];
   createdAt?: Date;
   updatedAt?: Date;
   recordStatus?: ERecordStatus;
@@ -88,6 +104,7 @@ export class Bill implements IBill {
     fullTextUrl,
     passed,
     events,
+    mediaSources,
     createdAt,
     updatedAt,
     recordStatus,
@@ -106,6 +123,7 @@ export class Bill implements IBill {
     this.fullTextUrl = fullTextUrl;
     this.passed = passed;
     this.events = events;
+    this.mediaSources = mediaSources;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.recordStatus = recordStatus;
@@ -127,6 +145,7 @@ export class BillInput implements IBill {
   fullTextUrl?: string | null;
   passed?: boolean | null;
   events: IBillEvent[];
+  mediaSources?: IBillMediaSource[];
   createdAt?: Date;
   updatedAt?: Date;
   recordStatus?: ERecordStatus;
@@ -139,6 +158,7 @@ export class BillInput implements IBill {
     this.summaryUrl = null;
     this.fullTextUrl = null;
     this.passed = null;
+    this.mediaSources = [];
     this.events = [];
     this.categories = [];
   }

@@ -4,7 +4,13 @@ import { BaseService, ParliamentsService } from "../../services";
 import { EBillCategories, IBillSummaryMap, PBillEvent } from "../../types";
 import { FormatUtils } from "../../utils";
 
-import { Bill, BillEvent, BillInput, createBill } from "./model";
+import {
+  Bill,
+  BillEvent,
+  BillInput,
+  createBill,
+  IBillMediaSource,
+} from "./model";
 import { Collection as BillCollection } from "./collection";
 
 export class BillsService extends BaseService<Bill> {
@@ -156,5 +162,24 @@ export class BillsService extends BaseService<Bill> {
     categories: EBillCategories[],
   ): Promise<Bill> {
     return this.updateOne({ code }, { categories });
+  }
+
+  /* Media Sources methods */
+  async addMediaSourceToBill(
+    code: string,
+    mediaSourceData: IBillMediaSource,
+  ): Promise<Bill> {
+    const mediaSourceExistsQuery = {
+      $and: [
+        { code },
+        { "mediaSources.articleUrl": mediaSourceData.articleUrl },
+      ],
+    };
+    if (await super.doesOneExist(mediaSourceExistsQuery)) {
+      console.warn(`Media source already exists for Bill ${code}.`);
+      return;
+    }
+
+    return this.updatePush({ code }, { mediaSources: mediaSourceData });
   }
 }

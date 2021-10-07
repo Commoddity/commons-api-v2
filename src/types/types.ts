@@ -340,3 +340,5 @@ export enum ECognitoTriggerSource {
   PreSignUp_SignUp = "PreSignUp_SignUp",
   PostConfirmation_ConfirmSignUp = "PostConfirmation_ConfirmSignUp",
 }
+
+export interface PMediaSourceInputData {}

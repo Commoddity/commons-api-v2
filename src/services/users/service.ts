@@ -1,6 +1,5 @@
+import { CognitoIdentityServiceProvider } from "aws-sdk";
 import { FilterQuery, UpdateQuery } from "mongoose";
-
-import { CognitoIdentityServiceProvider, AWSError } from "aws-sdk";
 
 import { BaseService } from "../../services";
 import {
@@ -97,6 +96,10 @@ export class UsersService extends BaseService<User> {
   async cognitoSignUpApple(
     userAttributes: ICognitoAppleUserAttributes,
   ): Promise<User> {
+    const userPoolId = await SSMUtil.getInstance().getVar(
+      ESSMParams.UserPoolId,
+    );
+
     const { userId }: ICognitoParsedUserIdentities = JSON.parse(
       userAttributes.identities,
     )[0];
@@ -132,16 +135,19 @@ export class UsersService extends BaseService<User> {
       "custom:userId",
       String(user.id),
       userId,
+      userPoolId,
     );
     await this.updateCognitoUserAttribute(
       "given_name",
       String(user.firstName),
       userId,
+      userPoolId,
     );
     await this.updateCognitoUserAttribute(
       "family_name",
       String(user.lastName),
       userId,
+      userPoolId,
     );
 
     return user;
@@ -150,6 +156,10 @@ export class UsersService extends BaseService<User> {
   async cognitoSignUpFacebook(
     userAttributes: ICognitoFacebookUserAttributes,
   ): Promise<User> {
+    const userPoolId = await SSMUtil.getInstance().getVar(
+      ESSMParams.UserPoolId,
+    );
+
     const { userId } = JSON.parse(userAttributes.identities)[0];
 
     let user: User;
@@ -182,16 +192,19 @@ export class UsersService extends BaseService<User> {
       "custom:userId",
       String(user.id),
       userId,
+      userPoolId,
     );
     await this.updateCognitoUserAttribute(
       "given_name",
       String(user.firstName),
       userId,
+      userPoolId,
     );
     await this.updateCognitoUserAttribute(
       "family_name",
       String(user.lastName),
       userId,
+      userPoolId,
     );
 
     return user;
@@ -200,6 +213,10 @@ export class UsersService extends BaseService<User> {
   async cognitoSignUpEmail(
     userAttributes: ICognitoEmailUserAttributes,
   ): Promise<User | undefined> {
+    const userPoolId = await SSMUtil.getInstance().getVar(
+      ESSMParams.UserPoolId,
+    );
+
     const userExists = await super.doesOneExist({
       email: userAttributes.email,
     });
@@ -223,6 +240,7 @@ export class UsersService extends BaseService<User> {
         "custom:userId",
         String(user.id),
         userAttributes.email,
+        userPoolId,
       );
 
       return user;
@@ -242,6 +260,7 @@ export class UsersService extends BaseService<User> {
         "custom:userId",
         String(user.id),
         userAttributes.email,
+        userPoolId,
       );
 
       return user;
@@ -254,31 +273,26 @@ export class UsersService extends BaseService<User> {
     name: string,
     value: string,
     email: string,
+    userPoolId: string,
   ): Promise<CognitoIdentityServiceProvider.Types.AdminUpdateUserAttributesResponse> {
-    const userPoolId = await SSMUtil.getInstance().getVar(
-      ESSMParams.UserPoolId,
-    );
+    const params = {
+      UserAttributes: [
+        {
+          Name: name, // Name of attribute
+          Value: value, // The new attribute value
+        },
+      ],
+      UserPoolId: userPoolId,
+      Username: email,
+    };
 
-    return new Promise((resolve, reject) => {
-      const params = {
-        UserAttributes: [
-          {
-            Name: name, // Name of attribute
-            Value: value, // The new attribute value
-          },
-        ],
-        UserPoolId: userPoolId,
-        Username: email,
-      };
-
-      this.cognitoServiceObject.adminUpdateUserAttributes(
-        params,
-        (
-          error: AWSError,
-          data: CognitoIdentityServiceProvider.Types.AdminUpdateUserAttributesResponse,
-        ) => (error ? reject(error) : resolve(data)),
-      );
-    });
+    try {
+      return this.cognitoServiceObject
+        .adminUpdateUserAttributes(params)
+        .promise();
+    } catch (error) {
+      throw new Error(`[COGNITO UPDATE USER ATTRIBUTE]: ${error}`);
+    }
   }
 
   /* CRUD methods */

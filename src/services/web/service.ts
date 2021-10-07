@@ -1,7 +1,7 @@
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
 
-import { BillsService, MapBoxService } from "../../services";
+import { BillsService, MapBoxService, IBillMediaSource } from "../../services";
 import {
   EBillEndpoints,
   EDataEndpoints,
@@ -10,6 +10,7 @@ import {
   ESSMParams,
   IBillSummary,
   IBillSummaryMap,
+  PMediaSourceInputData,
   IMemberOfParliament,
   IMPAddress,
   IMPOffice,
@@ -114,7 +115,8 @@ export class WebService {
     }
   }
 
-  // Fetches a users MP info, based on address (street, city, province)
+  /* Fetch MP Data methods */
+  /* Fetches a users MP info, based on address (street, city, province) */
   async fetchMpInfo(query: PGeocodeQuery): Promise<IMemberOfParliament> {
     const { latitude, longitude } = await new MapBoxService().getGeocode(query);
 
@@ -190,7 +192,38 @@ export class WebService {
     };
   }
 
-  // Bipartisan Press Data
+  /* Media Sources methods */
+  /** 
+  @todo
+  1. Get domain of news article from URL
+  2. Enter domain into MBFC website and proceed to search results then media source page
+  3. Scrape mbfcData fields from MBFC page
+  */
+  async addMediaSourceToBill(
+    billCode: string,
+    mediaSourceInputData: PMediaSourceInputData,
+  ) {
+    const mockData = await this.fetchMediaBiasFactCheckData(
+      mediaSourceInputData,
+    );
+
+    await new BillsService().addMediaSourceToBill(billCode, mockData);
+  }
+
+  /** 
+  @todo
+  1. Get domain of news article from URL
+  2. Enter domain into MBFC website and proceed to search results then media source page
+  3. Scrape mbfcData fields from MBFC page
+  */
+  async fetchMediaBiasFactCheckData(
+    _mediaSourceInputData: PMediaSourceInputData,
+  ): Promise<IBillMediaSource> {
+    const mockMBFCData = "" as unknown as IBillMediaSource;
+    return mockMBFCData;
+  }
+
+  /* Bipartisan Press Data */
   async fetchBPPressInfo(url: string): Promise<any> {
     SSMUtil.initInstance();
     try {
