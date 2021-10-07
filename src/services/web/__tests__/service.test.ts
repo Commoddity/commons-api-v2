@@ -60,4 +60,25 @@ describe(`WebService methods`, () => {
       expect(jennyKwan.riding).toEqual("Vancouver East");
     });
   });
+
+  describe("fetchBPPressInfo", () => {
+    it("Gets the text of a news article from a URL", async () => {
+      const testUrl =
+        "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/";
+
+      const test = await new WebService().fetchBPPressInfo(testUrl);
+      console.log(test);
+    });
+  });
+
+  describe("getArticleText", () => {
+    it("Gets the text of a news article from a URL", async () => {
+      const testUrl =
+        "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/";
+
+      const text = await new WebService().getArticleText(testUrl);
+
+      expect(typeof text).toEqual("string");
+    });
+  });
 });

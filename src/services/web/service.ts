@@ -7,6 +7,7 @@ import {
   EDataEndpoints,
   EProvinceCodes,
   EMPOfficeType,
+  ESSMParams,
   IBillSummary,
   IBillSummaryMap,
   IMemberOfParliament,
@@ -18,7 +19,7 @@ import {
   PBillEvent,
   PGeocodeQuery,
 } from "../../types";
-import { FormatUtils } from "../../utils";
+import { FormatUtils, SSMUtil } from "../../utils";
 
 export class WebService {
   async updateBills(): Promise<void> {
@@ -113,7 +114,7 @@ export class WebService {
     }
   }
 
-  // Fetches a users MP info, based on postal code
+  // Fetches a users MP info, based on address (street, city, province)
   async fetchMpInfo(query: PGeocodeQuery): Promise<IMemberOfParliament> {
     const { latitude, longitude } = await new MapBoxService().getGeocode(query);
 
@@ -124,8 +125,6 @@ export class WebService {
         `${EDataEndpoints.MP_ENDPOINT}/representatives/house-of-commons/?point=${latitude},${longitude}`,
       );
       const [mpData] = objects;
-
-      console.log(mpData);
 
       return this.parseMpData(mpData);
     } catch (error) {
@@ -189,5 +188,47 @@ export class WebService {
       province: EProvinceCodes[province],
       postalCode,
     };
+  }
+
+  // Bipartisan Press Data
+  async fetchBPPressInfo(url: string): Promise<any> {
+    SSMUtil.initInstance();
+    try {
+      const apiKey = await SSMUtil.getInstance().getVar(
+        ESSMParams.BPPressApiKey,
+      );
+
+      const text = await this.getArticleText(url);
+
+      const response = await Axios.post(
+        `${EDataEndpoints.BP_PRESS_AI}?API=${apiKey}&Text=${text}`,
+      );
+
+      return response;
+    } catch (error) {
+      console.error(error);
+      throw new Error(`[FETCH BP PRESS INFO ERROR] ${error}`);
+    }
+  }
+
+  async getArticleText(url: string): Promise<string> {
+    const { data } = await Axios.get(url);
+
+    const articleTextArray: string[] = [];
+
+    const articlePage = Cheerio.load(data);
+
+    articlePage("article")
+      .find("p")
+      .each((_id, element) => {
+        articleTextArray.push(articlePage(element).text());
+      });
+
+    return articleTextArray
+      .join(" ")
+      .replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")
+      .replace(/[^\w\s\\.]/g, "")
+      .replace(/\//g, "")
+      .replace(/\\/g, "");
   }
 }
