@@ -246,7 +246,7 @@ export enum ECredentialTypes {
 
 export enum EDataEndpoints {
   MP_ENDPOINT = "https://represent.opennorth.ca",
-  MBFC_HOMEPAGE = "https://mediabiasfactcheck.com/",
+  MBFC_HOMEPAGE = "https://mediabiasfactcheck.com",
   BP_PRESS_AI = "https://api.thebipartisanpress.com/api/endpoints/beta/robert",
 }
 

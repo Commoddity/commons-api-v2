@@ -201,8 +201,11 @@ export class WebService {
   1. Set up GraphQL and Retool to build Media Source input interface and resolvers.
   */
   async addMediaSourceToBill(billCode: string, mediaSourceUrl: string) {
-    const { hostname } = await this.getArticleText(mediaSourceUrl);
-    const mbfcResults = await this.fetchMediaBiasFactCheckData(hostname);
+    const { hostname, source } = await this.getArticleText(mediaSourceUrl);
+    const mbfcResults = await this.fetchMediaBiasFactCheckData(
+      hostname,
+      source,
+    );
     console.log({ mbfcResults });
 
     // await new BillsService().addMediaSourceToBill(billCode, mockData);
@@ -214,41 +217,53 @@ export class WebService {
   2. Enter domain into MBFC website and proceed to search results then media source page
   3. Scrape mbfcData fields from MBFC page
   */
-  async fetchMediaBiasFactCheckData(hostname: string): Promise<IMBFCResults> {
+  async fetchMediaBiasFactCheckData(
+    hostname: string,
+    source: string,
+  ): Promise<IMBFCResults> {
     const searchUrl = `${EDataEndpoints.MBFC_HOMEPAGE}/?s=${hostname}`;
     const biasResults: IMBFCResults = {};
+
+    console.log({ searchUrl, source });
 
     try {
       const searchResults: cheerio.Root = Cheerio.load(
         (await Axios.get<string>(searchUrl)).data,
+        {
+          lowerCaseTags: true,
+          lowerCaseAttributeNames: true,
+          ignoreWhitespace: true,
+        },
       );
-      const mediaSourceUrl: string = searchResults('span:contains("Read More")')
-        .parent()
-        .attr("href");
+      const mediaSourceUrl: string = searchResults(
+        `a:contains("${source}")`,
+      ).attr("href");
 
-      console.log({ mediaSourceUrl });
       const mediaSourcePage: cheerio.Root = Cheerio.load(
         (await Axios.get<string>(mediaSourceUrl)).data,
       );
+      const biasResultsData = mediaSourcePage(
+        'span:contains("Detailed Record"), span:contains("Detailed Report"), span:contains("Detailed Reports")',
+      )
+        .parent("h3")
+        .next("p")
+        .text()
+        .split("\n");
+      biasResultsData.forEach((field) => {
+        const split = field.split(":");
+        biasResults[FormatUtils.toCamelCase(split[0])] = split[1].trim();
+      });
 
-      if (mediaSourcePage('span:contains("Detailed Record")')?.text()) {
-        const biasResultsData = mediaSourcePage(
-          'span:contains("Detailed Record")',
+      if (!biasResults?.biasRating) {
+        const biasRating = mediaSourcePage(
+          'span[style="text-decoration: underline;"]:contains("BIAS")',
         )
-          .parent("h3")
-          .next("p")
           .text()
-          .split("\n");
-        biasResultsData.forEach((field) => {
-          const split = field.split(":");
-          biasResults[FormatUtils.toCamelCase(split[0])] = split[1].trim();
-        });
-
-        console.log({ biasResults });
-      } else if (mediaSourcePage('span:contains("Detailed Reports")')?.text()) {
-        // mediaSourcePage('span:contains("Detailed Reports")').text();
-        // .parent("h3")
-        // .siblings("p")
+          .replace("BIAS", "")
+          .trim();
+        biasResults.biasRating = biasRating;
+        biasResults.country = (biasResults as any).worldPressFreedomRank;
+        delete (biasResults as any).worldPressFreedomRank;
       }
     } catch (error) {
       throw new Error(`[FETCH MBFC DATA ERROR]: ${error}`);
@@ -281,8 +296,17 @@ export class WebService {
     try {
       const articleData = await extract(url);
       const rawText = striptags(articleData.content);
+      const source = articleData.source.includes("|")
+        ? articleData.source.split("|")[1].trim()
+        : articleData.source.includes("News") &&
+          !articleData.source.includes(" News")
+        ? `${articleData.source.split("News")[0].trim()} News`
+        : articleData.source.includes("nationalpost")
+        ? `National Post`
+        : FormatUtils.capitalizeFirstLetter(articleData.source);
       const { hostname } = new URL(articleData.url);
-      return { ...articleData, content: rawText, hostname };
+
+      return { ...articleData, content: rawText, hostname, source };
     } catch (error) {
       throw new Error(`[GET ARTICLE TEXT]: ${error}`);
     }

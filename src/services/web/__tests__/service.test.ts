@@ -93,19 +93,38 @@ describe(`WebService methods`, () => {
     });
   });
 
-  describe("addMediaSourceToBill", () => {
-    it("Gets the text of a news article from a URL", async () => {
-      // const testUrl =
-      //   "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/";
-      const testUrl =
-        "https://www.rebelnews.com/trudeau_mandates_vaccines_for_planes_trains_disregards_natural_immunity";
-      // const testUrl =
-      //   "https://www.cbc.ca/news/business/covid-19-layoffs-1.6202871";
+  describe("fetchMediaBiasFactCheckData", () => {
+    it("Fetches the ", async () => {
+      const testUrls = [
+        "https://globalnews.ca/news/8257958/canadian-auto-production-semiconductor-shortage/",
+        "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/",
+        "https://www.cbc.ca/news/business/covid-19-layoffs-1.6202871",
+        "https://www.rebelnews.com/trudeau_mandates_vaccines_for_planes_trains_disregards_natural_immunity",
+        "https://www.ctvnews.ca/canada/bring-our-canadians-home-lawyer-files-suit-on-behalf-of-26-canadians-stuck-in-syrian-camps-1.5619422",
+        // "https://www.cbc.ca/news/world/coronavirus-covid19-canada-world-oct11-2021-1.6207161",
+        "https://www.theglobeandmail.com/canada/alberta/article-prairies-record-countrys-highest-covid-19-death-rates/",
+        "https://nationalpost.com/news/politics/the-first-100-days-major-battle-over-free-speech-internet-regulation-looms-when-parliament-returns",
+        "https://rabble.ca/politics/world-politics/the-time-to-prohibit-nuclear-weapons-is-now/",
+      ];
 
-      await new WebService().addMediaSourceToBill("T-123", testUrl);
+      const webService = new WebService();
+      for await (const url of testUrls) {
+        const { hostname, source } = await webService.getArticleText(url);
+        const mbfcData = await webService.fetchMediaBiasFactCheckData(
+          hostname,
+          source,
+        );
+        const { factualReporting, country, biasRating } = mbfcData;
 
-      // expect(typeof mbfcResults.biasRating).toEqual("string");
-      // expect(typeof mbfcResults.factualReporting).toEqual("string");
+        console.debug({ [url]: mbfcData });
+
+        expect(factualReporting).toBeTruthy();
+        expect(typeof factualReporting).toEqual("string");
+        expect(country).toBeTruthy();
+        expect(typeof country).toEqual("string");
+        expect(biasRating).toBeTruthy();
+        expect(typeof biasRating).toEqual("string");
+      }
     });
   });
 });

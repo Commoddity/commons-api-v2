@@ -64,4 +64,7 @@ export class FormatUtils {
       .trim()
       .split(/[.\-_\s]/g)
       .reduce((string, word) => string + word[0].toUpperCase() + word.slice(1));
+
+  static capitalizeFirstLetter = (string: string): string =>
+    string.charAt(0).toUpperCase() + string.slice(1);
 }
