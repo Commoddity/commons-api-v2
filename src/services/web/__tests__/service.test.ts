@@ -89,10 +89,6 @@ describe(`WebService methods`, () => {
 
   describe("fetchBPPressInfo", () => {
     it("Analyzes the text of a new article", async () => {
-      // const testUrl =
-      //   "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/";
-      // const testUrl =
-      //   "https://www.foxnews.com/politics/joe-biden-hunter-biden-secure-business-license-china";
       const testUrl =
         "https://www.theguardian.com/world/2021/oct/07/britons-stranded-in-afghanistan-call-for-urgent-evacuation-help";
 
@@ -102,9 +98,11 @@ describe(`WebService methods`, () => {
         testUrl,
       );
 
-      const test = await webService.fetchBPPressInfo(articleText);
+      const bpPressArticleRating = await webService.fetchBPPressInfo(
+        articleText,
+      );
 
-      console.log("RESULTS HERE", test);
+      expect(typeof bpPressArticleRating).toEqual("number");
     });
   });
 
@@ -121,11 +119,11 @@ describe(`WebService methods`, () => {
         expect(typeof mediaSourceData.source).toEqual("string");
         expect(typeof mediaSourceData.url).toEqual("string");
         expect(typeof mediaSourceData.description).toEqual("string");
-        expect(typeof mediaSourceData.bpArticleRating).toEqual("number");
+        expect(typeof mediaSourceData.bpPressArticleRating).toEqual("number");
         testArray.push({
           "Article Title": mediaSourceData.title,
           "Article URL": mediaSourceData.url,
-          "Bipartisan Press Rating": mediaSourceData.bpArticleRating,
+          "Bipartisan Press Rating": mediaSourceData.bpPressArticleRating,
         });
 
         await wait(2000);

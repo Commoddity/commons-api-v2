@@ -43,7 +43,7 @@ export interface IBillMediaSource extends IArticleData {
     credibilityRating?: string;
     trafficPopularity?: string;
   };
-  bpArticleRating: number;
+  bpPressArticleRating: number;
 }
 
 export interface IBill {

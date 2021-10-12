@@ -36,7 +36,7 @@ const mediaSourcesSchema = new mongoose.Schema<IBillMediaSource>(
     publicationDate: { type: Date },
     ttr: { type: Number },
     mbfcData: { type: mediaBiasFactCheckDataSchema, required: true },
-    bpArticleRating: { type: Number, required: true },
+    bpPressArticleRating: { type: Number, required: true },
   },
   { timestamps: true, _id: true },
 );

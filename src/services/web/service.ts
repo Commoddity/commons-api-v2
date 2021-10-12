@@ -205,12 +205,12 @@ export class WebService {
       hostname,
       articleData.source,
     );
-    const bpArticleRating = await this.fetchBPPressInfo(content);
+    const bpPressArticleRating = await this.fetchBPPressInfo(content);
 
     return {
       ...rest,
       mbfcData: { ...mbfcData },
-      bpArticleRating,
+      bpPressArticleRating,
     } as IBillMediaSource;
   }
 
