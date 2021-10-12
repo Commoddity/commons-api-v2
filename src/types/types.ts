@@ -345,6 +345,7 @@ export enum ECognitoTriggerSource {
 
 export interface IArticleData extends ArticleData {
   hostname: string;
+  publicationDate: Date;
 }
 
 export interface IMBFCResults {

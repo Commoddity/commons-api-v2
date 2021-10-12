@@ -1,6 +1,7 @@
 import { initClient, closeDbConnection } from "../../../db";
 import { WebService } from "../../web";
 import { EProvinceCodes } from "../../../types";
+import { wait } from "../../../utils";
 
 beforeAll(async () => {
   await initClient();
@@ -61,6 +62,31 @@ describe(`WebService methods`, () => {
     });
   });
 
+  const testUrls = [
+    "https://globalnews.ca/news/8257958/canadian-auto-production-semiconductor-shortage/",
+    "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/",
+    "https://www.cbc.ca/news/business/covid-19-layoffs-1.6202871",
+    "https://www.rebelnews.com/trudeau_mandates_vaccines_for_planes_trains_disregards_natural_immunity",
+    "https://www.ctvnews.ca/canada/bring-our-canadians-home-lawyer-files-suit-on-behalf-of-26-canadians-stuck-in-syrian-camps-1.5619422",
+    "https://www.theglobeandmail.com/canada/alberta/article-prairies-record-countrys-highest-covid-19-death-rates/",
+    "https://nationalpost.com/news/politics/the-first-100-days-major-battle-over-free-speech-internet-regulation-looms-when-parliament-returns",
+    "https://rabble.ca/politics/world-politics/the-time-to-prohibit-nuclear-weapons-is-now/",
+    "https://www.nationalobserver.com/2021/10/08/news/meet-fossil-fuel-workers-pushing-energy-transition",
+    "https://thepostmillennial.com/biden-defends-jobs-report",
+    "https://ottawasun.com/news/local-news/in-a-sure-sign-of-fall-its-the-last-weekend-for-boaters-on-the-rideau-canal/wcm/687d282a-b74b-4ac0-83f2-92a8bcd9108d",
+    "https://calgarysun.com/news/local-news/alcohol-related-illnesses-in-alberta-surging-during-covid-19-pandemic/wcm/8a92e939-93f0-4ad5-9622-77bdd1d39ccf",
+    "https://www.thestar.com/news/canada/2021/10/11/vancouver-police-gang-task-force-arrest-alleged-top-six-gang-member.html",
+    "https://pressprogress.ca/doug-fords-government-quietly-cut-over-100-million-for-protecting-school-children-from-covid-19/",
+    "https://montrealgazette.com/news/local-news/unvaccinated-nurses-will-have-their-licenses-suspended-order-warns",
+    "https://thewalrus.ca/eating-dinner-with-canadas-migrant-workers/",
+    "https://www.canadaland.com/angela-rasmussen-origin-covid-19/",
+    "https://www.macleans.ca/politics/t%e1%b8%b1emlups-te-secwepemc-first-nation-is-not-interested-in-apologies/",
+    "https://ottawacitizen.com/news/world/canadian-david-card-among-three-nobel-prize-winners-for-economics/wcm/83a6c74c-fcda-44c9-9be2-fe4b81c4fd96",
+    "https://vancouversun.com/news/bad-crash-on-coquihalla-south-of-merritt-on-monday-afternoon-attributed-to-wildlife",
+    "https://calgaryherald.com/news/local-news/nurses-say-immediate-action-needed-in-wake-of-calgary-icu-nurse-apparent-overdose-death",
+    "https://edmontonjournal.com/news/local-news/alberta-health-services-responds-to-more-than-3000-covid-19-health-measure-complaints",
+  ];
+
   describe("fetchBPPressInfo", () => {
     it("Analyzes the text of a new article", async () => {
       // const testUrl =
@@ -72,7 +98,9 @@ describe(`WebService methods`, () => {
 
       const webService = new WebService();
 
-      const { content: articleText } = await webService.getArticleText(testUrl);
+      const { content: articleText } = await webService.fetchArticleData(
+        testUrl,
+      );
 
       const test = await webService.fetchBPPressInfo(articleText);
 
@@ -80,49 +108,52 @@ describe(`WebService methods`, () => {
     });
   });
 
-  describe("getArticleText", () => {
+  describe("getMediaSourceData", () => {
+    it("Gets the media source information from a provided URL", async () => {
+      const webService = new WebService();
+      const testArray = [];
+      for await (const url of testUrls) {
+        const mediaSourceData = await webService.getMediaSourceData(url);
+
+        console.debug({ [mediaSourceData.title]: mediaSourceData });
+
+        expect(typeof mediaSourceData.title).toEqual("string");
+        expect(typeof mediaSourceData.source).toEqual("string");
+        expect(typeof mediaSourceData.url).toEqual("string");
+        expect(typeof mediaSourceData.description).toEqual("string");
+        expect(typeof mediaSourceData.bpArticleRating).toEqual("number");
+        testArray.push({
+          "Article Title": mediaSourceData.title,
+          "Article URL": mediaSourceData.url,
+          "Bipartisan Press Rating": mediaSourceData.bpArticleRating,
+        });
+
+        await wait(2000);
+      }
+      console.debug({ testArray });
+    });
+  });
+
+  describe("fetchArticleData", () => {
     it("Gets the text of a news article from a URL", async () => {
-      const testUrl =
-        "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/";
+      const webService = new WebService();
+      for await (const url of testUrls) {
+        const articleData = await webService.fetchArticleData(url);
 
-      const articleData = await new WebService().getArticleText(testUrl);
+        console.debug({ [articleData.title]: articleData });
 
-      console.log(articleData);
-
-      expect(typeof articleData.content).toEqual("string");
+        expect(typeof articleData.content).toEqual("string");
+        expect(typeof articleData.title).toEqual("string");
+        expect(typeof articleData.source).toEqual("string");
+      }
     });
   });
 
   describe("fetchMediaBiasFactCheckData", () => {
     it("Fetches the ", async () => {
-      const testUrls = [
-        "https://globalnews.ca/news/8257958/canadian-auto-production-semiconductor-shortage/",
-        "https://thetyee.ca/News/2021/09/15/Anjali-Appadurai-Campaign-New-Politics/",
-        "https://www.cbc.ca/news/business/covid-19-layoffs-1.6202871",
-        "https://www.rebelnews.com/trudeau_mandates_vaccines_for_planes_trains_disregards_natural_immunity",
-        "https://www.ctvnews.ca/canada/bring-our-canadians-home-lawyer-files-suit-on-behalf-of-26-canadians-stuck-in-syrian-camps-1.5619422",
-        "https://www.theglobeandmail.com/canada/alberta/article-prairies-record-countrys-highest-covid-19-death-rates/",
-        "https://nationalpost.com/news/politics/the-first-100-days-major-battle-over-free-speech-internet-regulation-looms-when-parliament-returns",
-        "https://rabble.ca/politics/world-politics/the-time-to-prohibit-nuclear-weapons-is-now/",
-        "https://www.nationalobserver.com/2021/10/08/news/meet-fossil-fuel-workers-pushing-energy-transition",
-        "https://thepostmillennial.com/biden-defends-jobs-report",
-        "https://ottawasun.com/news/local-news/in-a-sure-sign-of-fall-its-the-last-weekend-for-boaters-on-the-rideau-canal/wcm/687d282a-b74b-4ac0-83f2-92a8bcd9108d",
-        "https://calgarysun.com/news/local-news/alcohol-related-illnesses-in-alberta-surging-during-covid-19-pandemic/wcm/8a92e939-93f0-4ad5-9622-77bdd1d39ccf",
-        "https://www.thestar.com/news/canada/2021/10/11/vancouver-police-gang-task-force-arrest-alleged-top-six-gang-member.html",
-        "https://pressprogress.ca/doug-fords-government-quietly-cut-over-100-million-for-protecting-school-children-from-covid-19/",
-        "https://montrealgazette.com/news/local-news/unvaccinated-nurses-will-have-their-licenses-suspended-order-warns",
-        "https://thewalrus.ca/eating-dinner-with-canadas-migrant-workers/",
-        "https://www.canadaland.com/angela-rasmussen-origin-covid-19/",
-        "https://www.macleans.ca/politics/t%e1%b8%b1emlups-te-secwepemc-first-nation-is-not-interested-in-apologies/",
-        "https://ottawacitizen.com/news/world/canadian-david-card-among-three-nobel-prize-winners-for-economics/wcm/83a6c74c-fcda-44c9-9be2-fe4b81c4fd96",
-        "https://vancouversun.com/news/bad-crash-on-coquihalla-south-of-merritt-on-monday-afternoon-attributed-to-wildlife",
-        "https://calgaryherald.com/news/local-news/nurses-say-immediate-action-needed-in-wake-of-calgary-icu-nurse-apparent-overdose-death",
-        "https://edmontonjournal.com/news/local-news/alberta-health-services-responds-to-more-than-3000-covid-19-health-measure-complaints",
-      ];
-
       const webService = new WebService();
       for await (const url of testUrls) {
-        const { hostname, source } = await webService.getArticleText(url);
+        const { hostname, source } = await webService.fetchArticleData(url);
         const mbfcData = await webService.fetchMediaBiasFactCheckData(
           hostname,
           source,

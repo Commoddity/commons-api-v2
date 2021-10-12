@@ -6,6 +6,7 @@ import { ParliamentsService } from "../../services";
 import {
   EBillCategories,
   ERecordStatus,
+  IArticleData,
   PBillEvent,
   PFetchPage,
 } from "../../types";
@@ -34,18 +35,15 @@ export class BillEvent implements IBillEvent {
   }
 }
 
-export interface IBillMediaSource {
-  articleTitle: string;
-  articleUrl: string;
-  mediaSource: string;
-  excerpt: string;
-  publicationDate: Date;
+export interface IBillMediaSource extends IArticleData {
   mbfcData: {
     biasRating: string;
-    factualRating: string;
+    factualReporting: string;
     country: string;
     credibilityRating?: string;
+    trafficPopularity?: string;
   };
+  bpArticleRating: number;
 }
 
 export interface IBill {

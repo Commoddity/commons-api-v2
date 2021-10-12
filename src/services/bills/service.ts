@@ -1,6 +1,6 @@
 import { FilterQuery, UpdateQuery } from "mongoose";
 
-import { BaseService, ParliamentsService } from "../../services";
+import { BaseService, ParliamentsService, WebService } from "../../services";
 import { EBillCategories, IBillSummaryMap, PBillEvent } from "../../types";
 import { FormatUtils } from "../../utils";
 
@@ -165,21 +165,18 @@ export class BillsService extends BaseService<Bill> {
   }
 
   /* Media Sources methods */
-  async addMediaSourceToBill(
-    code: string,
-    mediaSourceData: IBillMediaSource,
-  ): Promise<Bill> {
-    const mediaSourceExistsQuery = {
-      $and: [
-        { code },
-        { "mediaSources.articleUrl": mediaSourceData.articleUrl },
-      ],
-    };
-    if (await super.doesOneExist(mediaSourceExistsQuery)) {
-      console.warn(`Media source already exists for Bill ${code}.`);
-      return;
-    }
+  async addMediaSourceToBill(code: string, url: string): Promise<Bill> {
+    try {
+      if (await super.doesOneExist({ code, "mediaSources.url": url })) {
+        throw new Error(`Media source already exists for Bill ${code}.`);
+      }
 
-    return this.updatePush({ code }, { mediaSources: mediaSourceData });
+      const webService = new WebService();
+      const mediaSourceData = await webService.getMediaSourceData(url);
+
+      return this.updatePush({ code }, { mediaSources: mediaSourceData });
+    } catch (error) {
+      throw new Error(`[ADD MEDIA SOURCE TO BILL]: ${error}`);
+    }
   }
 }

@@ -3,7 +3,7 @@ import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
 import striptags from "striptags";
 
-import { BillsService, MapBoxService } from "../../services";
+import { BillsService, IBillMediaSource, MapBoxService } from "../../services";
 import {
   EBillEndpoints,
   EDataEndpoints,
@@ -197,27 +197,23 @@ export class WebService {
   }
 
   /* Media Sources methods */
-  /** 
-  @todo
-  1. Set up GraphQL and Retool to build Media Source input interface and resolvers.
-  */
-  async addMediaSourceToBill(billCode: string, mediaSourceUrl: string) {
-    const { hostname, source } = await this.getArticleText(mediaSourceUrl);
-    const mbfcResults = await this.fetchMediaBiasFactCheckData(
-      hostname,
-      source,
-    );
-    console.log({ mbfcResults });
+  async getMediaSourceData(mediaSourceUrl: string): Promise<IBillMediaSource> {
+    const articleData = await this.fetchArticleData(mediaSourceUrl);
+    const { content, hostname, links, ...rest } = articleData;
 
-    // await new BillsService().addMediaSourceToBill(billCode, mockData);
+    const mbfcData = await this.fetchMediaBiasFactCheckData(
+      hostname,
+      articleData.source,
+    );
+    const bpArticleRating = await this.fetchBPPressInfo(content);
+
+    return {
+      ...rest,
+      mbfcData: { ...mbfcData },
+      bpArticleRating,
+    } as IBillMediaSource;
   }
 
-  /** 
-  @todo
-  1. Get domain of news article from URL
-  2. Enter domain into MBFC website and proceed to search results then media source page
-  3. Scrape mbfcData fields from MBFC page
-  */
   async fetchMediaBiasFactCheckData(
     hostname: string,
     source: string,
@@ -228,11 +224,6 @@ export class WebService {
     try {
       const searchResults: cheerio.Root = Cheerio.load(
         (await Axios.get<string>(searchUrl)).data,
-        {
-          lowerCaseTags: true,
-          lowerCaseAttributeNames: true,
-          ignoreWhitespace: true,
-        },
       );
       const mediaSourceUrl: string = searchResults(
         `a:contains("${source}")`,
@@ -294,14 +285,22 @@ export class WebService {
     }
   }
 
-  async getArticleText(url: string): Promise<IArticleData> {
+  async fetchArticleData(url: string): Promise<IArticleData> {
     try {
-      const { content, description, links, source } = await extract(url);
+      const articleData = await extract(url);
+      const { content, links, published, source } = articleData;
       const rawText = striptags(content);
       const sourceString = this.getSourceString(source);
       const { hostname } = new URL(links[0]);
+      const publicationDate = published ? new Date(published) : null;
 
-      return { content: rawText, description, hostname, source: sourceString };
+      return FormatUtils.truthy<IArticleData>({
+        ...articleData,
+        hostname,
+        publicationDate,
+        content: rawText,
+        source: sourceString,
+      });
     } catch (error) {
       throw new Error(`[GET ARTICLE TEXT]: ${error}`);
     }

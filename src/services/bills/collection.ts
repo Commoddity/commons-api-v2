@@ -17,21 +17,26 @@ const mediaBiasFactCheckDataSchema = new mongoose.Schema<
 >(
   {
     biasRating: { type: String, required: true },
-    factualRating: { type: String, required: true },
+    factualReporting: { type: String, required: true },
     country: { type: String, required: true },
     credibilityRating: { type: String },
+    trafficPopularity: { type: String },
   },
   { timestamps: false, _id: false },
 );
 
 const mediaSourcesSchema = new mongoose.Schema<IBillMediaSource>(
   {
-    articleTitle: { type: String, required: true },
-    articleUrl: { type: String, required: true },
-    mediaSource: { type: String, required: true },
-    excerpt: { type: String, required: true },
-    publicationDate: { type: Date, required: true },
+    title: { type: String, required: true },
+    url: { type: String, required: true },
+    source: { type: String, required: true },
+    description: { type: String, required: true },
+    image: { type: String },
+    author: { type: String },
+    publicationDate: { type: Date },
+    ttr: { type: Number },
     mbfcData: { type: mediaBiasFactCheckDataSchema, required: true },
+    bpArticleRating: { type: Number, required: true },
   },
   { timestamps: true, _id: true },
 );

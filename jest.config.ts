@@ -6,7 +6,7 @@ const config: Config.InitialOptions = {
   testPathIgnorePatterns: ["/node_modules/"],
   roots: ["<rootDir>/src"],
   collectCoverage: true,
-  testTimeout: 90000,
+  testTimeout: 500000,
   coverageDirectory: "src/test/coverage",
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",

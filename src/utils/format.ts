@@ -67,4 +67,11 @@ export class FormatUtils {
 
   static capitalizeFirstLetter = (string: string): string =>
     string.charAt(0).toUpperCase() + string.slice(1);
+
+  static truthy<T = any>(object: T): T {
+    Object.entries(object).forEach(
+      ([key, value]) => !value && delete object[key],
+    );
+    return object;
+  }
 }
