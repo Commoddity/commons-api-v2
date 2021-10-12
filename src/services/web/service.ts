@@ -14,6 +14,7 @@ import {
   IBillSummary,
   IBillSummaryMap,
   IMBFCResults,
+  ISourceSplit,
   IMemberOfParliament,
   IMPAddress,
   IMPOffice,
@@ -224,8 +225,6 @@ export class WebService {
     const searchUrl = `${EDataEndpoints.MBFC_HOMEPAGE}/?s=${hostname}`;
     const biasResults: IMBFCResults = {};
 
-    console.log({ searchUrl, source });
-
     try {
       const searchResults: cheerio.Root = Cheerio.load(
         (await Axios.get<string>(searchUrl)).data,
@@ -242,13 +241,14 @@ export class WebService {
       const mediaSourcePage: cheerio.Root = Cheerio.load(
         (await Axios.get<string>(mediaSourceUrl)).data,
       );
-      const biasResultsData = mediaSourcePage(
-        'span:contains("Detailed Record"), span:contains("Detailed Report"), span:contains("Detailed Reports")',
-      )
-        .parent("h3")
-        .next("p")
-        .text()
-        .split("\n");
+      const biasResultsData = (
+        mediaSourcePage(
+          'span:contains("Detailed Record"), span:contains("Detailed Report"), span:contains("Detailed Reports")',
+        )
+          .parent("h3")
+          .next("p")
+          .text() || mediaSourcePage('p:contains("Factual Reporting")').text()
+      ).split("\n");
       biasResultsData.forEach((field) => {
         const split = field.split(":");
         biasResults[FormatUtils.toCamelCase(split[0])] = split[1].trim();
@@ -266,7 +266,9 @@ export class WebService {
         delete (biasResults as any).worldPressFreedomRank;
       }
     } catch (error) {
-      throw new Error(`[FETCH MBFC DATA ERROR]: ${error}`);
+      throw new Error(
+        `[FETCH MBFC DATA ERROR]: ${{ error, searchUrl, source }}`,
+      );
     }
 
     return biasResults;
@@ -294,21 +296,49 @@ export class WebService {
 
   async getArticleText(url: string): Promise<IArticleData> {
     try {
-      const articleData = await extract(url);
-      const rawText = striptags(articleData.content);
-      const source = articleData.source.includes("|")
-        ? articleData.source.split("|")[1].trim()
-        : articleData.source.includes("News") &&
-          !articleData.source.includes(" News")
-        ? `${articleData.source.split("News")[0].trim()} News`
-        : articleData.source.includes("nationalpost")
-        ? `National Post`
-        : FormatUtils.capitalizeFirstLetter(articleData.source);
-      const { hostname } = new URL(articleData.url);
+      const { content, description, links, source } = await extract(url);
+      const rawText = striptags(content);
+      const sourceString = this.getSourceString(source);
+      const { hostname } = new URL(links[0]);
 
-      return { ...articleData, content: rawText, hostname, source };
+      return { content: rawText, description, hostname, source: sourceString };
     } catch (error) {
       throw new Error(`[GET ARTICLE TEXT]: ${error}`);
+    }
+  }
+
+  private sourceSplit: ISourceSplit[] = [
+    { name: "The Tyee", symbol: "|", sourceBefore: false },
+  ];
+  private sourceConversion = {
+    calgaryherald: "Calgary Herald",
+    calgarysun: "Calgary Sun",
+    "Canada's National Observer": "National Observer",
+    CANADALAND: "Canadaland",
+    CTVNews: "CTV News",
+    edmontonjournal: "Edmonton Journal",
+    "Macleans.ca": "Maclean’s Magazine",
+    montrealgazette: "Montreal Gazette",
+    nationalpost: "National Post",
+    ottawacitizen: "Ottawa Citizen",
+    ottawasun: "Ottawa Sun",
+    PressProgress: "Press Progress",
+    "thestar.com": "Toronto Star",
+    vancouversun: "Vancouver Sun",
+  };
+
+  private getSourceString(sourceInput: string): string {
+    const checkSplit = ({ name }: ISourceSplit) => sourceInput.includes(name);
+    const requiresSplit = this.sourceSplit.some(checkSplit);
+
+    if (requiresSplit) {
+      const { symbol, sourceBefore } = this.sourceSplit.find(checkSplit);
+      return sourceInput.split(symbol)[sourceBefore ? 0 : 1].trim();
+    } else {
+      return (
+        this.sourceConversion[sourceInput] ||
+        FormatUtils.capitalizeFirstLetter(sourceInput).trim()
+      );
     }
   }
 }

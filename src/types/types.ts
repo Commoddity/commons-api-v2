@@ -355,3 +355,9 @@ export interface IMBFCResults {
   trafficPopularity?: string;
   mbfcCredibilityRating?: string;
 }
+
+export interface ISourceSplit {
+  name: string;
+  symbol: string;
+  sourceBefore: boolean;
+}
