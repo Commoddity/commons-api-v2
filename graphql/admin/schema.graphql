@@ -6,6 +6,7 @@ type Query {
 
 type Mutation {
   updateBillCategories(code: ID!, categories: [EBillCategories]!): IBill
+  addMediaSourceToBill(code: ID!, url: String!): IBill
 }
 
 schema {

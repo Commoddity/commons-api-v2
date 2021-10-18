@@ -1,10 +1,6 @@
 import { initClient } from "../db";
 import { UsersService } from "../services/users/service";
-import {
-  ECognitoTriggerSource,
-  ICognitoContext,
-  ICognitoEvent,
-} from "../types";
+import { ECognitoTriggerSource, ICognitoContext, ICognitoEvent } from "../types";
 
 let initialize = null;
 

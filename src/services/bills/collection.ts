@@ -12,9 +12,7 @@ const billEventSchema = new mongoose.Schema<BillEvent>(
   { timestamps: true, _id: false },
 );
 
-const mediaBiasFactCheckDataSchema = new mongoose.Schema<
-  IBillMediaSource["mbfcData"]
->(
+const mediaBiasFactCheckDataSchema = new mongoose.Schema<IBillMediaSource["mbfcData"]>(
   {
     biasRating: { type: String, required: true },
     factualReporting: { type: String, required: true },
@@ -27,6 +25,7 @@ const mediaBiasFactCheckDataSchema = new mongoose.Schema<
 
 const mediaSourcesSchema = new mongoose.Schema<IBillMediaSource>(
   {
+    mediaSourceId: { type: String, required: true },
     title: { type: String, required: true },
     url: { type: String, required: true },
     source: { type: String, required: true },
@@ -37,8 +36,9 @@ const mediaSourcesSchema = new mongoose.Schema<IBillMediaSource>(
     ttr: { type: Number },
     mbfcData: { type: mediaBiasFactCheckDataSchema, required: true },
     bpPressArticleRating: { type: Number, required: true },
+    isEditorial: { type: Boolean, required: true },
   },
-  { timestamps: true, _id: true },
+  { timestamps: true, _id: false },
 );
 
 const billSchema = new mongoose.Schema<Bill>(

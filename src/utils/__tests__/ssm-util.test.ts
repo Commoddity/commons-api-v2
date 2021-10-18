@@ -13,9 +13,7 @@ describe(`SSMUtil methods`, () => {
   });
 
   it("Should fetch a string param", async () => {
-    const uri = await SSMUtil.getInstance().getVar(
-      ESSMParams.MongoConnectionString,
-    );
+    const uri = await SSMUtil.getInstance().getVar(ESSMParams.MongoConnectionString);
 
     expect(uri).toBeDefined();
     expect(typeof uri).toEqual("string");

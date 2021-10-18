@@ -4,8 +4,7 @@ type Query {
   getOneBill(code: String!): IBill
   getAllParliaments: [IParliament]
   getOneUser: IUser @aws_cognito_user_pools
-  fetchMpInfo(query: PGeocodeQuery!): IMemberOfParliament
-    @aws_cognito_user_pools
+  fetchMpInfo(query: PGeocodeQuery!): IMemberOfParliament @aws_cognito_user_pools
 }
 
 type Mutation {

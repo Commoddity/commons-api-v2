@@ -54,8 +54,7 @@ export class FormatUtils {
     description.toString().substr(0, description.indexOf(","));
 
   // Returns the title of a bill or event from the 'description' or 'title' field
-  static formatTitle = (title: string): string =>
-    title.toString().split(/, (.+)/)[1];
+  static formatTitle = (title: string): string => title.toString().split(/, (.+)/)[1];
 
   static toCamelCase = (string: string): string =>
     string
@@ -69,9 +68,7 @@ export class FormatUtils {
     string.charAt(0).toUpperCase() + string.slice(1);
 
   static truthy<T = any>(object: T): T {
-    Object.entries(object).forEach(
-      ([key, value]) => !value && delete object[key],
-    );
+    Object.entries(object).forEach(([key, value]) => !value && delete object[key]);
     return object;
   }
 }

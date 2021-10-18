@@ -28,9 +28,7 @@ export class ParliamentsService extends BaseService<Parliament> {
       { limit: 1, sort: { number: -1 } },
     );
 
-    const { sessionId } = sessions.reduce((a, b) =>
-      a.number > b.number ? a : b,
-    );
+    const { sessionId } = sessions.reduce((a, b) => (a.number > b.number ? a : b));
     return sessionId;
   }
 

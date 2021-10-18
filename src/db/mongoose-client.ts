@@ -14,9 +14,7 @@ export class MongooseClient {
 
   static async initInstance(): Promise<void> {
     try {
-      const uri = await SSMUtil.getInstance().getVar(
-        ESSMParams.MongoConnectionString,
-      );
+      const uri = await SSMUtil.getInstance().getVar(ESSMParams.MongoConnectionString);
 
       const sanitizedUri = MongooseClient.sanitizeUri(uri);
       const initConnectionLog = `Initializing connection to MongoDB using URI ${sanitizedUri} ...`;

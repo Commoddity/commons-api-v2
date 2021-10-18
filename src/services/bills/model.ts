@@ -36,6 +36,7 @@ export class BillEvent implements IBillEvent {
 }
 
 export interface IBillMediaSource extends IArticleData {
+  mediaSourceId: string;
   mbfcData: {
     biasRating: string;
     factualReporting: string;
@@ -44,6 +45,7 @@ export interface IBillMediaSource extends IArticleData {
     trafficPopularity?: string;
   };
   bpPressArticleRating: number;
+  isEditorial: boolean;
 }
 
 export interface IBill {
@@ -199,8 +201,7 @@ export class BillInput implements IBill {
       number: parliamentNumber,
     });
 
-    return parliamentarySessions.find(({ number }) => number === sessionNumber)
-      .sessionId;
+    return parliamentarySessions.find(({ number }) => number === sessionNumber).sessionId;
   }
 
   // Returns the date that a bill was introduced from a bill page
@@ -232,9 +233,7 @@ export class BillInput implements IBill {
           .substring(0, 10);
       }
 
-      return introducedDate
-        ? FormatUtils.formatDate(introducedDate)
-        : undefined;
+      return introducedDate ? FormatUtils.formatDate(introducedDate) : undefined;
     } catch (error) {
       console.error(
         `[BILL CREATE ERROR]: fetchIntroducedDate - Bill ${billCode}: ${error}`,
@@ -251,24 +250,17 @@ export class BillInput implements IBill {
     try {
       const { data }: AxiosResponse<string> = await Axios.get(pageUrl);
       const billPage: cheerio.Root = Cheerio.load(data);
-      const link: string | undefined = billPage(
-        'a:contains("Latest Publication")',
-      ).attr("href");
+      const link: string | undefined = billPage('a:contains("Latest Publication")').attr(
+        "href",
+      );
 
-      const fullTextUrl: string | undefined = link
-        ? `https:${link}`
-        : undefined;
+      const fullTextUrl: string | undefined = link ? `https:${link}` : undefined;
 
-      !link &&
-        console.log(
-          `No full text available for Bill ${billCode}. Skipping ...`,
-        );
+      !link && console.log(`No full text available for Bill ${billCode}. Skipping ...`);
 
       return fullTextUrl;
     } catch (error) {
-      console.error(
-        `[BILL CREATE ERROR]: fetchFullTextUrl - Bill ${billCode}: ${error}`,
-      );
+      console.error(`[BILL CREATE ERROR]: fetchFullTextUrl - Bill ${billCode}: ${error}`);
     }
   }
 
@@ -299,9 +291,7 @@ export class BillInput implements IBill {
 
       return description;
     } catch (error) {
-      console.error(
-        `[BILL CREATE ERROR]: fetchDescription - Bill ${billCode}: ${error}`,
-      );
+      console.error(`[BILL CREATE ERROR]: fetchDescription - Bill ${billCode}: ${error}`);
     }
   }
 
@@ -310,9 +300,7 @@ export class BillInput implements IBill {
       const response: AxiosResponse<string> = await Axios.get(pageUrl);
       const billPage: cheerio.Root = Cheerio.load(response.data);
 
-      const passedDate = billPage(
-        "#ctl00_PageContentSection_LastStageEventDate",
-      )
+      const passedDate = billPage("#ctl00_PageContentSection_LastStageEventDate")
         .text()
         .replace(/([()])/g, "");
 
@@ -325,10 +313,7 @@ export class BillInput implements IBill {
 
 export async function createBill(billEvent: PBillEvent): Promise<Bill> {
   const newBillInput = new BillInput(billEvent);
-  await newBillInput.insertFetchedValues(
-    newBillInput.pageUrl,
-    newBillInput.code,
-  );
+  await newBillInput.insertFetchedValues(newBillInput.pageUrl, newBillInput.code);
 
   return new Bill(newBillInput);
 }

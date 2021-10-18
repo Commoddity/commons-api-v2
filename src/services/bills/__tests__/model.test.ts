@@ -20,15 +20,13 @@ describe.skip(`Bill model`, () => {
     {
       title: "C-8, Introduction and First Reading in the House of Commons",
       link: "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10686845",
-      description:
-        "C-8, An Act to amend the Criminal Code (conversion therapy)",
+      description: "C-8, An Act to amend the Criminal Code (conversion therapy)",
       pubDate: "Mon, 09 Mar 2020 00:00:00 EST",
     },
     {
       title: "C-237, Placed in the Order of Precedence in the House of Commons",
       link: "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10660264",
-      description:
-        "C-237, An Act to establish a national framework for diabetes",
+      description: "C-237, An Act to establish a national framework for diabetes",
       pubDate: "Thu, 05 Mar 2020 00:00:00 EST",
     },
   ];
@@ -143,16 +141,13 @@ describe.skip(`Bill model`, () => {
 
       it("Fetches the introduced date if it was reinstated from a previous session", async () => {
         const testReinstatedIntroducedDate = "2020/02/25";
-        const testNoIntroducedDateResponse =
-          await ProtoBill.fetchIntroducedDate({
-            pageUrl:
-              "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866196",
-            billCode: "C-226",
-          });
+        const testNoIntroducedDateResponse = await ProtoBill.fetchIntroducedDate({
+          pageUrl:
+            "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10866196",
+          billCode: "C-226",
+        });
 
-        expect(testNoIntroducedDateResponse).toEqual(
-          testReinstatedIntroducedDate,
-        );
+        expect(testNoIntroducedDateResponse).toEqual(testReinstatedIntroducedDate);
       });
     });
 

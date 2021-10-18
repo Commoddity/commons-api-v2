@@ -35,9 +35,7 @@ export class UsersService extends BaseService<User> {
   }
 
   /* Pre Sign Up Cognito Event */
-  async checkIfEmailExists(
-    userAttributes: ICognitoUserAttributes,
-  ): Promise<void> {
+  async checkIfEmailExists(userAttributes: ICognitoUserAttributes): Promise<void> {
     const emailAddress = userAttributes.email.toLowerCase().trim();
 
     const isApple = emailAddress.startsWith("signinwithapple_");
@@ -58,31 +56,23 @@ export class UsersService extends BaseService<User> {
   /* Post Confirmation Cognito Event */
   async cognitoSignUp(userAttributes: ICognitoUserAttributes): Promise<void> {
     if ((userAttributes as ICognitoSocialUserAttributes).identities) {
-      await this.cognitoSignUpSocial(
-        userAttributes as ICognitoSocialUserAttributes,
-      );
+      await this.cognitoSignUpSocial(userAttributes as ICognitoSocialUserAttributes);
     } else {
-      await this.cognitoSignUpEmail(
-        userAttributes as ICognitoEmailUserAttributes,
-      );
+      await this.cognitoSignUpEmail(userAttributes as ICognitoEmailUserAttributes);
     }
 
     return;
   }
 
   /* Cognito Sign Up Methods */
-  async cognitoSignUpSocial(
-    userAttributes: ICognitoSocialUserAttributes,
-  ): Promise<void> {
+  async cognitoSignUpSocial(userAttributes: ICognitoSocialUserAttributes): Promise<void> {
     const { providerName }: ICognitoParsedUserIdentities = JSON.parse(
       userAttributes.identities,
     )[0];
 
     const createSocialUser: () => Promise<User> = {
       SignInWithApple: async () =>
-        await this.cognitoSignUpApple(
-          userAttributes as ICognitoAppleUserAttributes,
-        ),
+        await this.cognitoSignUpApple(userAttributes as ICognitoAppleUserAttributes),
 
       Facebook: async () =>
         await this.cognitoSignUpFacebook(
@@ -93,12 +83,8 @@ export class UsersService extends BaseService<User> {
     await createSocialUser();
   }
 
-  async cognitoSignUpApple(
-    userAttributes: ICognitoAppleUserAttributes,
-  ): Promise<User> {
-    const userPoolId = await SSMUtil.getInstance().getVar(
-      ESSMParams.UserPoolId,
-    );
+  async cognitoSignUpApple(userAttributes: ICognitoAppleUserAttributes): Promise<User> {
+    const userPoolId = await SSMUtil.getInstance().getVar(ESSMParams.UserPoolId);
 
     const { userId }: ICognitoParsedUserIdentities = JSON.parse(
       userAttributes.identities,
@@ -156,9 +142,7 @@ export class UsersService extends BaseService<User> {
   async cognitoSignUpFacebook(
     userAttributes: ICognitoFacebookUserAttributes,
   ): Promise<User> {
-    const userPoolId = await SSMUtil.getInstance().getVar(
-      ESSMParams.UserPoolId,
-    );
+    const userPoolId = await SSMUtil.getInstance().getVar(ESSMParams.UserPoolId);
 
     const { userId } = JSON.parse(userAttributes.identities)[0];
 
@@ -213,9 +197,7 @@ export class UsersService extends BaseService<User> {
   async cognitoSignUpEmail(
     userAttributes: ICognitoEmailUserAttributes,
   ): Promise<User | undefined> {
-    const userPoolId = await SSMUtil.getInstance().getVar(
-      ESSMParams.UserPoolId,
-    );
+    const userPoolId = await SSMUtil.getInstance().getVar(ESSMParams.UserPoolId);
 
     const userExists = await super.doesOneExist({
       email: userAttributes.email,
@@ -287,9 +269,7 @@ export class UsersService extends BaseService<User> {
     };
 
     try {
-      return this.cognitoServiceObject
-        .adminUpdateUserAttributes(params)
-        .promise();
+      return this.cognitoServiceObject.adminUpdateUserAttributes(params).promise();
     } catch (error) {
       throw new Error(`[COGNITO UPDATE USER ATTRIBUTE]: ${error}`);
     }
@@ -308,10 +288,7 @@ export class UsersService extends BaseService<User> {
     return (await super.findOne({ email })).id;
   }
 
-  async updateUser(
-    query: FilterQuery<User>,
-    update: UpdateQuery<User>,
-  ): Promise<User> {
+  async updateUser(query: FilterQuery<User>, update: UpdateQuery<User>): Promise<User> {
     return super.updateOne(query, update);
   }
 
@@ -327,17 +304,11 @@ export class UsersService extends BaseService<User> {
     return this.updatePull({ _id: userId }, { bills: billCode });
   }
 
-  async addUserCategory(
-    userId: string,
-    category: EBillCategories,
-  ): Promise<User> {
+  async addUserCategory(userId: string, category: EBillCategories): Promise<User> {
     return this.updatePush({ _id: userId }, { categories: category });
   }
 
-  async removeUserCategory(
-    userId: string,
-    category: EBillCategories,
-  ): Promise<User> {
+  async removeUserCategory(userId: string, category: EBillCategories): Promise<User> {
     return this.updatePull({ _id: userId }, { categories: category });
   }
 }

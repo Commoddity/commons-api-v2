@@ -1,8 +1,4 @@
-import {
-  BillsService,
-  ParliamentsService,
-  WebService,
-} from "../../../services";
+import { BillsService, ParliamentsService, WebService } from "../../../services";
 import { testBills } from "../../../test";
 import { Bill } from "../model";
 import { EBillCategories } from "../../../types";
@@ -12,16 +8,16 @@ beforeAll(async () => {
   await initClient();
 });
 
-afterEach(async () => {
-  await new BillsService().deleteMany(
-    {
-      code: {
-        $in: [...testBills.map(({ code }) => code), "C-231", "C-44", "C-829"],
-      },
-    },
-    { hard: true },
-  );
-});
+// afterEach(async () => {
+//   await new BillsService().deleteMany(
+//     {
+//       code: {
+//         $in: [...testBills.map(({ code }) => code), "C-231", "C-44", "C-829"],
+//       },
+//     },
+//     { hard: true },
+//   );
+// });
 
 afterAll(async () => {
   await new BillsService().closeDbConnection();
@@ -31,8 +27,7 @@ describe(`BillsService methods`, () => {
   describe(`Create Bill`, () => {
     it(`Creates a new bill in the DB `, async () => {
       const testBillInput = testBills[1];
-      const parliamentarySessionId =
-        await new ParliamentsService().queryLatestSession();
+      const parliamentarySessionId = await new ParliamentsService().queryLatestSession();
       testBillInput.parliamentarySessionId = parliamentarySessionId;
 
       const testBillResult = await new BillsService().createBill(
@@ -63,8 +58,7 @@ describe(`BillsService methods`, () => {
   describe(`Create Many Bills`, () => {
     it(`Creates many bills in the DB `, async () => {
       const testBillsInput = testBills;
-      const parliamentarySessionId =
-        await new ParliamentsService().queryLatestSession();
+      const parliamentarySessionId = await new ParliamentsService().queryLatestSession();
       testBillsInput.forEach((bill) => {
         bill.parliamentarySessionId = parliamentarySessionId;
       });
@@ -136,9 +130,7 @@ describe(`BillsService methods`, () => {
       const ProtoWebService = Object.getPrototypeOf(testWebService);
       const billSummaryMaps = await ProtoWebService.getSummaries();
 
-      const billsUpdated = await new BillsService().updateSummaryUrls(
-        billSummaryMaps,
-      );
+      const billsUpdated = await new BillsService().updateSummaryUrls(billSummaryMaps);
 
       // No bills from the actual Summaries site are in the Test DB
       expect(billsUpdated).toEqual(0);
@@ -161,22 +153,20 @@ describe(`BillsService methods`, () => {
       };
       await new BillsService().createBill(new Bill(testBill as any));
 
-      const afterUpdate = await new BillsService().updateBillCategories(
-        testBill.code,
-        [EBillCategories.arts_culture],
-      );
+      const afterUpdate = await new BillsService().updateBillCategories(testBill.code, [
+        EBillCategories.arts_culture,
+      ]);
 
       expect(afterUpdate.categories).toContain(EBillCategories.arts_culture);
     });
   });
 
   describe.skip(`addBillsToParliamentarySession`, () => {
-    it(`Should add newly created bills to the parliamentary session's bills array `, async () => {
+    it(`Should add newly created bills to the parliamentary session's bills array`, async () => {
       /* Test Setup */
       const testBillsService = new BillsService();
       const ProtoBillsService = Object.getPrototypeOf(testBillsService);
-      const parliamentarySessionId =
-        await new ParliamentsService().queryLatestSession();
+      const parliamentarySessionId = await new ParliamentsService().queryLatestSession();
 
       /* Test Execution */
       await ProtoBillsService.addBillsToParliamentarySession(
@@ -191,6 +181,26 @@ describe(`BillsService methods`, () => {
       const { bills } = parliamentarySessions[parliamentarySessions.length - 1];
 
       expect(bills).toContain("C-829");
+    });
+  });
+
+  describe(`addMediaSourceToBill`, () => {
+    it(`Collects the media information and adds a media source object to a bill when provided a bill code and medai source URL`, async () => {
+      /* Test Execution */
+      const testUrls = [
+        "https://www.theglobeandmail.com/politics/article-what-is-bill-c-10-and-why-are-the-liberals-planning-to-regulate-the/",
+        "https://ipolitics.ca/2021/09/30/government-must-prioritize-amending-broadcasting-act-blanchet/",
+        "https://financialpost.com/opinion/peter-menzies-stop-messing-with-free-speech-on-the-internet",
+      ];
+
+      let billWithMediaSource: Bill;
+      const billsService = new BillsService();
+      for await (const url of testUrls) {
+        billWithMediaSource = await billsService.addMediaSourceToBill("C-10", url);
+      }
+
+      /* Test Assertions */
+      expect(billWithMediaSource.mediaSources.length).toEqual(3);
     });
   });
 });

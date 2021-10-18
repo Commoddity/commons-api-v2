@@ -12,13 +12,9 @@ export class BaseService<T> {
   private commandsCollection: MongoModel<T>;
   private modelName: string;
 
-  constructor(
-    private queriesCollection: MongoModel<T>,
-    private klass: any = null,
-  ) {
+  constructor(private queriesCollection: MongoModel<T>, private klass: any = null) {
     this.modelName = this.queriesCollection.modelName;
-    this.commandsCollection =
-      MongooseClient.getInstance().models[this.modelName];
+    this.commandsCollection = MongooseClient.getInstance().models[this.modelName];
   }
 
   async closeDbConnection(): Promise<void> {
@@ -126,10 +122,7 @@ export class BaseService<T> {
     }
   }
 
-  async updateMany(
-    query: FilterQuery<T>,
-    update: UpdateQuery<T>,
-  ): Promise<T[]> {
+  async updateMany(query: FilterQuery<T>, update: UpdateQuery<T>): Promise<T[]> {
     try {
       await this.commandsCollection.updateMany(query, update);
 
@@ -140,16 +133,11 @@ export class BaseService<T> {
     }
   }
 
-  async updatePush(
-    query: FilterQuery<T>,
-    update: OnlyFieldsOfType<T>,
-  ): Promise<T> {
+  async updatePush(query: FilterQuery<T>, update: OnlyFieldsOfType<T>): Promise<T> {
     try {
-      await this.commandsCollection.updateOne(
-        query,
-        { $addToSet: update } as any,
-        { new: true },
-      );
+      await this.commandsCollection.updateOne(query, { $addToSet: update } as any, {
+        new: true,
+      });
 
       const data = await this.commandsCollection.findOne(query);
       return this.build(data);
@@ -158,10 +146,7 @@ export class BaseService<T> {
     }
   }
 
-  async updatePull(
-    query: FilterQuery<T>,
-    update: OnlyFieldsOfType<T>,
-  ): Promise<T> {
+  async updatePull(query: FilterQuery<T>, update: OnlyFieldsOfType<T>): Promise<T> {
     try {
       await this.queriesCollection.updateOne(query, { $pull: update } as any, {
         new: true,
@@ -250,10 +235,7 @@ export class BaseService<T> {
   }
 
   /* Query Utils */
-  private transformQuery(
-    query: FilterQuery<T>,
-    includeDeleted = false,
-  ): FilterQuery<T> {
+  private transformQuery(query: FilterQuery<T>, includeDeleted = false): FilterQuery<T> {
     if (includeDeleted) {
       return query;
     } else {
@@ -268,10 +250,7 @@ export class BaseService<T> {
     return options.projection;
   }
 
-  private transformOptions = ({
-    limit,
-    sort,
-  }: PQueryOptions): PQueryOptions => ({
+  private transformOptions = ({ limit, sort }: PQueryOptions): PQueryOptions => ({
     limit: limit ?? 3000,
     sort: sort || { createdAt: -1 },
   });

@@ -13,10 +13,7 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  await new UsersService().deleteMany(
-    { email: "burgertime@yahoo.com" },
-    { hard: true },
-  );
+  await new UsersService().deleteMany({ email: "burgertime@yahoo.com" }, { hard: true });
 });
 
 afterAll(async () => {
@@ -33,9 +30,7 @@ describe(`UsersService methods`, () => {
         credentials: [ECredentialTypes.Username],
       });
 
-      const createdNewUser = await new UsersService().createUser(
-        new User(testNewUser),
-      );
+      const createdNewUser = await new UsersService().createUser(new User(testNewUser));
 
       expect(createdNewUser).toMatchObject(testNewUser);
       expect(createdNewUser.id).toBeTruthy();
@@ -99,9 +94,7 @@ describe(`UsersService methods`, () => {
       const service = new UsersService();
       await service.cognitoSignUp(testNewUserAttributesFacebook);
 
-      const userId = await service.findUserId(
-        testNewUserAttributesFacebook.email,
-      );
+      const userId = await service.findUserId(testNewUserAttributesFacebook.email);
       const newDbUser = await service.getOneUser(userId);
 
       expect(newDbUser.id).toBeTruthy();

@@ -1,6 +1,7 @@
 import { extract } from "article-parser";
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
+import mongoose from "mongoose";
 import striptags from "striptags";
 
 import { BillsService, IBillMediaSource, MapBoxService } from "../../services";
@@ -63,9 +64,7 @@ export class WebService {
     }
   }
 
-  private splitSummaries(
-    fetchedSummaryArray: IBillSummary[],
-  ): IBillSummaryMap[] {
+  private splitSummaries(fetchedSummaryArray: IBillSummary[]): IBillSummaryMap[] {
     const summariesArray: IBillSummaryMap[] = [];
 
     fetchedSummaryArray.forEach((summary) => {
@@ -103,9 +102,7 @@ export class WebService {
     try {
       const response: AxiosResponse<string> = await Axios.get(fullTextUrl);
       const fullTextPage: cheerio.Root = Cheerio.load(response.data);
-      const xmlPageLink = fullTextPage('a.btn-export-xml:contains("XML")').attr(
-        "href",
-      );
+      const xmlPageLink = fullTextPage('a.btn-export-xml:contains("XML")').attr("href");
       const fullTextUrlJoined = `https://www.parl.ca${xmlPageLink}`;
 
       const fullTextXml = await this.fetchXml(fullTextUrlJoined);
@@ -164,10 +161,7 @@ export class WebService {
     };
   }
 
-  private parseOfficeData(
-    offices: IRepresentOffice[],
-    name: string,
-  ): IMPOffice[] {
+  private parseOfficeData(offices: IRepresentOffice[], name: string): IMPOffice[] {
     return offices.map(({ fax, postal, tel, type }) => ({
       type,
       phoneNumber: tel,
@@ -176,11 +170,7 @@ export class WebService {
     }));
   }
 
-  private splitPostal(
-    postal: string,
-    type: EMPOfficeType,
-    name: string,
-  ): IMPAddress {
+  private splitPostal(postal: string, type: EMPOfficeType, name: string): IMPAddress {
     const splitAddress = postal.split("\n");
     if (type === EMPOfficeType.constituency) splitAddress.shift();
     const [street] = splitAddress;
@@ -201,16 +191,16 @@ export class WebService {
     const articleData = await this.fetchArticleData(mediaSourceUrl);
     const { content, hostname, links, ...rest } = articleData;
 
-    const mbfcData = await this.fetchMediaBiasFactCheckData(
-      hostname,
-      articleData.source,
-    );
+    const mbfcData = await this.fetchMediaBiasFactCheckData(hostname, articleData.source);
     const bpPressArticleRating = await this.fetchBPPressInfo(content);
+    const isEditorial = this.checkIfEditorial(articleData);
 
     return {
-      ...rest,
+      mediaSourceId: new mongoose.Types.ObjectId().toString(),
       mbfcData: { ...mbfcData },
       bpPressArticleRating,
+      isEditorial,
+      ...rest,
     } as IBillMediaSource;
   }
 
@@ -225,9 +215,9 @@ export class WebService {
       const searchResults: cheerio.Root = Cheerio.load(
         (await Axios.get<string>(searchUrl)).data,
       );
-      const mediaSourceUrl: string = searchResults(
-        `a:contains("${source}")`,
-      ).attr("href");
+      const mediaSourceUrl: string = searchResults(`a:contains("${source}")`).attr(
+        "href",
+      );
 
       const mediaSourcePage: cheerio.Root = Cheerio.load(
         (await Axios.get<string>(mediaSourceUrl)).data,
@@ -257,9 +247,7 @@ export class WebService {
         delete (biasResults as any).worldPressFreedomRank;
       }
     } catch (error) {
-      throw new Error(
-        `[FETCH MBFC DATA ERROR]: ${{ error, searchUrl, source }}`,
-      );
+      throw new Error(`[FETCH MBFC DATA ERROR]: ${error} ${searchUrl} ${source} }}`);
     }
 
     return biasResults;
@@ -270,9 +258,7 @@ export class WebService {
     SSMUtil.initInstance();
 
     try {
-      const apiKey = await SSMUtil.getInstance().getVar(
-        ESSMParams.BPPressApiKey,
-      );
+      const apiKey = await SSMUtil.getInstance().getVar(ESSMParams.BPPressApiKey);
 
       const { data } = await Axios.post<number>(
         `${EDataEndpoints.BP_PRESS_AI}`,
@@ -316,6 +302,7 @@ export class WebService {
     CANADALAND: "Canadaland",
     CTVNews: "CTV News",
     edmontonjournal: "Edmonton Journal",
+    financialpost: "Financial Post",
     "Macleans.ca": "Maclean’s Magazine",
     montrealgazette: "Montreal Gazette",
     nationalpost: "National Post",
@@ -334,10 +321,13 @@ export class WebService {
       const { symbol, sourceBefore } = this.sourceSplit.find(checkSplit);
       return sourceInput.split(symbol)[sourceBefore ? 0 : 1].trim();
     } else {
-      return (
-        this.sourceConversion[sourceInput] ||
-        FormatUtils.capitalizeFirstLetter(sourceInput).trim()
-      );
+      return this.sourceConversion[sourceInput] || sourceInput.trim();
     }
+  }
+
+  private checkIfEditorial({ description, title, url }: IArticleData): boolean {
+    const fieldsToCheck = `${description} ${title} ${url}`.toLowerCase();
+    const keywords = ["editorial", "opinion", "commentary", "critique"];
+    return keywords.some((word) => fieldsToCheck.includes(word));
   }
 }

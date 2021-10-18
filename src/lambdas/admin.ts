@@ -7,9 +7,7 @@ import { IAppSyncResolverEvent } from "../types";
 
 let initialize = null;
 
-exports.handler = async (
-  event: IAppSyncResolverEvent | IAppSyncResolverEvent[],
-) => {
+exports.handler = async (event: IAppSyncResolverEvent | IAppSyncResolverEvent[]) => {
   if (!initialize) {
     initialize = await initClient();
   }
@@ -38,6 +36,11 @@ exports.handler = async (
       updateBillCategories: () => {
         const { code, categories } = params;
         return new BillsService().updateBillCategories(code, categories);
+      },
+
+      addMediaSourceToBill: () => {
+        const { code, url } = params;
+        return new BillsService().addMediaSourceToBill(code, url);
       },
     }[field];
   } else {
@@ -69,9 +72,7 @@ exports.handler = async (
 
         for await (const { source: bill } of events) {
           const { parliamentarySessionId: sessionId } = bill;
-          const sessionCode = await new ParliamentsService().getSessionCode(
-            sessionId,
-          );
+          const sessionCode = await new ParliamentsService().getSessionCode(sessionId);
 
           sessionCodesArray.push(sessionCode || null);
         }

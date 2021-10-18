@@ -36,8 +36,7 @@ describe(`FormatUtils methods`, () => {
   describe("formatDate", () => {
     const testBill = {
       title: "C-9, Introduction and First Reading in the House of Commons",
-      link:
-        "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10686850",
+      link: "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10686850",
       description:
         "C-9, An Act to amend the Chemical Weapons Convention Implementation Act",
       pubDate: "Tue, 10 Mar 2020 00:00:00 EST",
@@ -55,8 +54,7 @@ describe(`FormatUtils methods`, () => {
   describe("formatCode", () => {
     const testBill = {
       title: "C-9, Introduction and First Reading in the House of Commons",
-      link:
-        "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10686850",
+      link: "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10686850",
       description:
         "C-9, An Act to amend the Chemical Weapons Convention Implementation Act",
       pubDate: "Tue, 10 Mar 2020 00:00:00 EST",
@@ -70,8 +68,7 @@ describe(`FormatUtils methods`, () => {
   describe("formatTitle", () => {
     const testBill = {
       title: "C-9, Introduction and First Reading in the House of Commons",
-      link:
-        "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10686850",
+      link: "https://www.parl.ca/LegisInfo/BillDetails.aspx?Language=E&billId=10686850",
       description:
         "C-9, An Act to amend the Chemical Weapons Convention Implementation Act",
       pubDate: "Tue, 10 Mar 2020 00:00:00 EST",

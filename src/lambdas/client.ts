@@ -1,18 +1,11 @@
 import { initClient } from "../db";
-import {
-  BillsService,
-  ParliamentsService,
-  UsersService,
-  WebService,
-} from "../services";
+import { BillsService, ParliamentsService, UsersService, WebService } from "../services";
 import { IParliamentarySession } from "../services/parliaments/model";
 import { IAppSyncResolverEvent } from "../types";
 
 let initialize = null;
 
-exports.handler = async (
-  event: IAppSyncResolverEvent | IAppSyncResolverEvent[],
-) => {
+exports.handler = async (event: IAppSyncResolverEvent | IAppSyncResolverEvent[]) => {
   if (!initialize) {
     initialize = await initClient();
   }
@@ -78,10 +71,7 @@ exports.handler = async (
     resolver = {
       /* Field Level Resolvers*/
       getBillsField: async () => {
-        const events = event as IAppSyncResolverEvent<
-          any,
-          IParliamentarySession
-        >[];
+        const events = event as IAppSyncResolverEvent<any, IParliamentarySession>[];
         const billsArray = [];
 
         for await (const { source: session } of events) {

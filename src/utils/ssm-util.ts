@@ -46,11 +46,7 @@ export class SSMUtil {
     return this.get(fullKey, required);
   }
 
-  public setVar(
-    key: ESSMParams,
-    value: string,
-    overwrite = true,
-  ): Promise<string> {
+  public setVar(key: ESSMParams, value: string, overwrite = true): Promise<string> {
     const fullKey = `/${this.environment}/${key}`;
 
     return this.set(fullKey, value, overwrite);
@@ -95,11 +91,7 @@ export class SSMUtil {
     });
   }
 
-  private async set(
-    key: string,
-    value: string,
-    overwrite = true,
-  ): Promise<string> {
+  private async set(key: string, value: string, overwrite = true): Promise<string> {
     console.log(`[SSM]: Setting SSM parameter ${key}`);
 
     return new Promise<string>((resolve, reject) => {

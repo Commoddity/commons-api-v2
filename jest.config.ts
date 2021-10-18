@@ -8,10 +8,7 @@ const config: Config.InitialOptions = {
   collectCoverage: true,
   testTimeout: 500000,
   coverageDirectory: "src/test/coverage",
-  testMatch: [
-    "**/__tests__/**/*.+(ts|tsx|js)",
-    "**/?(*.)+(spec|test).+(ts|tsx|js)",
-  ],
+  testMatch: ["**/__tests__/**/*.+(ts|tsx|js)", "**/?(*.)+(spec|test).+(ts|tsx|js)"],
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },

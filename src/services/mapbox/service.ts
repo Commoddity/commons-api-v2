@@ -1,6 +1,4 @@
-import mapBoxGeocoding, {
-  GeocodeService,
-} from "@mapbox/mapbox-sdk/services/geocoding";
+import mapBoxGeocoding, { GeocodeService } from "@mapbox/mapbox-sdk/services/geocoding";
 
 import {
   EProvinceCodes,
@@ -15,9 +13,7 @@ export class MapBoxService {
   private geocodingClient: GeocodeService;
 
   private async initMapBoxClient() {
-    const accessToken = await SSMUtil.getInstance().getVar(
-      ESSMParams.MapBoxToken,
-    );
+    const accessToken = await SSMUtil.getInstance().getVar(ESSMParams.MapBoxToken);
     this.geocodingClient = mapBoxGeocoding({ accessToken });
   }
 

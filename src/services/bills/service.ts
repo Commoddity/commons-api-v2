@@ -4,13 +4,7 @@ import { BaseService, ParliamentsService, WebService } from "../../services";
 import { EBillCategories, IBillSummaryMap, PBillEvent } from "../../types";
 import { FormatUtils } from "../../utils";
 
-import {
-  Bill,
-  BillEvent,
-  BillInput,
-  createBill,
-  IBillMediaSource,
-} from "./model";
+import { Bill, BillEvent, BillInput, createBill } from "./model";
 import { Collection as BillCollection } from "./collection";
 
 export class BillsService extends BaseService<Bill> {
@@ -30,11 +24,7 @@ export class BillsService extends BaseService<Bill> {
     return super.deleteOne(query);
   }
 
-  async updateBillPassed({
-    code,
-    pageUrl,
-    passed,
-  }: UpdateQuery<Bill>): Promise<Bill> {
+  async updateBillPassed({ code, pageUrl, passed }: UpdateQuery<Bill>): Promise<Bill> {
     let update: UpdateQuery<Bill> = { passed };
     if (passed) {
       update = {
@@ -92,14 +82,10 @@ export class BillsService extends BaseService<Bill> {
     await this.addBillsToParliamentarySession(createdBillIds, sessionId);
   }
 
-  billHasPassed = (eventTitle: string): boolean =>
-    eventTitle.includes("Royal Assent");
+  billHasPassed = (eventTitle: string): boolean => eventTitle.includes("Royal Assent");
 
   billHasFailed = (eventTitle: string): boolean =>
-    Boolean(
-      eventTitle.includes("Defeated") ||
-        eventTitle.includes("Not Proceeded With"),
-    );
+    Boolean(eventTitle.includes("Defeated") || eventTitle.includes("Not Proceeded With"));
 
   private async addBillsToParliamentarySession(
     billIds: string[],
@@ -108,9 +94,7 @@ export class BillsService extends BaseService<Bill> {
     const parlService = new ParliamentsService();
     const query = { "parliamentarySessions.id": sessionId };
 
-    const { parliamentarySessions: sessions } = await parlService.findOne(
-      query,
-    );
+    const { parliamentarySessions: sessions } = await parlService.findOne(query);
     const { bills } = sessions[sessions.length - 1];
 
     for await (const billId of billIds) {
@@ -141,9 +125,7 @@ export class BillsService extends BaseService<Bill> {
     });
 
     for await (const { code, url: summaryUrl } of billSummaryMaps) {
-      const billToUpdate = billsWithNoSummary?.find(
-        (bill) => bill.code === code,
-      );
+      const billToUpdate = billsWithNoSummary?.find((bill) => bill.code === code);
       if (billToUpdate) {
         await this.updateOne({ _id: billToUpdate.id }, { summaryUrl });
         billsUpdated++;
@@ -157,10 +139,7 @@ export class BillsService extends BaseService<Bill> {
     return this.updatePush({ code }, { events: event });
   }
 
-  async updateBillCategories(
-    code: string,
-    categories: EBillCategories[],
-  ): Promise<Bill> {
+  async updateBillCategories(code: string, categories: EBillCategories[]): Promise<Bill> {
     return this.updateOne({ code }, { categories });
   }
 
