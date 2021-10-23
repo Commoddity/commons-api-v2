@@ -13,12 +13,12 @@ provider:
   name: aws
   profile: commons-app
   runtime: nodejs14.x
-  vpc:
-    securityGroupIds:
-      - sg-032d9aa86d926a1d1
-    subnetIds:
-      - subnet-02f47c3bb960dc6e3
-      - subnet-0ce52114d1cfc7b8d
+  # vpc:
+  #   securityGroupIds:
+  #     - sg-032d9aa86d926a1d1
+  #   subnetIds:
+  #     - subnet-02f47c3bb960dc6e3
+  #     - subnet-0ce52114d1cfc7b8d
   region: ca-central-1
   memorySize: 512
   timeout: 15

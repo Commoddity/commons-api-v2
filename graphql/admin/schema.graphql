@@ -29,7 +29,8 @@ type IBill {
   summaryUrl: String
   fullTextUrl: String
   passed: Boolean
-  events: [IBillEvent]
+  events: [IBillEvent]!
+  mediaSources: [IBillMediaSource]
   createdAt: String!
   updatedAt: String
 }
@@ -40,6 +41,29 @@ type IBillEvent {
   publicationDate: String!
   createdAt: String!
   updatedAt: String
+}
+
+type IBillMediaSource {
+  mediaSourceId: String!
+  title: String!
+  url: String!
+  source: String!
+  description: String!
+  image: String
+  author: String
+  publicationDate: String
+  ttr: Int
+  mbfcData: IMBFCData!
+  bpPressArticleRating: Float!
+  isEditorial: Boolean!
+}
+
+type IMBFCData {
+  biasRating: String!
+  factualReporting: String!
+  country: String!
+  credibilityRating: String
+  trafficPopularity: String
 }
 
 enum EBillCategories {
