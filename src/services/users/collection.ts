@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema<User>(
       type: String,
       required: true,
       enum: Object.values(ERecordStatus),
-      default: ERecordStatus.Created,
+      default: ERecordStatus.created,
     },
   },
   { timestamps: true },

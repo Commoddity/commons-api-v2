@@ -1,5 +1,5 @@
 import { initClient } from "../db";
-import { WebService } from "../services/web/service";
+import { BillsService } from "../services/bills/service";
 import { EEntityTypes, EEventTypes, ICloudWatchEvent } from "../types";
 
 let initialize = null;
@@ -17,7 +17,7 @@ exports.handler = async ({
 
   if (entityType === EEntityTypes.Bills) {
     if (type === EEventTypes.UpdateBills) {
-      consumer = async () => await new WebService().updateBills();
+      consumer = async () => await new BillsService().updateBillsForCurrentSession();
     }
   }
 

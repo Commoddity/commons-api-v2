@@ -1,7 +1,6 @@
 import { initClient } from "../db";
-import { BillsService, ParliamentsService, UsersService, WebService } from "../services";
-import { IParliamentarySession } from "../services/parliaments/model";
-import { IAppSyncResolverEvent } from "../types";
+import { BillsService, UsersService, WebService } from "../services";
+import { IAppSyncResolverEvent, IBill } from "../types";
 
 let initialize = null;
 
@@ -17,17 +16,14 @@ exports.handler = async (event: IAppSyncResolverEvent | IAppSyncResolverEvent[])
 
     resolver = {
       /* Read */
-      getAllBills: () => {
-        return new BillsService().findAll();
+      getAllBillsForSession: () => {
+        const { parliament, session } = params;
+        return new BillsService().getAllBillsForSession(parliament, session);
       },
 
       getOneBill: () => {
-        const { code } = params;
-        return new BillsService().findOne({ code });
-      },
-
-      getAllParliaments: () => {
-        return new ParliamentsService().findAll();
+        const { parliament, session, code } = params;
+        return new BillsService().getOneBill({ parliament, session, code });
       },
 
       getOneUser: () => {
@@ -70,19 +66,20 @@ exports.handler = async (event: IAppSyncResolverEvent | IAppSyncResolverEvent[])
 
     resolver = {
       /* Field Level Resolvers*/
-      getBillsField: async () => {
-        const events = event as IAppSyncResolverEvent<any, IParliamentarySession>[];
-        const billsArray = [];
+      getBillAddedFields: async () => {
+        const events = event as IAppSyncResolverEvent<any, IBill>[];
+        const {
+          source: { ParliamentNumber, SessionNumber },
+        } = events[0];
+        const parliamentarySession = `${ParliamentNumber}-${SessionNumber}`;
+        const billCodes = events.map(({ source: { NumberCode } }) => NumberCode);
 
-        for await (const { source: session } of events) {
-          const { bills: billIds } = session;
-          const bills = await new BillsService().findMany({
-            _id: { $in: billIds },
-          });
-          billsArray.push(bills?.length ? bills : null);
-        }
+        const recordsMap = {};
+        (await new BillsService().getBillAddedFields(parliamentarySession, billCodes)).forEach(
+          (bill) => (recordsMap[bill.code] = bill),
+        );
 
-        return billsArray;
+        return events.map(({ source: { NumberCode } }) => recordsMap[NumberCode]);
       },
     }[field];
   }

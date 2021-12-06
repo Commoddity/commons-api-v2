@@ -1,12 +1,16 @@
 type Query {
-  getAllBills: [IBill]
-  getOneBill(code: ID!): IBill
-  getAllParliaments: [IParliament]
+  getAllBillsForSession(parliament: Int!, session: Int!): [IBill]
+  getOneBill(parliament: Int!, session: Int!, code: String!): IBill
 }
 
 type Mutation {
-  updateBillCategories(code: ID!, categories: [EBillCategories]!): IBill
-  addMediaSourceToBill(code: ID!, url: String!): IBill
+  updateBillCategories(
+    parliament: Int!
+    session: Int!
+    code: String!
+    categories: [EBillCategories]!
+  ): IBill
+  addMediaSourceToBill(parliament: Int!, session: Int!, code: String!, url: String!): IBill
 }
 
 schema {
@@ -14,98 +18,393 @@ schema {
   mutation: Mutation
 }
 
+enum ERecordStatus {
+  created
+  deleted
+}
+
 type IBill {
+  # Fields Added By Commons API
+  billAddedFields: IBillAddedFields!
+  # Bill Data From LEGISinfo
+  Id: ID!
+  NumberCode: String
+  NumberPrefix: String
+  Number: Int
+  LongTitleEn: String
+  LongTitleFr: String
+  LongTitle: String
+  ShortTitleEn: String
+  ShortTitleFr: String
+  ShortTitle: String
+  StatusId: Int
+  StatusNameEn: String
+  StatusNameFr: String
+  StatusName: String
+  LatestCompletedMajorStageId: Int
+  LatestCompletedMajorStageNameEn: String
+  LatestCompletedMajorStageNameFr: String
+  LatestCompletedMajorStageName: String
+  LatestCompletedMajorStageNameWithChamberSuffix: String
+  IsInSenatePreStudy: Boolean
+  LatestCompletedMajorStageChamberOrganizationId: Int
+  LatestCompletedMajorStageChamberNameEn: String
+  LatestCompletedMajorStageChamberNameFr: String
+  LatestCompletedMajorStageChamberName: String
+  OngoingStageId: Int
+  OngoingStageNameEn: String
+  OngoingStageNameFr: String
+  OngoingStageName: String
+  LatestCompletedBillStageId: Int
+  LatestCompletedBillStageNameEn: String
+  LatestCompletedBillStageNameFr: String
+  LatestCompletedBillStageName: String
+  LatestCompletedBillStageChamberOrganizationId: Int
+  LatestCompletedBillStageChamberNameEn: String
+  LatestCompletedBillStageChamberNameFr: String
+  LatestCompletedBillStageChamberName: String
+  LatestCompletedBillStageDateTime: String
+  ParliamentNumber: Int
+  SessionNumber: Int
+  BillDocumentTypeId: Int
+  BillDocumentTypeNameEn: String
+  BillDocumentTypeNameFr: String
+  BillDocumentTypeName: String
+  IsGovernmentBill: Boolean
+  OriginatingChamberOrganizationId: Int
+  OriginatingChamberNameEn: String
+  OriginatingChamberNameFr: String
+  OriginatingChamberName: String
+  IsHouseBill: Boolean
+  IsSenateBill: Boolean
+  SponsorSenateSystemAffiliationId: Int
+  SponsorPersonId: Int
+  SponsorPersonOfficialFirstName: String
+  SponsorPersonOfficialLastName: String
+  SponsorPersonUsualFirstName: String
+  SponsorPersonMiddleName: String
+  SponsorPersonName: String
+  SponsorPersonShortHonorificEn: String
+  SponsorPersonShortHonorificFr: String
+  SponsorPersonShortHonorific: String
+  SponsorAffiliationTitleEn: String
+  SponsorAffiliationTitleFr: String
+  SponsorAffiliationTitle: String
+  SponsorAffiliationRoleId: Int
+  SponsorAffiliationRoleNameEn: String
+  SponsorAffiliationRoleNameFr: String
+  SponsorAffiliationRoleName: String
+  SponsorConstituencyId: Int
+  SponsorConstituencyNameEn: String
+  SponsorConstituencyNameFr: String
+  SponsorConstituencyName: String
+  LatestBillEventEventTypeId: Int
+  LatestBillEventTypeNameEn: String
+  LatestBillEventTypeNameFr: String
+  LatestBillEventStageId: Int
+  LatestBillEventTypeName: String
+  LatestBillEventCommitteeDetails: String
+  LatestBillEventDateTime: String
+  LatestBillEventChamberOrganizationId: Int
+  LatestBillEventChamberNameEn: String
+  LatestBillEventChamberNameFr: String
+  LatestBillEventChamberName: String
+  LatestBillEventNumberOfAmendments: Int
+  LatestBillEventAmendmentNoteId: Int
+  LatestBillEventMeetingNumber: String
+  LatestBillEventAdditionalInformationEn: String
+  LatestBillEventAdditionalInformationFr: String
+  LatestBillEventAdditionalInformation: String
+  PassedHouseFirstReadingDateTime: String
+  PassedHouseSecondReadingDateTime: String
+  PassedHouseThirdReadingDateTime: String
+  PassedSenateFirstReadingDateTime: String
+  PassedSenateSecondReadingDateTime: String
+  PassedSenateThirdReadingDateTime: String
+  ReceivedRoyalAssentDateTime: String
+  DidReinstateFromPreviousSession: Boolean
+  ReinstatedFromBillDocumentId: String
+  ReinstatedFromBillNumberCode: String
+  DidReinstateInNextSession: Boolean
+  ReinstatedAsBillDocumentId: String
+  ReinstatedAsBillNumberCode: String
+  PassedFirstChamberFirstReading: Boolean
+  PassedFirstChamberSecondReading: Boolean
+  PassedFirstChamberThirdReading: Boolean
+  PassedSecondChamberFirstReading: Boolean
+  PassedSecondChamberSecondReading: Boolean
+  PassedSecondChamberThirdReading: Boolean
+  ReceivedRoyalAssent: Boolean
+  ConsideredDuringPreviousSitting: Boolean
+  IsProForma: Boolean
+  BillFormId: Int
+  BillFormNameEn: String
+  BillFormNameFr: String
+  BillFormName: String
+  NotesEn: String
+  NotesFr: String
+  Notes: String
+  ShortLegislativeSummaryEn: String
+  ShortLegislativeSummaryFr: String
+  ShortLegislativeSummary: String
+  IsFullLegislativeSummaryAvailable: Boolean
+  StatuteYear: String
+  StatuteChapter: String
+  BillStages: IBillStages
+  Publications: [IPublication]
+  HouseVoteDetails: [IVoteDetails]
+  SenateVoteDetails: [IVoteDetails]
+  HouseRulingAndStatements: [IRulingAndStatements]
+  SenateRulingAndStatements: [IRulingAndStatements]
+  WebReferences: [IWebReference]
+  BibliographicNotices: [IBibliographicNotice]
+  SimilarBills: [IBill]
+  IsDroppedFromSenateOrderPaper: Boolean
+  IsSessionOngoing: Boolean
+}
+
+type IBillStages {
+  BillId: ID!
+  HouseBillStages: [IBillStage]
+  SenateBillStages: [IBillStage]
+  # RoyalAssent: Null
+  # HouseAdditionalInformation: Null
+  # SenateAdditionalInformation: Null
+  # InterChamberMessages: Null
+}
+
+type IBillStage {
+  BillStageId: ID!
+  BillStageNameEn: String
+  BillStageNameFr: String
+  BillStageName: String
+  ChamberOrganizationId: Int
+  ParliamentNumber: Int
+  SessionNumber: Int
+  State: Int
+  StateNameEn: String
+  StateNameFr: String
+  StateAsOfDate: String
+  StateName: String
+  Committee: String
+  Sittings: [ISitting]
+  Decisions: [ISitting]
+  CommitteeMeetings: [ICommitteeMeeting]
+  SignificantEvents: [ISignificantEvent]
+  EndOfStageEvent: IEndOfStageEvent
+  StageEventCount: Int
+  LastStageEventStartDateTime: String
+  Speeches: [ISpeech]
+  ContainsReferralToCommitteeEvent: Boolean
+  ContainsRecommittalOfBillEvent: Boolean
+}
+
+type ISitting {
+  NameEn: String
+  NameFr: String
+  Name: String
+  Number: String
+  Date: String
+  AdditionalInformationEn: String
+  AdditionalInformationFr: String
+  AdditionalInformation: String
+}
+
+type IDecision {
+  DecisionProceduralEventId: Int
+  DecisionMotionDocumentId: Int
+  DecisionMotionTitleEn: String
+  DecisionMotionTitleFr: String
+  DecisionMotionTitle: String
+  DecisionResultId: Int
+  DecisionResultNameEn: String
+  DecisionResultNameFr: String
+  DecisionResultName: String
+  DecisionMethodId: Int
+  DecisionMethodNameEn: String
+  DecisionMethodNameFr: String
+  DecisionMethodName: String
+  DivisionNumber: Int
+  DivisionVotesYeas: Int
+  DivisionVotesNays: Int
+  DivisionVotePaired: Int
+  DecisionSittingDate: String
+  DecisionSittingNumber: String
+}
+
+type ICommitteeMeeting {
+  CommitteeOrganizationId: Int
+  CommitteeNameEn: String
+  CommitteeNameFr: String
+  CommitteeAcronym: String
+  Number: String
+  Date: String
+  CommitteeName: String
+}
+
+type ISignificantEvent {
+  EventTypeId: ID!
+  BillDocumentId: Int
+  EventNameEn: String
+  EventNameFr: String
+  EventName: String
+  EventDateTime: String
+  IsCompletionOfBillStage: Boolean
+  IsDefeatedEvent: Boolean
+  CommitteeReportId: Int
+  CommitteeReportNumber: Int
+  AdditionalInformationEn: String
+  AdditionalInformationFr: String
+  AdditionalInformation: String
+  MeetingEventId: Int
+  AmendmentNoteId: Int
+}
+
+type IEndOfStageEvent {
+  EventTypeId: ID!
+  EventTypeNameEn: String
+  EventTypeNameFr: String
+  EventTypeName: String
+  EventStartDateTime: String
+  EventEndDateTime: String
+}
+
+type ISpeech {
+  BillId: ID!
+  ChamberOrganizationId: Int
+  InterventionEventId: Int
+  EventTypeId: Int
+  EventTypeNameEn: String
+  EventTypeNameFr: String
+  EventTypeName: String
+  PersonId: Int
+  PersonOfficialFirstName: String
+  PersonOfficialLastName: String
+  PersonMiddleName: String
+  PersonName: String
+  SenateSystemAffiliationId: Int
+  CaucusShortNameEn: String
+  CaucusShortNameFr: String
+  CaucusShortName: String
+  ParliamentNumber: Int
+  SessionNumber: Int
+  MeetingNumber: String
+  SpeechDateTime: String
+  UrlEn: String
+  UrlFr: String
+  Url: String
+}
+
+type IPublication {
+  PublicationId: ID!
+  PublicationTypeId: Int
+  PublicationTypeNameEn: String
+  PublicationTypeNameFr: String
+  PublicationTypeName: String
+}
+
+type IVoteDetails {
+  BillDocumentId: Int
+  DivisionNumber: Int
+  DivisionSubjectEn: String
+  DivisionSubjectFr: String
+  DivisionSubject: String
+  DivisionVotesYeas: Int
+  DivisionVotesNays: Int
+  DivisionVotePaired: Int
+  DivisionVoteTotal: Int
+  DecisionResultId: Int
+  DecisionResultNameEn: String
+  DecisionResultNameFr: String
+  DecisionResultName: String
+  DecisionDateTime: String
+  IsAgreedTo: Boolean
+  IsNegatived: Boolean
+  IsTied: Boolean
+  OrganizationId: Int
+}
+
+type IRulingAndStatements {
+  EventTypeId: ID!
+  EventTypeNameEn: String
+  EventTypeName: String
+  ParliamentNumber: Int
+  SessionNumber: Int
+  MeetingNumber: Int
+  HansardNumber: Int
+  RulingStatementDateTime: String
+  ChamberOrganizationId: Int
+  UrlEn: String
+  UrlFr: String
+}
+
+type IWebReference {
+  BillDocumentId: ID!
+  TitleEn: String
+  TitleFr: String
+  Title: String
+  WebReferenceTypeId: Int
+  WebReferenceTypeNameEn: String
+  WebReferenceTypeNameFr: String
+  WebReferenceTypeName: String
+  UrlEn: String
+  UrlFr: String
+  Url: String
+}
+
+type IBibliographicNotice {
+  BillDocumentId: ID!
+  BibliographicNoticeId: Int
+  Title: String
+  Author: String
+  Publication: String
+  VolumePage: String
+  PublicationDate: String
+  Classification: String
+  LanguageId: Int
+  IsOnlineVersionAvailable: Boolean
+}
+
+# Fields Added By Commons API
+type IBillAddedFields {
   id: ID!
   code: String!
   title: String!
-  parliamentarySessionId: String!
-  session: String
   pageUrl: String!
+  parliamentarySession: String!
   categories: [EBillCategories]
-  type: EBillType
-  description: String
-  introducedDate: String
-  passedDate: String
-  summaryUrl: String
-  fullTextUrl: String
-  passed: Boolean
-  events: [IBillEvent]!
   mediaSources: [IBillMediaSource]
+  fullTextUrl: String
   createdAt: String!
   updatedAt: String
-}
-
-type IBillEvent {
-  eventId: ID!
-  title: String!
-  publicationDate: String!
-  createdAt: String!
-  updatedAt: String
+  recordStatus: ERecordStatus!
 }
 
 type IBillMediaSource {
-  mediaSourceId: String!
-  title: String!
-  url: String!
-  source: String!
-  description: String!
+  mediaSourceId: ID!
+  hostname: String
+  publicationDate: String
+  url: String
+  links: [String]
+  title: String
+  description: String
   image: String
   author: String
-  publicationDate: String
+  content: String
+  source: String
+  published: String
   ttr: Int
-  mbfcData: IMBFCData!
-  bpPressArticleRating: Float!
-  isEditorial: Boolean!
+  mbfcData: IMediaBiasFactCheckData
+  bpPressArticleRating: Float
+  isEditorial: Boolean
 }
 
-type IMBFCData {
+type IMediaBiasFactCheckData {
   biasRating: String!
   factualReporting: String!
   country: String!
   credibilityRating: String
   trafficPopularity: String
-}
-
-enum EBillCategories {
-  agriculture_environment
-  arts_culture
-  business_industry
-  economics_finance
-  education_language
-  employment_labour
-  government_politics
-  health_safety
-  indigenous_affairs
-  information_communications
-  international_affairs
-  law_justice
-  science_technology
-  social_affairs
-}
-
-enum EBillType {
-  commons
-  senate
-}
-
-type IParliament {
-  id: ID!
-  number: Int!
-  startDate: String!
-  endDate: String
-  parliamentarySessions: [IParliamentarySession]
-  createdAt: String!
-  updatedAt: String
-}
-
-type IParliamentarySession {
-  sessionId: ID!
-  number: Int!
-  startDate: String!
-  endDate: String
-  createdAt: String!
-  updatedAt: String
-  bills: [IBill]
 }
 
 type IUser {
@@ -128,4 +427,48 @@ type IUser {
   categories: [EBillCategories]
   createdAt: String!
   updatedAt: String
+}
+
+# Enums
+enum EBillCategories {
+  agriculture_environment
+  arts_culture
+  business_industry
+  economics_finance
+  education_language
+  employment_labour
+  government_politics
+  health_safety
+  indigenous_affairs
+  information_communications
+  international_affairs
+  law_justice
+  science_technology
+  social_affairs
+}
+
+enum EBillType {
+  commons
+  senate
+}
+
+enum EMPOfficeType {
+  constituency
+  legislature
+}
+
+enum EProvinceCodes {
+  AB
+  BC
+  MB
+  NB
+  NL
+  NS
+  NT
+  NU
+  ON
+  PE
+  QC
+  SK
+  YT
 }

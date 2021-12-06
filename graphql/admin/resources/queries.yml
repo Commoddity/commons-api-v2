@@ -1,27 +1,19 @@
 # Query Resolvers
 - dataSource: AdminLambda
   type: Query
-  field: getAllBills
+  field: getAllBillsForSession
   response: false
 - dataSource: AdminLambda
   type: Query
   field: getOneBill
   response: false
-- dataSource: AdminLambda
-  type: Query
-  field: getAllParliaments
-  response: false
 
 # Field Level Resolvers
-- dataSource: AdminLambda
-  type: IParliamentarySession
-  field: bills
-  response: false
 - dataSource: AdminLambda
   type: IUser
   field: bills
   response: false
 - dataSource: AdminLambda
   type: IBill
-  field: session
+  field: billAddedFields
   response: false

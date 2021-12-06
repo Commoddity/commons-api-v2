@@ -209,7 +209,7 @@ export class BaseService<T> {
         await this.commandsCollection.deleteOne(query);
       } else {
         await this.commandsCollection.updateOne(query, {
-          recordStatus: ERecordStatus.Deleted,
+          recordStatus: ERecordStatus.deleted,
         } as any);
       }
     } catch (error) {
@@ -226,7 +226,7 @@ export class BaseService<T> {
         await this.commandsCollection.deleteMany(query);
       } else {
         await this.commandsCollection.updateMany(query, {
-          recordStatus: ERecordStatus.Deleted,
+          recordStatus: ERecordStatus.deleted,
         } as any);
       }
     } catch (error) {
@@ -241,7 +241,7 @@ export class BaseService<T> {
     } else {
       return {
         ...query,
-        recordStatus: { $ne: ERecordStatus.Deleted },
+        recordStatus: { $ne: ERecordStatus.deleted },
       };
     }
   }

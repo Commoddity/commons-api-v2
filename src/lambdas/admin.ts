@@ -1,9 +1,6 @@
 import { initClient } from "../db";
-import { BillsService, ParliamentsService } from "../services";
-import { IBill } from "../services/bills/model";
-import { IParliamentarySession } from "../services/parliaments/model";
-import { IUser } from "../services/users/model";
-import { IAppSyncResolverEvent } from "../types";
+import { BillsService } from "../services";
+import { IAppSyncResolverEvent, IBill } from "../types";
 
 let initialize = null;
 
@@ -19,28 +16,25 @@ exports.handler = async (event: IAppSyncResolverEvent | IAppSyncResolverEvent[])
 
     resolver = {
       /* Read */
-      getAllBills: () => {
-        return new BillsService().findAll();
+      getAllBillsForSession: () => {
+        const { parliament, session } = params;
+        return new BillsService().getAllBillsForSession(parliament, session);
       },
 
       getOneBill: () => {
-        const { code } = params;
-        return new BillsService().findOne({ code });
-      },
-
-      getAllParliaments: () => {
-        return new ParliamentsService().findAll();
+        const { parliament, session, code } = params;
+        return new BillsService().getOneBill({ parliament, session, code });
       },
 
       /* Update */
       updateBillCategories: () => {
-        const { code, categories } = params;
-        return new BillsService().updateBillCategories(code, categories);
+        const { parliament, session, code, categories } = params;
+        return new BillsService().updateBillCategories({ parliament, session, code }, categories);
       },
 
       addMediaSourceToBill: () => {
-        const { code, url } = params;
-        return new BillsService().addMediaSourceToBill(code, url);
+        const { parliament, session, code, url } = params;
+        return new BillsService().addMediaSourceToBill({ parliament, session, code }, url);
       },
     }[field];
   } else {
@@ -48,36 +42,20 @@ exports.handler = async (event: IAppSyncResolverEvent | IAppSyncResolverEvent[])
 
     resolver = {
       /* Field Level Resolvers*/
-      getBillsField: async () => {
-        const events = event as IAppSyncResolverEvent<
-          any,
-          IParliamentarySession | IUser
-        >[];
-        const billsArray = [];
-
-        for await (const { source: session } of events) {
-          const { bills: billIds } = session;
-          const bills = await new BillsService().findMany({
-            _id: { $in: billIds },
-          });
-          billsArray.push(bills?.length ? bills : null);
-        }
-
-        return billsArray;
-      },
-
-      getSessionCodeField: async () => {
+      getBillAddedFields: async () => {
         const events = event as IAppSyncResolverEvent<any, IBill>[];
-        const sessionCodesArray = [];
+        const {
+          source: { ParliamentNumber, SessionNumber },
+        } = events[0];
+        const parliamentarySession = `${ParliamentNumber}-${SessionNumber}`;
+        const billCodes = events.map(({ source: { NumberCode } }) => NumberCode);
 
-        for await (const { source: bill } of events) {
-          const { parliamentarySessionId: sessionId } = bill;
-          const sessionCode = await new ParliamentsService().getSessionCode(sessionId);
+        const recordsMap = {};
+        (await new BillsService().getBillAddedFields(parliamentarySession, billCodes)).forEach(
+          (bill) => (recordsMap[bill.code] = bill),
+        );
 
-          sessionCodesArray.push(sessionCode || null);
-        }
-
-        return sessionCodesArray;
+        return events.map(({ source: { NumberCode } }) => recordsMap[NumberCode]);
       },
     }[field];
   }

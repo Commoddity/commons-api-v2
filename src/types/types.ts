@@ -2,6 +2,8 @@ import { ArticleData } from "article-parser";
 import { QueryOptions } from "mongoose";
 import { MapiResponse } from "@mapbox/mapbox-sdk/lib/classes/mapi-response";
 
+import { EMPOfficeType } from "./schema-types";
+
 export enum Envs {
   dev = "dev",
   production = "production",
@@ -35,16 +37,14 @@ export interface PUpdateSummary {
   summaryUrl: string;
 }
 
-export interface PGeocodeQuery {
-  street: string;
-  city: string;
-  province: EProvinceCodes;
+export interface PBillFetch {
+  parliament: number;
+  session: number;
+  code?: string;
 }
 
 /* Interfaces */
-export type ICognitoUserAttributes =
-  | ICognitoEmailUserAttributes
-  | ICognitoSocialUserAttributes;
+export type ICognitoUserAttributes = ICognitoEmailUserAttributes | ICognitoSocialUserAttributes;
 export type ICognitoSocialUserAttributes =
   | ICognitoAppleUserAttributes
   | ICognitoFacebookUserAttributes;
@@ -169,72 +169,8 @@ export interface IRepresentOffice {
   fax: string;
 }
 
-export enum EMPOfficeType {
-  constituency = "constituency",
-  legislature = "legislature",
-}
-
-export interface IMemberOfParliament {
-  name: string;
-  party: string;
-  riding: string;
-  email: string;
-  phoneNumber: string;
-  ourCommonsUrl: string;
-  photoUrl: string;
-  preferredLanguages: string[];
-  offices: IMPOffice[];
-}
-
-export interface IMPOffice {
-  type: EMPOfficeType;
-  phoneNumber: string;
-  faxNumber: string;
-  address: IMPAddress;
-}
-
-export interface IMPAddress {
-  name: string;
-  street: string;
-  city: string;
-  province: EProvinceCodes;
-  postalCode: string;
-}
-
 /* Enums */
-export enum EBillCategories {
-  // Agriculture, environment, fisheries and natural resources
-  agriculture_environment = "agriculture_environment",
-  // Arts, culture and entertainment
-  arts_culture = "arts_culture",
-  // Business, industry and trade
-  business_industry = "business_industry",
-  // Economics and finance
-  economics_finance = "economics_finance",
-  // Education, language and training
-  education_language = "education_language",
-  // Employment and labour
-  employment_labour = "employment_labour",
-  // Government, Parliament and politics
-  government_politics = "government_politics",
-  // Health and safety
-  health_safety = "health_safety",
-  // Indigenous affairs
-  indigenous_affairs = "indigenous_affairs",
-  // Information and communications
-  information_communications = "information_communications",
-  // International affairs and defence
-  international_affairs = "international_affairs",
-  // Law, justice and rights
-  law_justice = "law_justice",
-  // Science and technology
-  science_technology = "science_technology",
-  // Social affairs and population
-  social_affairs = "social_affairs",
-}
-
 export enum EBillEndpoints {
-  LEGISINFO_URL = "https://www.parl.ca/LegisInfo/RSSFeed.aspx?download=rss&Language=E&Mode=1&Source=LegislativeFilteredBills&AllBills=1&HOCEventTypes=60110,60111,60146,60306,60122,60115,60119,60121,60124,60125,60126,60127,60285,60145,60307,60128,60131,60132,60133,60134,60174,60112,60163,60304,60303,60139,60144,60136,60138,60142&SenateEventTypes=60109,60110,60111,60115,60118,60119,60120,60123,60124,60305,60286,60130,60129,60302,60131,60132,60133,60134,60147,60304,60303,60140,60143,60135,60137,60141,60149",
   SUMMARY_URL = "https://www.parl.ca/legisinfo/RSSFeed.aspx?download=rss&Language=E&source=LegislativeSummaryPublications",
 }
 
@@ -248,27 +184,6 @@ export enum EDataEndpoints {
   MP_ENDPOINT = "https://represent.opennorth.ca",
   MBFC_HOMEPAGE = "https://mediabiasfactcheck.com",
   BP_PRESS_AI = "https://api.thebipartisanpress.com/api/endpoints/beta/robert",
-}
-
-export enum EProvinceCodes {
-  AB = "AB",
-  BC = "BC",
-  MB = "MB",
-  NB = "NB",
-  NL = "NL",
-  NS = "NS",
-  NT = "NT",
-  NU = "NU",
-  ON = "ON",
-  PE = "PE",
-  QC = "QC",
-  SK = "SK",
-  YT = "YT",
-}
-
-export enum ERecordStatus {
-  Created = "created",
-  Deleted = "deleted",
 }
 
 export enum ESSMParams {
@@ -345,7 +260,7 @@ export enum ECognitoTriggerSource {
 
 export interface IArticleData extends ArticleData {
   hostname: string;
-  publicationDate: Date;
+  publicationDate: string;
 }
 
 export interface IMBFCResults {

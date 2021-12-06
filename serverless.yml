@@ -202,7 +202,7 @@ functions:
     events:
       - schedule:
           name: fetch-bills-cron-job-${self:custom.stage}
-          description: Fetches events from LEGISinfo server and creates Bills and Events in the database. Runs every 24 hours at 8AM Ottawa time (12PM UTC)
+          description: Fetches Bills from LEGISinfo server and creates Bills in the database. Runs every 24 hours at 8AM Ottawa time (5AM PST / 12PM UTC)
           rate: cron(0 12 * * ? *)
           input:
             eventSource: aws:cloudWatchEvent

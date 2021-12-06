@@ -15,14 +15,24 @@ describe(`WebService methods`, () => {
   const testWebService = new WebService();
   const ProtoWebService = Object.getPrototypeOf(testWebService);
 
-  describe("fetchXml", () => {
-    const testUrl =
-      "https://www.parl.ca/LegisInfo/RSSFeed.aspx?download=rss&Language=E&Mode=1&Source=LegislativeFilteredBills&AllBills=1&HOCEventTypes=60110,60111,60146,60306,60122,60115,60119,60121,60124,60125,60126,60127,60285,60145,60307,60128,60131,60132,60133,60134,60174,60112,60163,60304,60303,60139,60144,60136,60138,60142&SenateEventTypes=60109,60110,60111,60115,60118,60119,60120,60123,60124,60305,60286,60130,60129,60302,60131,60132,60133,60134,60147,60304,60303,60140,60143,60135,60137,60141,60149";
+  describe("fetchJSON", () => {
+    it("Fetchs a JSON object of Bills from LEGISinfo", async () => {
+      const jsonResponse = await ProtoWebService.getAllBillsForSession(44, 1);
 
-    it("Fetchs an XML string from a URL", async () => {
-      const xmlResponse = await ProtoWebService.fetchXml(testUrl);
+      console.debug({ jsonResponse });
 
-      expect(typeof xmlResponse).toBe("string");
+      expect(typeof jsonResponse).toBe("object");
+    });
+  });
+
+  describe("getCurrentSession", () => {
+    it("Fetchs a JSON object of Bills from LEGISinfo", async () => {
+      const { parliament, session } = await ProtoWebService.getCurrentSession();
+
+      console.log({ parliament, session });
+
+      expect(typeof parliament).toEqual("number");
+      expect(typeof session).toEqual("number");
     });
   });
 

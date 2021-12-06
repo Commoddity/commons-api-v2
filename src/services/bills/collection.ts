@@ -1,16 +1,11 @@
 import mongoose from "mongoose";
 
-import { Bill, BillEvent, EBillType, IBillMediaSource } from "./model";
-import { EBillCategories, ERecordStatus } from "../../types";
-
-const billEventSchema = new mongoose.Schema<BillEvent>(
-  {
-    eventId: { type: String, required: true },
-    title: { type: String, required: true },
-    publicationDate: { type: Date, required: true },
-  },
-  { timestamps: true, _id: false },
-);
+import {
+  IBillAddedFields,
+  EBillCategories,
+  ERecordStatus,
+  IBillMediaSource,
+} from "../../types";
 
 const mediaBiasFactCheckDataSchema = new mongoose.Schema<IBillMediaSource["mbfcData"]>(
   {
@@ -32,7 +27,7 @@ const mediaSourcesSchema = new mongoose.Schema<IBillMediaSource>(
     description: { type: String, required: true },
     image: { type: String },
     author: { type: String },
-    publicationDate: { type: Date },
+    publicationDate: { type: String },
     ttr: { type: Number },
     mbfcData: { type: mediaBiasFactCheckDataSchema, required: true },
     bpPressArticleRating: { type: Number, required: true },
@@ -41,40 +36,30 @@ const mediaSourcesSchema = new mongoose.Schema<IBillMediaSource>(
   { timestamps: true, _id: false },
 );
 
-const billSchema = new mongoose.Schema<Bill>(
+const billSchema = new mongoose.Schema<IBillAddedFields>(
   {
     code: { type: String, required: true },
     title: { type: String, required: true },
     pageUrl: { type: String, required: true },
-    events: { type: [billEventSchema], required: true },
-    parliamentarySessionId: { type: String },
-    description: { type: String },
-    summaryUrl: { type: String },
+    parliamentarySession: { type: String },
     fullTextUrl: { type: String },
-    passed: { type: Boolean },
-    introducedDate: { type: Date },
-    passedDate: { type: Date },
     mediaSources: { type: [mediaSourcesSchema] },
     categories: {
       type: [String],
       enum: Object.values(EBillCategories),
     },
-    type: {
-      type: String,
-      enum: Object.values(EBillType),
-    },
     recordStatus: {
       type: String,
       required: true,
       enum: Object.values(ERecordStatus),
-      default: ERecordStatus.Created,
+      default: ERecordStatus.created,
     },
   },
   { timestamps: true },
 );
 
-billSchema.index({ code: 1 }, { unique: true });
+billSchema.index({ code: 1, parliamentarySession: 1 }, { unique: true });
 
-const collection = mongoose.model<Bill>("Bill", billSchema);
+const collection = mongoose.model<IBillAddedFields>("Bill", billSchema);
 
 export { collection as Collection };

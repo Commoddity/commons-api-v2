@@ -1,19 +1,18 @@
 import { extract } from "article-parser";
 import Axios, { AxiosResponse } from "axios";
 import Cheerio from "cheerio";
-import mongoose from "mongoose";
 import striptags from "striptags";
+import mongoose from "mongoose";
 
-import { BillsService, IBillMediaSource, MapBoxService } from "../../services";
+import { MapBoxService } from "../../services";
 import {
-  EBillEndpoints,
   EDataEndpoints,
   EProvinceCodes,
   EMPOfficeType,
   ESSMParams,
   IArticleData,
-  IBillSummary,
-  IBillSummaryMap,
+  IBill,
+  IBillMediaSource,
   IMBFCResults,
   ISourceSplit,
   IMemberOfParliament,
@@ -22,99 +21,81 @@ import {
   IRepresentMP,
   IRepresentMPResponse,
   IRepresentOffice,
-  PBillEvent,
   PGeocodeQuery,
 } from "../../types";
 import { FormatUtils, SSMUtil } from "../../utils";
 
 export class WebService {
-  async updateBills(): Promise<void> {
-    const service = new BillsService();
-
+  async fetchJSON(url: string): Promise<IBill[]> {
     try {
-      const billEventsArray = await this.getLegisInfoCaller();
-      await service.updateBillsAndEvents(billEventsArray);
-
-      const billSummaryMaps = await this.getSummaries();
-      await service.updateSummaryUrls(billSummaryMaps);
-
-      await service.closeDbConnection();
+      const { data: json }: AxiosResponse<IBill[]> = await Axios.get(url, {
+        timeout: 100000,
+      });
+      return json;
     } catch (error) {
-      throw new Error(`[UPDATE DB SCRIPT ERROR]: ${error}`);
+      throw new Error(`[WEB SERVICE ERROR]: fetchJSON: ${error}`);
     }
   }
 
-  private async getLegisInfoCaller(): Promise<PBillEvent[]> {
+  async getCurrentSession(): Promise<{ parliament: number; session: number }> {
     try {
-      const xml = await this.fetchXml(EBillEndpoints.LEGISINFO_URL);
-      return FormatUtils.formatXml<PBillEvent>(xml);
-    } catch (error) {
-      throw new Error(`[LEGISINFO CALLER ERROR] ${error}`);
-    }
-  }
-
-  private async getSummaries(): Promise<IBillSummaryMap[]> {
-    try {
-      const xml = await this.fetchXml(EBillEndpoints.SUMMARY_URL);
-      const summariesArray = await FormatUtils.formatXml<IBillSummary>(xml);
-
-      return this.splitSummaries(summariesArray);
+      const legisInfoPage: cheerio.Root = Cheerio.load(
+        (await Axios.get<string>("https://www.parl.ca/LegisInfo")).data,
+      );
+      const [parliament, session] = legisInfoPage("span.parl-session-number")
+        .toArray()
+        .map((element) => Number(legisInfoPage(element).text().replace(/\D/g, "").trim()));
+      return { parliament, session };
     } catch (error) {
       throw new Error(`[SUMMARIES FETCH ERROR] ${error}`);
     }
   }
 
-  private splitSummaries(fetchedSummaryArray: IBillSummary[]): IBillSummaryMap[] {
-    const summariesArray: IBillSummaryMap[] = [];
+  // private async getSummaries(): Promise<IBillSummaryMap[]> {
+  //   try {
+  //     const xml = await this.fetchJSON(EBillEndpoints.SUMMARY_URL);
+  //     const summariesArray = await FormatUtils.formatSummariesXml<IBillSummary>(xml);
 
-    fetchedSummaryArray.forEach((summary) => {
-      if (summary.title.includes("Legislative Summary Published for ")) {
-        const summaryBillCode = summary.title
-          .split("Legislative Summary Published for ")[1]
-          .split(",")[0];
+  //     return this.splitSummaries(summariesArray);
+  //   } catch (error) {
+  //     throw new Error(`[SUMMARIES FETCH ERROR] ${error}`);
+  //   }
+  // }
 
-        const summaryObject: IBillSummaryMap = {
-          code: summaryBillCode,
-          url: summary.link,
-        };
+  // async updateBills(): Promise<void> {
+  //   const service = new BillsService();
 
-        summariesArray.push(summaryObject);
-      }
-    });
+  //   try {
+  //     const billEventsArray = await this.getAllBillsForSession();
+  //     await service.updateBillsAndEvents(billEventsArray);
 
-    return summariesArray;
-  }
+  //     const billSummaryMaps = await this.getSummaries();
+  //     await service.updateSummaryUrls(billSummaryMaps);
 
-  // Returns the XML document from a given URL
-  private async fetchXml(url: string): Promise<string> {
-    try {
-      const { data: xml }: AxiosResponse<string> = await Axios.get(url, {
-        timeout: 100000,
-      });
-      return xml;
-    } catch (error) {
-      throw new Error(`[WEB SERVICE ERROR]: fetchXml: ${error}`);
-    }
-  }
+  //     await service.closeDbConnection();
+  //   } catch (error) {
+  //     throw new Error(`[UPDATE DB SCRIPT ERROR]: ${error}`);
+  //   }
+  // }
 
   // Returns the raw text from the XML bill, in other words all text within <Text> tags
-  async fetchFullText(fullTextUrl: string): Promise<string | undefined> {
-    try {
-      const response: AxiosResponse<string> = await Axios.get(fullTextUrl);
-      const fullTextPage: cheerio.Root = Cheerio.load(response.data);
-      const xmlPageLink = fullTextPage('a.btn-export-xml:contains("XML")').attr("href");
-      const fullTextUrlJoined = `https://www.parl.ca${xmlPageLink}`;
+  // async fetchFullText(fullTextUrl: string): Promise<string | undefined> {
+  //   try {
+  //     const response: AxiosResponse<string> = await Axios.get(fullTextUrl);
+  //     const fullTextPage: cheerio.Root = Cheerio.load(response.data);
+  //     const xmlPageLink = fullTextPage('a.btn-export-xml:contains("XML")').attr("href");
+  //     const fullTextUrlJoined = `https://www.parl.ca${xmlPageLink}`;
 
-      const fullTextXml = await this.fetchXml(fullTextUrlJoined);
+  //     const fullTextXml = await this.fetchJSON(fullTextUrlJoined);
 
-      if (fullTextXml) {
-        const fullTextRaw: string = Cheerio.load(fullTextXml)("text").text();
-        return fullTextRaw;
-      }
-    } catch (error) {
-      console.error(`An error occurred while fetching raw full text: ${error}`);
-    }
-  }
+  //     if (fullTextXml) {
+  //       const fullTextRaw: string = Cheerio.load(fullTextXml)("text").text();
+  //       return fullTextRaw;
+  //     }
+  //   } catch (error) {
+  //     console.error(`An error occurred while fetching raw full text: ${error}`);
+  //   }
+  // }
 
   /* Fetch MP Data methods */
   /* Fetches a users MP info, based on address (street, city, province) */
@@ -145,9 +126,7 @@ export class WebService {
     photo_url,
     url,
   }: IRepresentMP): IMemberOfParliament {
-    const { tel: phoneNumber } = offices.find(
-      ({ type }) => type === EMPOfficeType.constituency,
-    );
+    const { tel: phoneNumber } = offices.find(({ type }) => type === EMPOfficeType.constituency);
     return {
       name,
       party: party_name,
@@ -204,20 +183,13 @@ export class WebService {
     } as IBillMediaSource;
   }
 
-  async fetchMediaBiasFactCheckData(
-    hostname: string,
-    source: string,
-  ): Promise<IMBFCResults> {
+  async fetchMediaBiasFactCheckData(hostname: string, source: string): Promise<IMBFCResults> {
     const searchUrl = `${EDataEndpoints.MBFC_HOMEPAGE}/?s=${hostname}`;
     const biasResults: IMBFCResults = {};
 
     try {
-      const searchResults: cheerio.Root = Cheerio.load(
-        (await Axios.get<string>(searchUrl)).data,
-      );
-      const mediaSourceUrl: string = searchResults(`a:contains("${source}")`).attr(
-        "href",
-      );
+      const searchResults: cheerio.Root = Cheerio.load((await Axios.get<string>(searchUrl)).data);
+      const mediaSourceUrl: string = searchResults(`a:contains("${source}")`).attr("href");
 
       const mediaSourcePage: cheerio.Root = Cheerio.load(
         (await Axios.get<string>(mediaSourceUrl)).data,
@@ -278,7 +250,7 @@ export class WebService {
       const rawText = striptags(content);
       const sourceString = this.getSourceString(source);
       const { hostname } = new URL(links[0]);
-      const publicationDate = published ? new Date(published) : null;
+      const publicationDate = published || null;
 
       return FormatUtils.truthy<IArticleData>({
         ...articleData,
@@ -292,9 +264,7 @@ export class WebService {
     }
   }
 
-  private sourceSplit: ISourceSplit[] = [
-    { name: "The Tyee", symbol: "|", sourceBefore: false },
-  ];
+  private sourceSplit: ISourceSplit[] = [{ name: "The Tyee", symbol: "|", sourceBefore: false }];
   private sourceConversion = {
     calgaryherald: "Calgary Herald",
     calgarysun: "Calgary Sun",
