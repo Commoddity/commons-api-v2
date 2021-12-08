@@ -1,0 +1,10 @@
+query GetAllBillsForSession($parliament: Int!, $session: Int!) {
+  bills: getAllBillsForSession(parliament: $parliament, session: $session) {
+    billAddedFields {
+      pageUrl
+      fullTextUrl
+    }
+    LongTitle
+    NumberCode
+  }
+}

@@ -1,6 +1,6 @@
 # Queries / Mutations
 type Query {
-  getAllBillsForSession(parliament: Int!, session: Int!): [IBill]
+  getAllBillsForSession(parliament: Int!, session: Int!): [IBill!]
   getOneBill(parliament: Int!, session: Int!, code: String!): IBill
   getOneUser: IUser @aws_cognito_user_pools
   fetchMpInfo(query: PGeocodeQuery!): IMemberOfParliament @aws_cognito_user_pools
@@ -36,12 +36,12 @@ type IBill {
   billAddedFields: IBillAddedFields!
   # Bill Data From LEGISinfo
   Id: ID!
-  NumberCode: String
+  NumberCode: String!
   NumberPrefix: String
   Number: Int
   LongTitleEn: String
   LongTitleFr: String
-  LongTitle: String
+  LongTitle: String!
   ShortTitleEn: String
   ShortTitleFr: String
   ShortTitle: String

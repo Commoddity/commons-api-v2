@@ -73,8 +73,13 @@ export class BillsService extends BaseService<IBillAddedFields> {
     const savedBills = await this.findMany({ parliamentarySession });
 
     console.log(`Initializing daily Bills update for session ${parliamentarySession} ...`);
+    let updated: 0;
+    let created: 0;
     for await (const bill of bills) {
-      const savedBill = savedBills?.find(({ code }) => code === bill.NumberCode);
+      const savedBill = savedBills?.find(
+        ({ code, parliamentarySession: savedSession }) =>
+          parliamentarySession === savedSession && code === bill.NumberCode,
+      );
 
       if (savedBill) {
         const { fullTextUrl } = new BillInput(bill);
@@ -82,13 +87,17 @@ export class BillsService extends BaseService<IBillAddedFields> {
           const { code } = savedBill;
           await super.updateOne({ parliamentarySession, code }, { fullTextUrl });
           console.log(`Bill ${code} updated with new fullTextUrl ...`);
+          updated++;
         }
       } else {
         const { code } = await super.createOne(new BillInput(bill));
         console.log(`New Bill ${code} created ...`);
+        created++;
       }
     }
-    console.log(`Daily Bills update for session ${parliamentarySession} completed`);
+    console.log(
+      `Daily Bills update for session ${parliamentarySession} completed. ${updated} Bills Updated, ${created} new Bills created.`,
+    );
   }
 
   async updateBillCategories(

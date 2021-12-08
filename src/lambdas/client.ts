@@ -79,7 +79,7 @@ exports.handler = async (event: IAppSyncResolverEvent | IAppSyncResolverEvent[])
           (bill) => (recordsMap[bill.code] = bill),
         );
 
-        return events.map(({ source: { NumberCode } }) => recordsMap[NumberCode]);
+        return events.map(({ source: { NumberCode } }) => recordsMap[NumberCode] || {});
       },
     }[field];
   }
