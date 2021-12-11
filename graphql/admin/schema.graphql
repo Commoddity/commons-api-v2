@@ -9,8 +9,13 @@ type Mutation {
     session: Int!
     code: String!
     categories: [EBillCategories]!
-  ): IBill
-  addMediaSourceToBill(parliament: Int!, session: Int!, code: String!, url: String!): IBill
+  ): IBillAddedFields
+  addMediaSourceToBill(
+    parliament: Int!
+    session: Int!
+    code: String!
+    url: String!
+  ): IBillAddedFields
 }
 
 schema {
@@ -167,7 +172,7 @@ type IBillStages {
   BillId: ID!
   HouseBillStages: [IBillStage]
   SenateBillStages: [IBillStage]
-  # RoyalAssent: Null
+  RoyalAssent: [IBillStage]
   # HouseAdditionalInformation: Null
   # SenateAdditionalInformation: Null
   # InterChamberMessages: Null
