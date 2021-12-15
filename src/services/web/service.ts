@@ -47,7 +47,7 @@ export class WebService {
         .map((element) => Number(legisInfoPage(element).text().replace(/\D/g, "").trim()));
       return { parliament, session };
     } catch (error) {
-      throw new Error(`[SUMMARIES FETCH ERROR] ${error}`);
+      throw new Error(`[CURRENT SESSION FETCH ERROR] ${error}`);
     }
   }
 
@@ -59,7 +59,7 @@ export class WebService {
         .attr("href");
       return fullTextPath ? `https://www.parl.ca${fullTextPath}` : null;
     } catch (error) {
-      throw new Error(`[SUMMARIES FETCH ERROR] ${error}`);
+      throw new Error(`[FULL TEXT URL FETCH ERROR] ${error}`);
     }
   }
 
