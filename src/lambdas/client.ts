@@ -16,9 +16,15 @@ exports.handler = async (event: IAppSyncResolverEvent | IAppSyncResolverEvent[])
 
     resolver = {
       /* Read */
-      getAllBillsForSession: () => {
+      getAllBillsForSession: async () => {
         const { parliament, session } = params;
-        return new BillsService().getAllBillsForSession(parliament, session);
+        console.log("FIRING INSIDE HERE!!!");
+        const bills = await new BillsService().getAllBillsForSession(parliament, session);
+        console.log(
+          "BILLS ARE HERE",
+          bills.map(({ NumberCode }) => NumberCode),
+        );
+        return bills;
       },
 
       getOneBill: () => {
@@ -62,26 +68,24 @@ exports.handler = async (event: IAppSyncResolverEvent | IAppSyncResolverEvent[])
       },
     }[field];
   } else {
-    const [{ field }] = event;
-
-    resolver = {
-      /* Field Level Resolvers*/
-      getBillAddedFields: async () => {
-        const events = event as IAppSyncResolverEvent<any, IBill>[];
-        const {
-          source: { ParliamentNumber, SessionNumber },
-        } = events[0];
-        const parliamentarySession = `${ParliamentNumber}-${SessionNumber}`;
-        const billCodes = events.map(({ source: { NumberCode } }) => NumberCode);
-
-        const recordsMap = {};
-        (await new BillsService().getBillAddedFields(parliamentarySession, billCodes)).forEach(
-          (bill) => (recordsMap[bill.code] = bill),
-        );
-
-        return events.map(({ source: { NumberCode } }) => recordsMap[NumberCode] || {});
-      },
-    }[field];
+    // const [{ field }] = event;
+    // resolver = {
+    //   /* Field Level Resolvers*/
+    //   getBillAddedFields: async () => {
+    //     const events = event as IAppSyncResolverEvent<any, IBill>[];
+    //     console.log({ events });
+    //     const {
+    //       source: { ParliamentNumber, SessionNumber },
+    //     } = events[0];
+    //     const parliamentarySession = `${ParliamentNumber}-${SessionNumber}`;
+    //     const billCodes = events.map(({ source: { NumberCode } }) => NumberCode);
+    //     const recordsMap = {};
+    //     const bills = await new BillsService().getBillAddedFields(parliamentarySession, billCodes);
+    //     console.log("HEY HI HELLO HERE WE ARE", { parliamentarySession, billCodes, bills });
+    //     bills.forEach((bill) => (recordsMap[bill.code] = bill));
+    //     return events.map(({ source: { NumberCode } }) => recordsMap[NumberCode]);
+    //   },
+    // }[field];
   }
 
   return resolver?.() || null;

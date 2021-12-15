@@ -51,6 +51,18 @@ export class WebService {
     }
   }
 
+  async getFullTextUrl(pageUrl: string): Promise<string | null> {
+    try {
+      const legisInfoPage: cheerio.Root = Cheerio.load((await Axios.get<string>(pageUrl)).data);
+      const fullTextPath = legisInfoPage(`span:contains("Text of the bill")`)
+        .closest("a.publication")
+        .attr("href");
+      return fullTextPath ? `https://www.parl.ca${fullTextPath}` : null;
+    } catch (error) {
+      throw new Error(`[SUMMARIES FETCH ERROR] ${error}`);
+    }
+  }
+
   // private async getSummaries(): Promise<IBillSummaryMap[]> {
   //   try {
   //     const xml = await this.fetchJSON(EBillEndpoints.SUMMARY_URL);

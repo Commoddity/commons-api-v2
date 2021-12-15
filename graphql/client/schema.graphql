@@ -175,7 +175,7 @@ type IBillStages {
   BillId: ID!
   HouseBillStages: [IBillStage]
   SenateBillStages: [IBillStage]
-  # RoyalAssent: Null
+  RoyalAssent: [IBillStage]
   # HouseAdditionalInformation: Null
   # SenateAdditionalInformation: Null
   # InterChamberMessages: Null
@@ -375,17 +375,17 @@ type IBibliographicNotice {
 
 # Fields Added By Commons API
 type IBillAddedFields {
-  id: ID!
-  code: String!
-  title: String!
-  pageUrl: String!
-  parliamentarySession: String!
+  id: ID
+  code: String
+  title: String
+  pageUrl: String
+  parliamentarySession: String
   categories: [EBillCategories]
   mediaSources: [IBillMediaSource]
   fullTextUrl: String
-  createdAt: String!
+  createdAt: String
   updatedAt: String
-  recordStatus: ERecordStatus!
+  recordStatus: ERecordStatus
 }
 
 type IBillMediaSource {

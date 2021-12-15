@@ -10,17 +10,6 @@ afterAll(async () => {
 });
 
 describe(`BillsService methods`, () => {
-  // describe(`createManyBills`, () => {
-  //   it(`Creates many bills in the DB `, async () => {
-  //     await new BillsService().createManyBills(44, 1);
-  //     await new BillsService().createManyBills(43, 2);
-  //     await new BillsService().createManyBills(43, 1);
-
-  //     // expect(Array.isArray(testBillsResult)).toBeTruthy();
-  //     // expect(testBillsResult).toHaveLength(testBillsInput.length);
-  //   });
-  // });
-
   describe(`getOneBill`, () => {
     it(`Fetches One Bill`, async () => {
       const bill = await new BillsService().getOneBill({
@@ -32,36 +21,21 @@ describe(`BillsService methods`, () => {
     });
   });
 
-  describe(`updateBillsForCurrentSession`, () => {
-    it(`Updates Bills if theire status has changed`, async () => {
-      const bill = await new BillsService().updateBillsForCurrentSession();
-      expect(bill).toBeTruthy();
+  describe(`getAllBillsForSession`, () => {
+    it(`Gets all Bills as well as the billAddedFields`, async () => {
+      const bills = await new BillsService().getAllBillsForSession(44, 1);
+
+      expect(bills?.length).toBeTruthy();
     });
   });
 
-  // describe(`updateBillCategories`, () => {
-  //   it(`Should update a bill's categories `, async () => {
-  //     const testBill = {
-  //       parliamentarySessionId: "1234",
-  //       code: "C-829",
-  //       title: "A Bill for the Provision of Momentary Sanity",
-  //       description: "Why god why",
-  //       summaryUrl: "http://billsarebills.com",
-  //       pageUrl: "http://billsbillsbills.com",
-  //       fullTextUrl: "http://whybillstho.com",
-  //       passed: true,
-  //       categories: [],
-  //       events: [],
-  //     };
-  //     await new BillsService().createBill(new Bill(testBill as any));
-
-  //     const afterUpdate = await new BillsService().updateBillCategories(testBill.code, [
-  //       EBillCategories.arts_culture,
-  //     ]);
-
-  //     expect(afterUpdate.categories).toContain(EBillCategories.arts_culture);
-  //   });
-  // });
+  describe(`updateBillsForSession`, () => {
+    it(`Creates or updates Bills got a given session`, async () => {
+      await new BillsService().updateBillsForSession(44, 1);
+      await new BillsService().updateBillsForSession(43, 2);
+      await new BillsService().updateBillsForSession(43, 1);
+    });
+  });
 
   describe(`addMediaSourceToBill`, () => {
     it(`Collects the media information and adds a media source object to a bill when provided a bill code and medai source URL`, async () => {

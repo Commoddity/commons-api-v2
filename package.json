@@ -11,7 +11,6 @@
     "build:clean": "tsc --build --clean",
     "codegen:admin": "graphql-codegen --config ./graphql/admin/codegen.yml",
     "codegen:client": "graphql-codegen --config ./graphql/client/codegen.yml",
-    "deploy": "serverless deploy",
     "validate": "serverless validate-schema",
     "playground": "serverless graphql-playground",
     "lint": "eslint . --ext .ts",
@@ -19,7 +18,7 @@
     "test": "yarn && yarn build && yarn set:dev && jest",
     "test:silent": "yarn && yarn build && yarn set:dev && jest --silent",
     "run:dev": "yarn && yarn build && yarn set:dev ts-node",
-    "deploy:dev": "yarn && yarn build:clean && yarn build && yarn set:dev && yarn deploy --stage dev"
+    "deploy:dev": "yarn && yarn build:clean && yarn build && yarn set:dev && serverless deploy --stage dev"
   },
   "dependencies": {
     "@graphql-codegen/typescript-react-apollo": "^3.2.2",

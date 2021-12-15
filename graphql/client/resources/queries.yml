@@ -15,9 +15,8 @@
   type: Query
   field: fetchMpInfo
   response: false
-
 # Field Level Resolvers
-- dataSource: ClientLambda
-  type: IBill
-  field: billAddedFields
-  response: false
+# - dataSource: ClientLambda
+#   type: IBill
+#   field: billAddedFields
+#   response: false
