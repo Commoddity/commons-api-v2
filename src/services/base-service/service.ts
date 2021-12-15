@@ -1,9 +1,4 @@
-import {
-  FilterQuery,
-  Model as MongoModel,
-  OnlyFieldsOfType,
-  UpdateQuery,
-} from "mongoose";
+import { FilterQuery, Model as MongoModel, OnlyFieldsOfType, UpdateQuery } from "mongoose";
 
 import { MongooseClient } from "../../db";
 import { ERecordStatus, PQueryOptions } from "../../types";
@@ -75,10 +70,7 @@ export class BaseService<T> {
     }
   }
 
-  async findAll(
-    options: PQueryOptions = { limit: 0 },
-    includeDeleted = false,
-  ): Promise<T[]> {
+  async findAll(options: PQueryOptions = { limit: 0 }, includeDeleted = false): Promise<T[]> {
     try {
       const data = await this.commandsCollection.find(
         this.transformQuery({}, includeDeleted),
@@ -96,10 +88,7 @@ export class BaseService<T> {
     query: FilterQuery<T> = {},
     includeDeleted = false,
   ): Promise<F[]> {
-    return this.commandsCollection.distinct(
-      field,
-      this.transformQuery(query, includeDeleted),
-    );
+    return this.commandsCollection.distinct(field, this.transformQuery(query, includeDeleted));
   }
 
   async doesOneExist(query: FilterQuery<T>): Promise<boolean> {
@@ -166,11 +155,9 @@ export class BaseService<T> {
     update: any,
   ): Promise<T> {
     try {
-      await this.queriesCollection.updateOne(
-        query,
-        { $addToSet: { [array]: update } } as any,
-        { arrayFilters: [arrayFilter] },
-      );
+      await this.queriesCollection.updateOne(query, { $addToSet: { [array]: update } } as any, {
+        arrayFilters: [arrayFilter],
+      });
 
       const data = await this.commandsCollection.findOne(query);
       return this.build(data);
@@ -186,11 +173,9 @@ export class BaseService<T> {
     update: any,
   ): Promise<T> {
     try {
-      await this.queriesCollection.updateOne(
-        query,
-        { $pull: { [array]: update } } as any,
-        { arrayFilters: [arrayFilter] },
-      );
+      await this.queriesCollection.updateOne(query, { $pull: { [array]: update } } as any, {
+        arrayFilters: [arrayFilter],
+      });
 
       const data = await this.commandsCollection.findOne(query);
       return this.build(data);
@@ -200,10 +185,7 @@ export class BaseService<T> {
   }
 
   /* Delete methods */
-  async deleteOne(
-    query: FilterQuery<T>,
-    options: PQueryOptions = { hard: false },
-  ): Promise<void> {
+  async deleteOne(query: FilterQuery<T>, options: PQueryOptions = { hard: false }): Promise<void> {
     try {
       if (options.hard) {
         await this.commandsCollection.deleteOne(query);
@@ -217,10 +199,7 @@ export class BaseService<T> {
     }
   }
 
-  async deleteMany(
-    query: FilterQuery<T>,
-    options: PQueryOptions = { hard: false },
-  ): Promise<void> {
+  async deleteMany(query: FilterQuery<T>, options: PQueryOptions = { hard: false }): Promise<void> {
     try {
       if (options.hard) {
         await this.commandsCollection.deleteMany(query);
@@ -239,10 +218,7 @@ export class BaseService<T> {
     if (includeDeleted) {
       return query;
     } else {
-      return {
-        ...query,
-        recordStatus: { $ne: ERecordStatus.deleted },
-      };
+      return { ...query, recordStatus: { $ne: ERecordStatus.deleted } };
     }
   }
 

@@ -36,13 +36,14 @@ export class UsersService extends BaseService<User> {
 
   /* Pre Sign Up Cognito Event */
   async checkIfEmailExists(userAttributes: ICognitoUserAttributes): Promise<void> {
-    const emailAddress = userAttributes.email.toLowerCase().trim();
+    const email = userAttributes.email.toLowerCase().trim();
 
-    const isApple = emailAddress.startsWith("signinwithapple_");
-    const isFacebook = emailAddress.startsWith("facebook_");
+    const isApple = email.startsWith("signinwithapple_");
+    const isFacebook = email.startsWith("facebook_");
     if (!isApple && !isFacebook) {
       const emailUserExists = await super.doesOneExist({
-        $and: [{ emailAddress }, { credentials: ECredentialTypes.Username }],
+        email,
+        credentials: ECredentialTypes.Username,
       });
 
       if (emailUserExists) {
@@ -66,18 +67,14 @@ export class UsersService extends BaseService<User> {
 
   /* Cognito Sign Up Methods */
   async cognitoSignUpSocial(userAttributes: ICognitoSocialUserAttributes): Promise<void> {
-    const { providerName }: ICognitoParsedUserIdentities = JSON.parse(
-      userAttributes.identities,
-    )[0];
+    const { providerName }: ICognitoParsedUserIdentities = JSON.parse(userAttributes.identities)[0];
 
     const createSocialUser: () => Promise<User> = {
       SignInWithApple: async () =>
         await this.cognitoSignUpApple(userAttributes as ICognitoAppleUserAttributes),
 
       Facebook: async () =>
-        await this.cognitoSignUpFacebook(
-          userAttributes as ICognitoFacebookUserAttributes,
-        ),
+        await this.cognitoSignUpFacebook(userAttributes as ICognitoFacebookUserAttributes),
     }[providerName];
 
     await createSocialUser();
@@ -86,9 +83,7 @@ export class UsersService extends BaseService<User> {
   async cognitoSignUpApple(userAttributes: ICognitoAppleUserAttributes): Promise<User> {
     const userPoolId = await SSMUtil.getInstance().getVar(ESSMParams.UserPoolId);
 
-    const { userId }: ICognitoParsedUserIdentities = JSON.parse(
-      userAttributes.identities,
-    )[0];
+    const { userId }: ICognitoParsedUserIdentities = JSON.parse(userAttributes.identities)[0];
 
     let user: User;
 
@@ -117,31 +112,14 @@ export class UsersService extends BaseService<User> {
 
     this.initCognitoServiceObject();
 
-    await this.updateCognitoUserAttribute(
-      "custom:userId",
-      String(user.id),
-      userId,
-      userPoolId,
-    );
-    await this.updateCognitoUserAttribute(
-      "given_name",
-      String(user.firstName),
-      userId,
-      userPoolId,
-    );
-    await this.updateCognitoUserAttribute(
-      "family_name",
-      String(user.lastName),
-      userId,
-      userPoolId,
-    );
+    await this.updateCognitoUserAttribute("custom:userId", String(user.id), userId, userPoolId);
+    await this.updateCognitoUserAttribute("given_name", String(user.firstName), userId, userPoolId);
+    await this.updateCognitoUserAttribute("family_name", String(user.lastName), userId, userPoolId);
 
     return user;
   }
 
-  async cognitoSignUpFacebook(
-    userAttributes: ICognitoFacebookUserAttributes,
-  ): Promise<User> {
+  async cognitoSignUpFacebook(userAttributes: ICognitoFacebookUserAttributes): Promise<User> {
     const userPoolId = await SSMUtil.getInstance().getVar(ESSMParams.UserPoolId);
 
     const { userId } = JSON.parse(userAttributes.identities)[0];
@@ -172,31 +150,14 @@ export class UsersService extends BaseService<User> {
 
     this.initCognitoServiceObject();
 
-    await this.updateCognitoUserAttribute(
-      "custom:userId",
-      String(user.id),
-      userId,
-      userPoolId,
-    );
-    await this.updateCognitoUserAttribute(
-      "given_name",
-      String(user.firstName),
-      userId,
-      userPoolId,
-    );
-    await this.updateCognitoUserAttribute(
-      "family_name",
-      String(user.lastName),
-      userId,
-      userPoolId,
-    );
+    await this.updateCognitoUserAttribute("custom:userId", String(user.id), userId, userPoolId);
+    await this.updateCognitoUserAttribute("given_name", String(user.firstName), userId, userPoolId);
+    await this.updateCognitoUserAttribute("family_name", String(user.lastName), userId, userPoolId);
 
     return user;
   }
 
-  async cognitoSignUpEmail(
-    userAttributes: ICognitoEmailUserAttributes,
-  ): Promise<User | undefined> {
+  async cognitoSignUpEmail(userAttributes: ICognitoEmailUserAttributes): Promise<User | undefined> {
     const userPoolId = await SSMUtil.getInstance().getVar(ESSMParams.UserPoolId);
 
     const userExists = await super.doesOneExist({
