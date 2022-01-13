@@ -41,7 +41,7 @@ Infrastructure
 
 # TO DO
 
--~~Set up Media Source & automatic bias processing~~
+- ~~Set up Media Source & automatic bias processing~~
 - ~~Set up Cognito and Cognito Handler lambda~~
 - ~~Set up CRON job bill updater Lambda~~
 - ~~Set up admin Lambda~~
