@@ -1,19 +1,4 @@
-# TO DO
-
-- NEXT UP: Set up Media Source & automatic bias processing using:
-  - https://www.thebipartisanpress.com/political-bias-api-and-integrations/
-
-- ~~Set up Cognito and Cognito Handler lambda~~
-- ~~Set up CRON job bill updater Lambda~~
-- ~~Set up admin Lambda~~
-- ~~Field level resolvers for User Bills & categories~~
-- ~~Retool module for updating categories~~
-- ~~Set up MP information fetching using MapBok and OpenNorth/Represent~~
-- Set up Email & SMS notification service
-- Set up notifications for when a new Bill or Event is created
-- Document all Services, Utils and other logic
-
-# Commons API - Rebuild
+# Commons API v2
 
 #### Up-to-date information and notifications about bills in progress in Canada's parliament.
 
@@ -21,7 +6,7 @@
 
 Commons aims to provide an easy to access source of information on current bills in session in Canada's federal parliament. The application sources data from various sources and serves it up to users in one easy to use location.
 
-The goal is to provide Canadians with an easy way to keep up to date with the goings on in parliament and engage with their government representatives. The information aggregated by the app is sourced from various public government websites.
+The goal is to provide Canadians with an easy way to keep up to date with the goings on in parliament and engage with their government representatives. The information aggregated by the application is sourced from various public government websites.
 
 ## Behaviour
 
@@ -53,3 +38,16 @@ Infrastructure
 # Testing
 
 - [Jest 27.1.1](https://jestjs.io/)
+
+# TO DO
+
+- ~~Set up Media Source & automatic bias processing~~
+- ~~Set up Cognito and Cognito Handler lambda~~
+- ~~Set up CRON job bill updater Lambda~~
+- ~~Set up admin Lambda~~
+- ~~Field level resolvers for User Bills & categories~~
+- ~~Retool module for updating categories~~
+- ~~Set up MP information fetching using MapBok and OpenNorth/Represent~~
+- Set up Email & SMS notification service
+- Set up notifications for when a new Bill or Event is created
+- Document all Services, Utils and other logic
