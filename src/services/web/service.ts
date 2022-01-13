@@ -63,52 +63,6 @@ export class WebService {
     }
   }
 
-  // private async getSummaries(): Promise<IBillSummaryMap[]> {
-  //   try {
-  //     const xml = await this.fetchJSON(EBillEndpoints.SUMMARY_URL);
-  //     const summariesArray = await FormatUtils.formatSummariesXml<IBillSummary>(xml);
-
-  //     return this.splitSummaries(summariesArray);
-  //   } catch (error) {
-  //     throw new Error(`[SUMMARIES FETCH ERROR] ${error}`);
-  //   }
-  // }
-
-  // async updateBills(): Promise<void> {
-  //   const service = new BillsService();
-
-  //   try {
-  //     const billEventsArray = await this.getAllBillsForSession();
-  //     await service.updateBillsAndEvents(billEventsArray);
-
-  //     const billSummaryMaps = await this.getSummaries();
-  //     await service.updateSummaryUrls(billSummaryMaps);
-
-  //     await service.closeDbConnection();
-  //   } catch (error) {
-  //     throw new Error(`[UPDATE DB SCRIPT ERROR]: ${error}`);
-  //   }
-  // }
-
-  // Returns the raw text from the XML bill, in other words all text within <Text> tags
-  // async fetchFullText(fullTextUrl: string): Promise<string | undefined> {
-  //   try {
-  //     const response: AxiosResponse<string> = await Axios.get(fullTextUrl);
-  //     const fullTextPage: cheerio.Root = Cheerio.load(response.data);
-  //     const xmlPageLink = fullTextPage('a.btn-export-xml:contains("XML")').attr("href");
-  //     const fullTextUrlJoined = `https://www.parl.ca${xmlPageLink}`;
-
-  //     const fullTextXml = await this.fetchJSON(fullTextUrlJoined);
-
-  //     if (fullTextXml) {
-  //       const fullTextRaw: string = Cheerio.load(fullTextXml)("text").text();
-  //       return fullTextRaw;
-  //     }
-  //   } catch (error) {
-  //     console.error(`An error occurred while fetching raw full text: ${error}`);
-  //   }
-  // }
-
   /* Fetch MP Data methods */
   /* Fetches a users MP info, based on address (street, city, province) */
   async fetchMpInfo(query: PGeocodeQuery): Promise<IMemberOfParliament> {
